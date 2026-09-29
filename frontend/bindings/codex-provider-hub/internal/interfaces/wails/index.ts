@@ -5,3 +5,10 @@ import * as App from "./app.js";
 export {
     App
 };
+
+export type {
+    ModelDTO,
+    ProfileDTO,
+    ProviderDTO,
+    RouteDTO
+} from "./models.js";

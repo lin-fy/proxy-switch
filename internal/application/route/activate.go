@@ -45,6 +45,10 @@ func (a *Activator) Activate(ctx context.Context, routeID, profileID string) err
 	if err != nil {
 		return fmt.Errorf("get model: %w", err)
 	}
+	models, err := a.models.ListByProvider(ctx, r.ProviderID)
+	if err != nil {
+		return fmt.Errorf("list provider models: %w", err)
+	}
 	pr, err := a.profiles.Get(ctx, profileID)
 	if err != nil {
 		return fmt.Errorf("get profile: %w", err)
@@ -56,7 +60,7 @@ func (a *Activator) Activate(ctx context.Context, routeID, profileID string) err
 	if err := adapter.Validate(ctx, r, p, m); err != nil {
 		return fmt.Errorf("validate route: %w", err)
 	}
-	if err := adapter.Prepare(ctx, r, p, m, pr); err != nil {
+	if err := adapter.Prepare(ctx, r, p, m, models, pr); err != nil {
 		return fmt.Errorf("prepare route: %w", err)
 	}
 	if r.RestartOnActivate {

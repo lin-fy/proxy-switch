@@ -12,6 +12,10 @@ func NewService(repo profile.Repository) *Service { return &Service{repo: repo} 
 
 func (s *Service) List(ctx context.Context) ([]profile.Profile, error) { return s.repo.List(ctx) }
 
+func (s *Service) Get(ctx context.Context, id string) (profile.Profile, error) {
+	return s.repo.Get(ctx, id)
+}
+
 func (s *Service) Create(ctx context.Context, id, name string) (profile.Profile, error) {
 	item, err := profile.New(id, name)
 	if err != nil {
