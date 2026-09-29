@@ -263,6 +263,14 @@ profile-name.models.json
 
 模型下拉列表同步依赖 `model_catalog_json` 的实际 JSON schema，先通过最小样例验证，不在未确认 schema 前实现复杂的模型目录编辑器。
 
+### 本机只读观察
+
+- 本机存在用户级 Codex 配置目录和 `config.toml`。
+- 当前配置使用自定义 Provider，当前模型为 `gpt-5.6-sol`。
+- 当前配置未发现显式的 `model_catalog_json` 配置。
+- 当前配置目录未发现命名的 `*.config.toml` 档案文件。
+- 以上仅为配置入口观察，不读取或记录认证凭据。
+
 ## 12. 实施顺序
 
 ### 阶段 A：配置与兼容性验证
