@@ -1,0 +1,21 @@
+# Build output
+build/
+bin/
+dist/
+
+# Wails / frontend dependencies
+node_modules/
+
+# Local secrets and runtime state
+.env
+*.local.json
+*.secret.json
+
+# IDE and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# CodeGraph cache is regenerated locally
+.codegraph/
