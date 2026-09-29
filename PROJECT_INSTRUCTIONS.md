@@ -50,11 +50,33 @@ V1 验收完成后关闭当前 goal。V1.1、V2 或其他平台支持必须创�
 
 ## 架构约束
 
+- 采用 DDD 分层架构，保持领域逻辑与 Wails、HTTP、文件系统和 Windows API 解耦。
+- 依赖方向只能由外向内：`interfaces → application → domain`；`infrastructure → application/domain`。
+- `domain` 不依赖任何基础设施、UI 或 Wails 类型。
+- `application` 只编排用例，通过端口/接口访问外部能力。
+- `infrastructure` 实现配置文件、凭据、HTTP、进程和 Codex 适配等外部能力。
+- `interfaces` 只负责 Wails 绑定、DTO 转换和错误呈现，不承载业务规则。
+- `cmd` 是组合根，只负责组装依赖和启动程序。
 - 使用 `PlatformAdapter` 策略封装平台配置、启动和验证。
 - 使用适配器注册表/工厂按平台 ID 创建适配器。
 - V1 只有 `CodexAdapter`。
 - Provider 作为数据，不为每个供应商创建工厂。
 - 暂不实现协议工厂、自建代理、协议转换、账户池、智能路由、云同步和插件系统。
+
+推荐目录：
+
+```text
+cmd/codex-provider-hub/
+internal/
+  domain/{provider,model,route,profile}/
+  application/{provider,model,route,profile}/
+  infrastructure/{config,credential,codex,launcher,provider}/
+  interfaces/wails/
+frontend/
+docs/
+```
+
+领域层优先使用标准库和纯 Go 类型；不把 Wails 生成类型、TOML 结构或 Windows API 传入领域层。
 
 ## 执行流程
 
@@ -66,6 +88,14 @@ V1 验收完成后关闭当前 goal。V1.1、V2 或其他平台支持必须创�
 6. 最后实现 Wails UI、托盘、开机启动和安装包。
 7. 每个非平凡逻辑保留至少一个可运行测试或验证。
 8. 不私自扩大 V1 范围；发现约束时优先寻找兼容实现。
+
+## 进度保存规则
+
+- 每个实施阶段完成后，必须先更新文档并同步 CodeGraph，再创建一次 Git 提交。
+- 长时间任务、工具链安装或可能中断前，先保存当前可运行进度。
+- 阶段提交应使用清晰的 Conventional Commit 消息，便于从最近阶段恢复。
+- 阶段边界尽量保持工作区干净；不得提交密钥、临时文件、构建产物或 CodeGraph 缓存。
+- 后续工作从最近一次阶段提交继续，不重做已经提交的内容。
 
 如果 Codex Desktop 不支持 `--profile`，使用备份后切换活动 `config.toml` 的方式实现。模型下拉列表是 V1 硬性要求，不得静默删除。
 
@@ -80,4 +110,3 @@ V1 验收完成后关闭当前 goal。V1.1、V2 或其他平台支持必须创�
 - 自动重启默认关闭且勾选后有效。
 - 托盘常驻和开机启动可用。
 - 测试、文档和 Git 版本基线完整。
-

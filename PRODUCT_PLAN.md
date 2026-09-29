@@ -124,6 +124,42 @@ RouteService
 - Provider 保持为数据，不为每个供应商创建工厂。
 - 协议适配器暂不抽象；只有出现第二种实际协议时再增加。
 
+### DDD 分层与依赖方向
+
+V1 采用 DDD 分层架构，业务规则与桌面框架、配置文件和 Windows API 解耦：
+
+```text
+interfaces (Wails / DTO)
+          ↓
+application (用例 / 编排)
+          ↓
+domain (Provider / Model / Route / Profile)
+
+infrastructure (JSON / TOML / Credential / HTTP / Process / Codex)
+          └────────实现 application/domain 所需端口
+```
+
+推荐目录：
+
+```text
+cmd/codex-provider-hub/
+internal/
+  domain/{provider,model,route,profile}/
+  application/{provider,model,route,profile}/
+  infrastructure/{config,credential,codex,launcher,provider}/
+  interfaces/wails/
+frontend/
+docs/
+```
+
+规则：
+
+- `domain` 不依赖 Wails、HTTP、文件系统或 Windows API。
+- `application` 只编排用例，通过端口访问外部能力。
+- `infrastructure` 实现端口和平台适配。
+- `interfaces` 只做 Wails 绑定、DTO 转换和错误呈现。
+- `cmd` 负责依赖组装和启动。
+
 最小接口方向：
 
 ```text
