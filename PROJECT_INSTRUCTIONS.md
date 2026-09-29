@@ -25,7 +25,7 @@ V1 验收完成后关闭当前 goal。V1.1、V2 或其他平台支持必须创�
 ## V1 范围
 
 - Windows only。
-- Wails + Go。
+- Wails 3（当前锁定 `v3.0.0-beta.26`）+ Go。
 - 只实现 Codex Desktop 平台适配器。
 - Provider 只配置一次，通过 Route 选择 Platform、Provider、Model。
 - CPA 作为普通 Provider，不实现独立的 CPA 产品逻辑。

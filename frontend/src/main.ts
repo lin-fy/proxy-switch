@@ -2,7 +2,7 @@ import './style.css';
 import './app.css';
 
 import logo from './assets/images/logo-universal.png';
-import {Greet} from '../wailsjs/go/main/App';
+import {Greet} from '../bindings/codex-provider-hub/app';
 
 // Setup the greet function
 window.greet = function () {

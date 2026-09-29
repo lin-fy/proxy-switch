@@ -1,5 +1,12 @@
-# Build output
-build/
+# Wails v3 build metadata is tracked; compiled output is ignored.
+build/bin/
+build/*.syso
+build/**/*.syso
+build/android/
+build/darwin/
+build/docker/
+build/ios/
+build/linux/
 bin/
 dist/
 

@@ -310,9 +310,9 @@ profile-name.models.json
 ### V1 开发验证记录
 
 - Go 1.27.1 便携工具链已就绪。
-- Wails CLI 2.16.0 已安装。
+- Wails CLI `wails3` v3.0.0-beta.26 已安装。
 - DDD 领域层和应用端口已通过 `go test ./...`。
-- Wails vanilla-ts 壳已成功构建 Windows amd64 可执行文件。
+- Wails v3 vanilla-ts 壳已成功构建 Windows amd64 可执行文件，前端绑定使用 `@wailsio/runtime`。
 - 当前仍未实现 Codex 配置写入、模型目录同步和真实 Provider 连接。
 
 ## 12. 实施顺序
