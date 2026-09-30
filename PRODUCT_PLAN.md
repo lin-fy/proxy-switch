@@ -319,6 +319,7 @@ profile-name.models.json
 - 已接入 Wails v3 系统托盘：关闭窗口隐藏、托盘单击切换、菜单显示/隐藏/退出。
 - 已接入 Wails v3 开机启动：Windows 使用 `HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run`，界面提供启用/禁用开关。
 - Go 测试、前端构建、Wails Windows amd64 构建和启动冒烟验证已通过。
+- `go vet ./...` 已通过；Windows Credential Manager 读取改为直接接收原生凭据指针，避免 `uintptr` 往返转换的安全检查告警。
 - Provider 连接测试已接入：通过 Responses API `/models` 检查可达性；模型测试会发送最小 `/responses` 请求（1 个输出 token）。两者都支持环境变量凭据、请求头和查询参数，并对失败响应做脱敏处理。
 - 凭据引用支持环境变量和 Windows Credential Manager 的 `credential:<target>` 形式，普通 JSON 状态文件只保存引用，不保存 API Key。
 - Codex 运行状态已暴露到界面，并提供启动/重新启动入口；实际可执行文件可通过 `CODEX_DESKTOP_EXECUTABLE` 配置。

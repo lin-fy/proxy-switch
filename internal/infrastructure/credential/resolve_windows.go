@@ -42,18 +42,20 @@ func resolveGeneric(target string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("encode credential target: %w", err)
 	}
-	var credentialPtr uintptr
+	var credential *nativeCredential
 	result, _, callErr := credRead.Call(
 		uintptr(unsafe.Pointer(targetName)),
 		credTypeGeneric,
 		0,
-		uintptr(unsafe.Pointer(&credentialPtr)),
+		uintptr(unsafe.Pointer(&credential)),
 	)
 	if result == 0 {
 		return "", fmt.Errorf("read Windows credential %q: %w", target, callErr)
 	}
-	defer credFree.Call(credentialPtr)
-	credential := (*nativeCredential)(unsafe.Pointer(credentialPtr))
+	defer credFree.Call(uintptr(unsafe.Pointer(credential)))
+	if credential == nil {
+		return "", fmt.Errorf("read Windows credential %q returned an empty result", target)
+	}
 	if credential.CredentialBlobSize == 0 || credential.CredentialBlob == nil {
 		return "", fmt.Errorf("Windows credential %q has an empty secret", target)
 	}
