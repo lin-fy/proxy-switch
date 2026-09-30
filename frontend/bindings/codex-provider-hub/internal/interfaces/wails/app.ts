@@ -96,3 +96,7 @@ export function SetAutostart(enabled: boolean): $CancellablePromise<void> {
 export function TestProvider(id: string): $CancellablePromise<void> {
     return $Call.ByID(1724053524, id);
 }
+
+export function TestProviderModel(providerID: string, modelID: string): $CancellablePromise<void> {
+    return $Call.ByID(1289429633, providerID, modelID);
+}

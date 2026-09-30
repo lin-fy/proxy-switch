@@ -8,4 +8,5 @@ import (
 
 type ProviderTester interface {
 	Test(context.Context, provider.Provider) error
+	TestModel(context.Context, provider.Provider, string) error
 }

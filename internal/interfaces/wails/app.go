@@ -112,6 +112,17 @@ func (a *App) TestProvider(ctx context.Context, id string) error {
 	return a.tester.Test(ctx, item)
 }
 
+func (a *App) TestProviderModel(ctx context.Context, providerID, modelID string) error {
+	if a.tester == nil {
+		return errors.New("Provider 模型测试服务尚未就绪")
+	}
+	item, err := a.providers.Get(ctx, providerID)
+	if err != nil {
+		return err
+	}
+	return a.tester.TestModel(ctx, item, modelID)
+}
+
 func (a *App) ListModels(ctx context.Context) ([]ModelDTO, error) {
 	items, err := a.models.List(ctx)
 	return mapModels(items), err

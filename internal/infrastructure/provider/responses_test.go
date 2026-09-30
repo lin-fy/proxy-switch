@@ -52,6 +52,27 @@ func TestResponsesTesterReportsHTTPStatusWithoutBody(t *testing.T) {
 	}
 }
 
+func TestResponsesTesterCanCallModel(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost || r.URL.Path != "/v1/responses" {
+			t.Errorf("request = %s %s", r.Method, r.URL.Path)
+		}
+		if r.Header.Get("Content-Type") != "application/json" {
+			t.Errorf("content type = %q", r.Header.Get("Content-Type"))
+		}
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{"id":"resp_test"}`))
+	}))
+	defer server.Close()
+	p, err := domainprovider.New("custom", "Custom", server.URL+"/v1", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := NewResponsesTester(server.Client()).TestModel(context.Background(), p, "model-a"); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestResponsesTesterRequiresConfiguredCredential(t *testing.T) {
 	t.Setenv("MISSING_PROVIDER_KEY", "")
 	p, err := domainprovider.New("custom", "Custom", "https://example.com/v1", "MISSING_PROVIDER_KEY")
