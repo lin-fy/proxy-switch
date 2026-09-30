@@ -6,10 +6,10 @@
 		"0000": {
 			"ProductVersion": "0.1.0",
 			"CompanyName": "Codex Provider Hub",
-			"FileDescription": "Codex Provider Hub",
-			"LegalCopyright": "© now, My Company",
+			"FileDescription": "Local provider routing for Codex Desktop",
+			"LegalCopyright": "(c) 2026 Codex Provider Hub",
 			"ProductName": "Codex Provider Hub",
-			"Comments": "This is a comment"
+			"Comments": "Manage Codex providers and routes locally"
 		}
 	}
 }

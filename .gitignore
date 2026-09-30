@@ -13,6 +13,8 @@ dist/
 # Wails / frontend dependencies
 node_modules/
 .task/
+.tools/
+build/windows/nsis/MicrosoftEdgeWebview2Setup.exe
 
 # Local secrets and runtime state
 .env
