@@ -8,11 +8,11 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"os"
 	"strings"
 	"time"
 
 	domainprovider "codex-provider-hub/internal/domain/provider"
+	"codex-provider-hub/internal/infrastructure/credential"
 )
 
 type ResponsesTester struct {
@@ -30,7 +30,7 @@ func (t *ResponsesTester) Test(ctx context.Context, p domainprovider.Provider) e
 	if err := p.Validate(); err != nil {
 		return err
 	}
-	token, err := resolveToken(p.AuthRef)
+	token, err := credential.Resolve(p.AuthRef)
 	if err != nil {
 		return err
 	}
@@ -74,7 +74,7 @@ func (t *ResponsesTester) TestModel(ctx context.Context, p domainprovider.Provid
 	if modelID == "" {
 		return fmt.Errorf("model id is required")
 	}
-	token, err := resolveToken(p.AuthRef)
+	token, err := credential.Resolve(p.AuthRef)
 	if err != nil {
 		return err
 	}
@@ -133,20 +133,4 @@ func endpoint(baseURL, suffix string) (string, error) {
 	}
 	parsed.Path = strings.TrimRight(parsed.Path, "/") + "/" + suffix
 	return parsed.String(), nil
-}
-
-func resolveToken(reference string) (string, error) {
-	reference = strings.TrimSpace(reference)
-	if reference == "" {
-		return "", nil
-	}
-	if strings.HasPrefix(reference, "credential:") {
-		return "", fmt.Errorf("credential reference %q requires Windows Credential Manager support", reference)
-	}
-	reference = strings.TrimPrefix(reference, "env:")
-	token := strings.TrimSpace(os.Getenv(reference))
-	if token == "" {
-		return "", fmt.Errorf("credential environment variable %q is not set", reference)
-	}
-	return token, nil
 }

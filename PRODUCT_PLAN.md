@@ -320,6 +320,7 @@ profile-name.models.json
 - 已接入 Wails v3 开机启动：Windows 使用 `HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run`，界面提供启用/禁用开关。
 - Go 测试、前端构建、Wails Windows amd64 构建和启动冒烟验证已通过。
 - Provider 连接测试已接入：通过 Responses API `/models` 检查可达性；模型测试会发送最小 `/responses` 请求（1 个输出 token）。两者都支持环境变量凭据、请求头和查询参数，并对失败响应做脱敏处理。
+- 凭据引用支持环境变量和 Windows Credential Manager 的 `credential:<target>` 形式，普通 JSON 状态文件只保存引用，不保存 API Key。
 - Windows 构建元数据已改为正式产品信息（版本 `0.1.0`）；可执行文件构建通过。NSIS 安装器任务已验证到 `makensis` 步骤，但当前开发环境未安装 NSIS，因此安装包仍待补齐工具后完成。
 
 ## 12. 实施顺序
