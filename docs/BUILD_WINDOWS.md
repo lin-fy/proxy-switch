@@ -46,6 +46,8 @@ powershell -ExecutionPolicy Bypass -File build/windows/portable/package.ps1
 
 解压后运行 `install.ps1` 会安装到 `%LOCALAPPDATA%\Programs\Codex Provider Hub` 并创建开始菜单快捷方式；安装目录中的 `uninstall.ps1` 可安全卸载该目录。
 
+最新 Windows amd64 ZIP 已实际验证：安装脚本能复制可执行文件并创建开始菜单快捷方式，卸载脚本能移除安装目录。
+
 ## 运行时配置
 
 - `CODEX_HOME`：覆盖 Codex 配置目录；未设置时使用用户目录下的 `.codex`。
