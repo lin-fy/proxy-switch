@@ -14,10 +14,11 @@ import {
   NSkeleton,
   NSwitch,
   NTag,
+  NDropdown,
 } from 'naive-ui';
-import { Pencil, Plus, PlugZap, Power, Trash2 } from 'lucide-vue-next';
+import { MoreHorizontal, Pencil, Plus, PlugZap, Power, Trash2 } from 'lucide-vue-next';
 import { useWorkspaceStore } from '../stores/workspace';
-import { wailsApi, type ModelDTO, type ProviderDTO, type RouteDTO } from '../services/wails-api';
+import type { ModelDTO, ProviderDTO, RouteDTO } from '../services/wails-api';
 
 const workspace = useWorkspaceStore();
 const message = useMessage();
@@ -28,6 +29,7 @@ const routeModal = ref(false);
 const providerDraft = ref<ProviderDTO | null>(null);
 const modelDraft = ref<ModelDTO | null>(null);
 const routeDraft = ref<RouteDTO | null>(null);
+const providerMenuTarget = ref<ProviderDTO | null>(null);
 const providerForm = ref({ id: '', name: '', baseURL: '', authRef: '' });
 const modelForm = ref({ providerID: '', id: '', name: '' });
 const routeForm = ref({ id: '', name: '', providerID: '', modelID: '', restart: false });
@@ -50,6 +52,10 @@ const modelOptions = computed(() =>
     })),
 );
 const profileOptions = computed(() => workspace.profiles.map((item) => ({ label: item.name, value: item.id })));
+const providerMenuOptions = [
+  { label: '编辑 Provider', key: 'edit' },
+  { label: '删除 Provider', key: 'delete' },
+];
 
 function providerName(id: string): string {
   return workspace.providers.find((item) => item.id === id)?.name ?? id;
@@ -73,6 +79,8 @@ function openModel(item?: ModelDTO): void {
 }
 function openRoute(item?: RouteDTO): void {
   routeDraft.value = item ? { ...item } : null;
+  const firstProviderID = workspace.providers[0]?.id ?? '';
+  const firstModel = workspace.models.find((model) => model.provider_id === firstProviderID);
   routeForm.value = item
     ? {
         id: item.id,
@@ -84,8 +92,8 @@ function openRoute(item?: RouteDTO): void {
     : {
         id: '',
         name: '',
-        providerID: workspace.providers[0]?.id ?? '',
-        modelID: workspace.models[0]?.id ?? '',
+        providerID: firstProviderID,
+        modelID: firstModel?.id ?? '',
         restart: false,
       };
   routeModal.value = true;
@@ -96,20 +104,16 @@ async function saveProvider(): Promise<void> {
     message.warning('请填写标识、名称和 API 地址');
     return;
   }
-  if (providerDraft.value)
-    await workspace.runAction(
-      () =>
-        wailsApi.saveProvider({
-          ...providerDraft.value!,
-          id: f.id,
-          name: f.name,
-          base_url: f.baseURL,
-          auth_ref: f.authRef,
-        }),
-      'Provider 已保存',
-    );
-  else await workspace.runAction(() => wailsApi.createProvider(f.id, f.name, f.baseURL, f.authRef), 'Provider 已添加');
-  if (!workspace.error) providerModal.value = false;
+  const ok = providerDraft.value
+    ? await workspace.saveProvider({
+        ...providerDraft.value,
+        id: f.id,
+        name: f.name,
+        base_url: f.baseURL,
+        auth_ref: f.authRef,
+      })
+    : await workspace.createProvider(f.id, f.name, f.baseURL, f.authRef);
+  if (ok) providerModal.value = false;
 }
 async function saveModel(): Promise<void> {
   const f = modelForm.value;
@@ -117,13 +121,10 @@ async function saveModel(): Promise<void> {
     message.warning('请选择 Provider 并填写模型 ID');
     return;
   }
-  if (modelDraft.value)
-    await workspace.runAction(
-      () => wailsApi.saveModel({ ...modelDraft.value!, provider_id: f.providerID, id: f.id, name: f.name }),
-      'Model 已保存',
-    );
-  else await workspace.runAction(() => wailsApi.createModel(f.providerID, f.id, f.name), 'Model 已添加');
-  if (!workspace.error) modelModal.value = false;
+  const ok = modelDraft.value
+    ? await workspace.saveModel({ ...modelDraft.value, provider_id: f.providerID, id: f.id, name: f.name })
+    : await workspace.createModel(f.providerID, f.id, f.name);
+  if (ok) modelModal.value = false;
 }
 async function saveRoute(): Promise<void> {
   const f = routeForm.value;
@@ -139,9 +140,10 @@ async function saveRoute(): Promise<void> {
     model_id: f.modelID,
     restart_on_activate: f.restart,
   };
-  if (routeDraft.value) await workspace.runAction(() => wailsApi.saveRoute(value), '路由已保存');
-  else await workspace.runAction(() => wailsApi.createRoute(f.id, f.name, f.providerID, f.modelID), '路由已添加');
-  if (!workspace.error) routeModal.value = false;
+  const ok = routeDraft.value
+    ? await workspace.saveRoute(value)
+    : await workspace.createRoute(f.id, f.name, f.providerID, f.modelID);
+  if (ok) routeModal.value = false;
 }
 function remove(kind: 'provider' | 'model' | 'route', item: ProviderDTO | ModelDTO | RouteDTO): void {
   dialog.warning({
@@ -150,15 +152,24 @@ function remove(kind: 'provider' | 'model' | 'route', item: ProviderDTO | ModelD
     positiveText: '删除',
     negativeText: '取消',
     onPositiveClick: async () => {
-      if (kind === 'provider')
-        await workspace.runAction(() => wailsApi.deleteProvider((item as ProviderDTO).id), 'Provider 已删除');
+      if (kind === 'provider') await workspace.deleteProvider((item as ProviderDTO).id);
       if (kind === 'model') {
         const m = item as ModelDTO;
-        await workspace.runAction(() => wailsApi.deleteModel(m.provider_id, m.id), 'Model 已删除');
+        await workspace.deleteModel(m.provider_id, m.id);
       }
-      if (kind === 'route') await workspace.runAction(() => wailsApi.deleteRoute((item as RouteDTO).id), '路由已删除');
+      if (kind === 'route') await workspace.deleteRoute((item as RouteDTO).id);
     },
   });
+}
+function openProviderMenu(item: ProviderDTO): void {
+  providerMenuTarget.value = item;
+}
+async function selectProviderMenu(key: string): Promise<void> {
+  const item = providerMenuTarget.value;
+  providerMenuTarget.value = null;
+  if (!item) return;
+  if (key === 'edit') openProvider(item);
+  if (key === 'delete') remove('provider', item);
 }
 async function activate(route: RouteDTO): Promise<void> {
   await workspace.activate(route.id, profileID.value);
@@ -226,11 +237,20 @@ async function testModel(item: ModelDTO): Promise<void> {
               ><span>{{ item.base_url }}</span>
             </div>
             <NTag size="small" :bordered="false">{{ item.protocol }}</NTag
-            ><NButton quaternary size="small" @click="testProvider(item.id)"><PlugZap :size="15" /></NButton
-            ><NButton quaternary size="small" @click="openProvider(item)"><Pencil :size="15" /></NButton
-            ><NButton quaternary size="small" type="error" @click="remove('provider', item)"
-              ><Trash2 :size="15"
+            ><NButton quaternary size="small" aria-label="测试 Provider" @click="testProvider(item.id)"
+              ><PlugZap :size="15"
+            /></NButton
+            ><NButton quaternary size="small" aria-label="编辑 Provider" @click="openProvider(item)"
+              ><Pencil :size="15"
             /></NButton>
+            ><NDropdown
+              trigger="click"
+              :options="providerMenuOptions"
+              @select="(key) => { openProviderMenu(item); void selectProviderMenu(key); }"
+              ><NButton quaternary size="small" aria-label="Provider 更多操作"
+                ><MoreHorizontal :size="15"
+              /></NButton>
+            ></NDropdown>
           </div>
         </div>
       </NCard>
@@ -257,13 +277,7 @@ async function testModel(item: ModelDTO): Promise<void> {
             <NSwitch
               :value="item.enabled"
               size="small"
-              @update:value="
-                (enabled) =>
-                  workspace.runAction(
-                    () => wailsApi.saveModel({ ...item, enabled }),
-                    enabled ? 'Model 已启用' : 'Model 已停用',
-                  )
-              "
+              @update:value="(enabled) => workspace.saveModel({ ...item, enabled }, enabled ? 'Model 已启用' : 'Model 已停用')"
             /><NButton quaternary size="small" @click="testModel(item)"><PlugZap :size="15" /></NButton
             ><NButton quaternary size="small" @click="openModel(item)"><Pencil :size="15" /></NButton>
           </div>
@@ -306,7 +320,7 @@ async function testModel(item: ModelDTO): Promise<void> {
     :title="providerDraft ? '编辑 Provider' : '添加 Provider'"
     class="edit-modal"
   >
-    <NForm label-placement="top"
+    <NForm label-placement="top" @submit.prevent="saveProvider"
       ><NFormItem label="标识"
         ><NInput v-model:value="providerForm.id" :disabled="!!providerDraft" placeholder="例如 openai" /></NFormItem
       ><NFormItem label="显示名称"><NInput v-model:value="providerForm.name" placeholder="例如 OpenAI" /></NFormItem
@@ -323,7 +337,7 @@ async function testModel(item: ModelDTO): Promise<void> {
     >
   </NModal>
   <NModal v-model:show="modelModal" preset="card" :title="modelDraft ? '编辑 Model' : '添加 Model'" class="edit-modal">
-    <NForm label-placement="top"
+    <NForm label-placement="top" @submit.prevent="saveModel"
       ><NFormItem label="Provider"
         ><NSelect
           v-model:value="modelForm.providerID"
@@ -341,7 +355,7 @@ async function testModel(item: ModelDTO): Promise<void> {
     >
   </NModal>
   <NModal v-model:show="routeModal" preset="card" :title="routeDraft ? '编辑 Route' : '添加 Route'" class="edit-modal">
-    <NForm label-placement="top"
+    <NForm label-placement="top" @submit.prevent="saveRoute"
       ><NFormItem label="路由标识"
         ><NInput v-model:value="routeForm.id" :disabled="!!routeDraft" placeholder="例如 work" /></NFormItem
       ><NFormItem label="路由名称"><NInput v-model:value="routeForm.name" placeholder="例如 工作模型" /></NFormItem

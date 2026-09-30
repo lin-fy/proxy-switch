@@ -76,22 +76,22 @@ export const useWorkspaceStore = defineStore('workspace', () => {
     }
   }
 
-  async function runAction<T>(
-    action: () => Promise<T>,
+  async function runAction(
+    action: () => Promise<unknown>,
     successMessage: string,
     actionPhase: WorkspacePhase = 'saving',
-  ): Promise<T | undefined> {
+  ): Promise<boolean> {
     phase.value = actionPhase;
     try {
-      const result = await action();
+      await action();
       phase.value = 'ready';
       setNotice(successMessage);
       await refresh();
-      return result;
+      return !error.value;
     } catch (cause) {
       phase.value = 'error';
       setNotice(describeError(cause), true);
-      return undefined;
+      return false;
     }
   }
 
@@ -117,6 +117,12 @@ export const useWorkspaceStore = defineStore('workspace', () => {
     await runAction(() => wailsApi.testProvider(id), 'Provider 连接测试成功', 'testing');
   }
 
+  async function syncProviderModels(providerID: string): Promise<boolean> {
+    return runAction(async () => {
+      models.value = (await wailsApi.syncProviderModels(providerID)) ?? [];
+    }, 'Provider 模型已同步', 'testing');
+  }
+
   async function testModel(providerID: string, id: string): Promise<void> {
     await runAction(() => wailsApi.testModel(providerID, id), '模型 Responses 调用成功', 'testing');
   }
@@ -132,26 +138,62 @@ export const useWorkspaceStore = defineStore('workspace', () => {
       () => wailsApi.setAutostart(enabled),
       enabled ? '已开启开机自动启动' : '已关闭开机自动启动',
     );
-    if (result === undefined) autostart.value = previous;
+    if (!result) autostart.value = previous;
   }
 
-  async function createProfile(item: ProfileDTO): Promise<void> {
-    await runAction(async () => {
+  async function createProvider(id: string, name: string, baseURL: string, authRef: string): Promise<boolean> {
+    return runAction(() => wailsApi.createProvider(id, name, baseURL, authRef), 'Provider 已添加');
+  }
+
+  async function saveProvider(item: ProviderDTO): Promise<boolean> {
+    return runAction(() => wailsApi.saveProvider(item), 'Provider 已保存');
+  }
+
+  async function deleteProvider(id: string): Promise<boolean> {
+    return runAction(() => wailsApi.deleteProvider(id), 'Provider 已删除');
+  }
+
+  async function createModel(providerID: string, id: string, name: string): Promise<boolean> {
+    return runAction(() => wailsApi.createModel(providerID, id, name), 'Model 已添加');
+  }
+
+  async function saveModel(item: ModelDTO, successMessage = 'Model 已保存'): Promise<boolean> {
+    return runAction(() => wailsApi.saveModel(item), successMessage);
+  }
+
+  async function deleteModel(providerID: string, id: string): Promise<boolean> {
+    return runAction(() => wailsApi.deleteModel(providerID, id), 'Model 已删除');
+  }
+
+  async function createRoute(id: string, name: string, providerID: string, modelID: string): Promise<boolean> {
+    return runAction(() => wailsApi.createRoute(id, name, providerID, modelID), '路由已添加');
+  }
+
+  async function saveRoute(item: RouteDTO): Promise<boolean> {
+    return runAction(() => wailsApi.saveRoute(item), '路由已保存');
+  }
+
+  async function deleteRoute(id: string): Promise<boolean> {
+    return runAction(() => wailsApi.deleteRoute(id), '路由已删除');
+  }
+
+  async function createProfile(item: ProfileDTO): Promise<boolean> {
+    return runAction(async () => {
       const created = await wailsApi.createProfile(item.id, item.name);
       if (item.config_path) await wailsApi.saveProfile({ ...created, config_path: item.config_path });
     }, '配置档案已创建');
   }
 
-  async function saveProfile(item: ProfileDTO): Promise<void> {
-    await runAction(() => wailsApi.saveProfile(item), '配置档案已保存');
+  async function saveProfile(item: ProfileDTO): Promise<boolean> {
+    return runAction(() => wailsApi.saveProfile(item), '配置档案已保存');
   }
 
-  async function deleteProfile(id: string): Promise<void> {
-    await runAction(() => wailsApi.deleteProfile(id), '配置档案已删除');
+  async function deleteProfile(id: string): Promise<boolean> {
+    return runAction(() => wailsApi.deleteProfile(id), '配置档案已删除');
   }
 
-  async function restoreProfile(id: string): Promise<void> {
-    await runAction(() => wailsApi.restoreProfile(id), 'Codex 配置已恢复');
+  async function restoreProfile(id: string): Promise<boolean> {
+    return runAction(() => wailsApi.restoreProfile(id), 'Codex 配置已恢复');
   }
 
   return {
@@ -173,12 +215,21 @@ export const useWorkspaceStore = defineStore('workspace', () => {
     modelsByProvider,
     busy,
     refresh,
-    runAction,
     activate,
     testProvider,
+    syncProviderModels,
     testModel,
     startCodex,
     setAutostart,
+    createProvider,
+    saveProvider,
+    deleteProvider,
+    createModel,
+    saveModel,
+    deleteModel,
+    createRoute,
+    saveRoute,
+    deleteRoute,
     createProfile,
     saveProfile,
     deleteProfile,
