@@ -3,6 +3,7 @@ package codex
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"os"
 	"path/filepath"
 	"testing"
@@ -198,5 +199,72 @@ func TestPrepareRollsBackActiveConfigWhenProfileWriteFails(t *testing.T) {
 	}
 	if string(contents) != original {
 		t.Fatalf("active config was not rolled back: %q", contents)
+	}
+}
+
+func TestRestoreReturnsNotFoundWithoutBackup(t *testing.T) {
+	adapter, err := NewAdapter(t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	pr, err := profile.New("default", "Default")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := adapter.Restore(pr); !errors.Is(err, ErrBackupNotFound) {
+		t.Fatalf("restore error = %v, want ErrBackupNotFound", err)
+	}
+}
+
+func TestRestoreRestoresActiveAndSelectedProfileFiles(t *testing.T) {
+	home := t.TempDir()
+	profilePath := filepath.Join(home, "profiles", "work.toml")
+	if err := os.MkdirAll(filepath.Dir(profilePath), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	activePath := filepath.Join(home, "config.toml")
+	activeOriginal := "model = \"active-old\"\n"
+	profileOriginal := "model = \"profile-old\"\n"
+	if err := os.WriteFile(activePath, []byte(activeOriginal), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(profilePath, []byte(profileOriginal), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(backupPath(activePath), []byte(activeOriginal), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(backupPath(profilePath), []byte(profileOriginal), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(activePath, []byte("model = \"active-new\"\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(profilePath, []byte("model = \"profile-new\"\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	adapter, err := NewAdapter(home)
+	if err != nil {
+		t.Fatal(err)
+	}
+	pr, err := profile.New("work", "Work")
+	if err != nil {
+		t.Fatal(err)
+	}
+	pr.ConfigPath = filepath.Join("profiles", "work.toml")
+	if err := adapter.Restore(pr); err != nil {
+		t.Fatal(err)
+	}
+	activeRestored, err := os.ReadFile(activePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	profileRestored, err := os.ReadFile(profilePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(activeRestored) != activeOriginal || string(profileRestored) != profileOriginal {
+		t.Fatalf("restored active/profile = %q/%q", activeRestored, profileRestored)
 	}
 }

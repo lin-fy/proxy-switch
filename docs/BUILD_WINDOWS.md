@@ -68,3 +68,5 @@ powershell -ExecutionPolicy Bypass -File build/windows/portable/package.ps1
 4. 配置准备成功后才把路由保存为默认路由。
 
 这组测试位于 `internal/application/route/activate_test.go`，用于防止界面层调整时破坏路由激活边界。
+
+Codex 适配器测试还覆盖：无备份时返回明确错误、活动配置与选中 Profile 配置同时恢复，以及多文件写入失败后的活动配置回滚。
