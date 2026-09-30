@@ -12,6 +12,7 @@ dist/
 
 # Wails / frontend dependencies
 node_modules/
+.task/
 
 # Local secrets and runtime state
 .env

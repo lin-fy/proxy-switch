@@ -2,6 +2,7 @@ package wails
 
 import (
 	"context"
+	"errors"
 
 	modelapp "codex-provider-hub/internal/application/model"
 	profileapp "codex-provider-hub/internal/application/profile"
@@ -21,7 +22,16 @@ type App struct {
 	profiles  *profileapp.Service
 	activator *routeapp.Activator
 	codex     *codexadapter.Adapter
+	autostart AutostartManager
 }
+
+type AutostartManager interface {
+	Enable() error
+	Disable() error
+	IsEnabled() (bool, error)
+}
+
+var errAutostartUnavailable = errors.New("开机启动服务尚未就绪")
 
 func NewApp(
 	providers *providerapp.Service,
@@ -30,8 +40,9 @@ func NewApp(
 	profiles *profileapp.Service,
 	activator *routeapp.Activator,
 	codex *codexadapter.Adapter,
+	autostart AutostartManager,
 ) *App {
-	return &App{providers: providers, models: models, routes: routes, profiles: profiles, activator: activator, codex: codex}
+	return &App{providers: providers, models: models, routes: routes, profiles: profiles, activator: activator, codex: codex, autostart: autostart}
 }
 
 type ProviderDTO struct {
@@ -152,6 +163,23 @@ func (a *App) RestoreCodexConfig(ctx context.Context, profileID string) error {
 		return err
 	}
 	return a.codex.Restore(item)
+}
+
+func (a *App) AutostartEnabled(context.Context) (bool, error) {
+	if a.autostart == nil {
+		return false, errAutostartUnavailable
+	}
+	return a.autostart.IsEnabled()
+}
+
+func (a *App) SetAutostart(_ context.Context, enabled bool) error {
+	if a.autostart == nil {
+		return errAutostartUnavailable
+	}
+	if enabled {
+		return a.autostart.Enable()
+	}
+	return a.autostart.Disable()
 }
 
 func toProvider(item provider.Provider) ProviderDTO {

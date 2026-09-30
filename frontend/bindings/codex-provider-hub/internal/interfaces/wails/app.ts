@@ -13,6 +13,10 @@ export function ActivateRoute(routeID: string, profileID: string): $CancellableP
     return $Call.ByID(23255109, routeID, profileID);
 }
 
+export function AutostartEnabled(): $CancellablePromise<boolean> {
+    return $Call.ByID(4206343947);
+}
+
 export function CreateModel(providerID: string, id: string, name: string): $CancellablePromise<$models.ModelDTO> {
     return $Call.ByID(244308170, providerID, id, name);
 }
@@ -83,4 +87,8 @@ export function SaveProvider(item: $models.ProviderDTO): $CancellablePromise<voi
 
 export function SaveRoute(item: $models.RouteDTO): $CancellablePromise<void> {
     return $Call.ByID(1033275885, item);
+}
+
+export function SetAutostart(enabled: boolean): $CancellablePromise<void> {
+    return $Call.ByID(1529005708, enabled);
 }
