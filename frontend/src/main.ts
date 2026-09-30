@@ -3,8 +3,8 @@ import './style.css';
 import * as App from '../bindings/codex-provider-hub/internal/interfaces/wails/app';
 import type { ModelDTO, ProfileDTO, ProviderDTO, RouteDTO } from '../bindings/codex-provider-hub/internal/interfaces/wails/models';
 
-type State = { providers: ProviderDTO[]; models: ModelDTO[]; routes: RouteDTO[]; profiles: ProfileDTO[]; selectedProfileID: string; autostart: boolean; busy: boolean; message: string; error: boolean };
-const state: State = { providers: [], models: [], routes: [], profiles: [], selectedProfileID: '', autostart: false, busy: false, message: '准备连接本地 Codex 配置', error: false };
+type State = { providers: ProviderDTO[]; models: ModelDTO[]; routes: RouteDTO[]; profiles: ProfileDTO[]; selectedProfileID: string; autostart: boolean; codexRunning: boolean; busy: boolean; message: string; error: boolean };
+const state: State = { providers: [], models: [], routes: [], profiles: [], selectedProfileID: '', autostart: false, codexRunning: false, busy: false, message: '准备连接本地 Codex 配置', error: false };
 const app = document.querySelector<HTMLDivElement>('#app');
 if (!app) throw new Error('app root not found');
 
@@ -15,10 +15,11 @@ const setMessage = (message: string, error = false): void => { state.message = m
 const refresh = async (): Promise<void> => {
     state.busy = true; render();
     try {
-        const [providers, models, routes, profiles, autostart] = await Promise.all([App.ListProviders(), App.ListModels(), App.ListRoutes(), App.ListProfiles(), App.AutostartEnabled()]);
+        const [providers, models, routes, profiles, autostart, codexRunning] = await Promise.all([App.ListProviders(), App.ListModels(), App.ListRoutes(), App.ListProfiles(), App.AutostartEnabled(), App.CodexRunning()]);
         state.providers = providers ?? []; state.models = models ?? []; state.routes = routes ?? []; state.profiles = profiles ?? [];
         if (!state.profiles.some((item) => item.id === state.selectedProfileID)) state.selectedProfileID = state.profiles[0]?.id ?? '';
         state.autostart = autostart;
+        state.codexRunning = codexRunning;
         state.message = '已同步本地配置'; state.error = false;
     } catch (error) { state.message = error instanceof Error ? error.message : '读取配置失败'; state.error = true; }
     finally { state.busy = false; render(); }
@@ -34,8 +35,8 @@ const render = (): void => {
     const activeModel = activeRoute && state.models.find((item) => item.provider_id === activeRoute.provider_id && item.id === activeRoute.model_id);
     app.innerHTML = `
       <main class="shell">
-        <aside class="rail"><div class="brand"><span class="brand-mark">CP</span><div><strong>Codex Provider Hub</strong><small>本地路由工作台</small></div></div><div class="rail-rule"></div><p class="eyebrow">当前路由</p><div class="current-route"><span class="status-dot"></span><div><strong>${escapeHTML(activeRoute?.name ?? '尚未激活')}</strong><small>${escapeHTML(activeProvider?.name ?? '选择一个 Provider')} · ${escapeHTML(activeModel?.name ?? '选择一个 Model')}</small></div></div><div class="rail-foot"><span class="pulse"></span>${state.busy ? '同步中…' : '本地配置已就绪'}</div></aside>
-        <section class="workspace"><header class="topbar"><div><p class="eyebrow">Provider routing / Windows</p><h1>把模型接入 Codex</h1><p class="lede">Provider 只需配置一次，路由负责决定 Codex 当前使用谁。</p><label class="profile-switcher">当前 Codex 档案<select data-control="profile">${profileOptions()}</select></label></div><button class="ghost-button" data-action="refresh" ${state.busy ? 'disabled' : ''}>${state.busy ? '同步中…' : '刷新配置'}</button></header>
+        <aside class="rail"><div class="brand"><span class="brand-mark">CP</span><div><strong>Codex Provider Hub</strong><small>本地路由工作台</small></div></div><div class="rail-rule"></div><p class="eyebrow">当前路由</p><div class="current-route"><span class="status-dot"></span><div><strong>${escapeHTML(activeRoute?.name ?? '尚未激活')}</strong><small>${escapeHTML(activeProvider?.name ?? '选择一个 Provider')} · ${escapeHTML(activeModel?.name ?? '选择一个 Model')}</small><small>Codex：${state.codexRunning ? '运行中' : '未运行'}</small></div></div><div class="rail-foot"><span class="pulse"></span>${state.busy ? '同步中…' : '本地配置已就绪'}</div></aside>
+        <section class="workspace"><header class="topbar"><div><p class="eyebrow">Provider routing / Windows</p><h1>把模型接入 Codex</h1><p class="lede">Provider 只需配置一次，路由负责决定 Codex 当前使用谁。</p><label class="profile-switcher">当前 Codex 档案<select data-control="profile">${profileOptions()}</select></label></div><div class="topbar-actions"><button class="ghost-button" data-action="start-codex">${state.codexRunning ? '重新启动 Codex' : '启动 Codex'}</button><button class="ghost-button" data-action="refresh" ${state.busy ? 'disabled' : ''}>${state.busy ? '同步中…' : '刷新配置'}</button></div></header>
           <div class="notice ${state.error ? 'notice-error' : ''}"><span class="notice-icon">${state.error ? '!' : 'i'}</span>${escapeHTML(state.message)}</div>
           <div class="grid">
             <section class="panel panel-wide"><div class="panel-heading"><div><span class="step">01</span><h2>Providers</h2><p>CPA、OpenAI 或任意 Responses API 中转。</p></div><span class="count">${state.providers.length} 个</span></div><form class="inline-form" data-form="provider"><input name="id" placeholder="标识，如 cpa" required><input name="name" placeholder="显示名称" required><input name="baseURL" placeholder="https://api.example.com/v1" required><input name="authRef" placeholder="API Key 环境变量（可选）"><button class="primary-button" type="submit">添加 Provider</button></form><div class="item-list">${state.providers.length ? state.providers.map((item) => `<div class="item-row"><div class="item-icon">${escapeHTML(item.name.slice(0, 1).toUpperCase())}</div><div class="item-main"><strong>${escapeHTML(item.name)}</strong><small>${escapeHTML(item.base_url)} · ${escapeHTML(item.protocol)}</small></div><button class="outline-button" data-action="test-provider" data-id="${escapeHTML(item.id)}">测试连接</button><button class="icon-button" data-action="delete-provider" data-id="${escapeHTML(item.id)}" aria-label="删除 Provider">×</button></div>`).join('') : '<div class="empty">还没有 Provider。添加一个 Responses API 地址开始。</div>'}</div></section>
@@ -57,10 +58,11 @@ app.addEventListener('click', async (event) => {
         if (action === 'delete-profile') await App.DeleteProfile(target.dataset.id ?? '');
         if (action === 'test-provider') await App.TestProvider(target.dataset.id ?? '');
         if (action === 'test-model') await App.TestProviderModel(target.dataset.provider ?? '', target.dataset.id ?? '');
+        if (action === 'start-codex') await App.StartCodex();
         if (action === 'activate') { if (!state.selectedProfileID) throw new Error('请先创建配置档案'); await App.ActivateRoute(target.dataset.route ?? '', state.selectedProfileID); }
 	        if (action === 'restore') await App.RestoreCodexConfig(target.dataset.profile ?? '');
         if (action === 'autostart') await App.SetAutostart(!state.autostart);
-        setMessage(action === 'restore' ? '已恢复 Codex 配置备份' : action === 'test-provider' ? 'Provider 连接测试成功' : action === 'test-model' ? '模型 Responses 调用成功' : '操作完成'); await refresh();
+        setMessage(action === 'restore' ? '已恢复 Codex 配置备份' : action === 'test-provider' ? 'Provider 连接测试成功' : action === 'test-model' ? '模型 Responses 调用成功' : action === 'start-codex' ? '已请求启动 Codex' : '操作完成'); await refresh();
     } catch (error) { setMessage(error instanceof Error ? error.message : '操作失败', true); }
 });
 

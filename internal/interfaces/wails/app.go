@@ -190,6 +190,14 @@ func (a *App) RestoreCodexConfig(ctx context.Context, profileID string) error {
 	return a.codex.Restore(item)
 }
 
+func (a *App) CodexRunning(ctx context.Context) (bool, error) {
+	return a.codex.IsRunning(ctx)
+}
+
+func (a *App) StartCodex(ctx context.Context) error {
+	return a.codex.Launch(ctx, route.Route{PlatformID: route.PlatformCodex})
+}
+
 func (a *App) AutostartEnabled(context.Context) (bool, error) {
 	if a.autostart == nil {
 		return false, errAutostartUnavailable

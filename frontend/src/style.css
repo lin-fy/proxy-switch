@@ -22,6 +22,7 @@ button { cursor: pointer; }
 .pulse { width: 5px; height: 5px; margin: 0; box-shadow: none; }
 .workspace { flex: 1; max-width: 1320px; padding: 36px 48px 24px; }
 .topbar { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
+.topbar-actions { display: flex; gap: 8px; }
 h1, h2, p { margin: 0; }
 h1 { margin-top: 5px; color: #f1f8f6; font-size: 30px; font-weight: 800; letter-spacing: -.04em; }
 .lede { max-width: 500px; margin-top: 7px; color: #8aa3a4; font-size: 14px; }
