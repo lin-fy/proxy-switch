@@ -37,6 +37,15 @@ wails3 task windows:create:msix:package USE_MSIX_TOOL=true
 
 MSIX 路径需要 Windows SDK 和 Microsoft MSIX Packaging Tool。两者都不是 Go/Wails 依赖，安装后重新打开终端再执行打包命令。
 
+如果暂时没有 NSIS 或 MSIX 工具，可以生成无管理员权限的用户级 ZIP 安装包：
+
+```powershell
+wails3 build
+powershell -ExecutionPolicy Bypass -File build/windows/portable/package.ps1
+```
+
+解压后运行 `install.ps1` 会安装到 `%LOCALAPPDATA%\Programs\Codex Provider Hub` 并创建开始菜单快捷方式；安装目录中的 `uninstall.ps1` 可安全卸载该目录。
+
 ## 运行时配置
 
 - `CODEX_HOME`：覆盖 Codex 配置目录；未设置时使用用户目录下的 `.codex`。
