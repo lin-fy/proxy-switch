@@ -10,6 +10,7 @@ import {
 } from '../services/wails-api';
 
 export type WorkspacePhase = 'idle' | 'loading' | 'ready' | 'saving' | 'testing' | 'activating' | 'error';
+export type ActivationStage = 'idle' | 'writing' | 'ready' | 'error';
 
 export const useWorkspaceStore = defineStore('workspace', () => {
   const providers = ref<ProviderDTO[]>([]);
@@ -23,6 +24,8 @@ export const useWorkspaceStore = defineStore('workspace', () => {
   const message = ref('准备连接本地 Codex 配置');
   const error = ref(false);
   const errorDetail = ref('');
+  const activationStage = ref<ActivationStage>('idle');
+  const activationRecovered = ref<boolean | null>(null);
 
   const currentRoute = computed(() => routes.value.find((item) => item.default) ?? routes.value[0]);
   const currentProvider = computed(() =>
@@ -97,18 +100,26 @@ export const useWorkspaceStore = defineStore('workspace', () => {
 
   async function activate(routeID: string, profileID = selectedProfileID.value): Promise<boolean> {
     if (!profileID) {
+      activationStage.value = 'error';
+      activationRecovered.value = false;
       setNotice('请先创建或选择一个配置档案', true);
       return false;
     }
     phase.value = 'activating';
+    activationStage.value = 'writing';
+    activationRecovered.value = null;
     try {
       await wailsApi.activateRoute(routeID, profileID);
+      activationStage.value = 'ready';
       setNotice('路由已激活，Codex 配置已更新');
       await refresh();
       return true;
     } catch (cause) {
       phase.value = 'error';
-      setNotice(describeError(cause, '路由激活失败，配置可能已自动恢复'), true);
+      const detail = describeError(cause, '路由激活失败，配置可能已自动恢复');
+      activationStage.value = 'error';
+      activationRecovered.value = detail.includes('恢复') || detail.toLowerCase().includes('restore');
+      setNotice(detail, true);
       return false;
     }
   }
@@ -118,9 +129,13 @@ export const useWorkspaceStore = defineStore('workspace', () => {
   }
 
   async function syncProviderModels(providerID: string): Promise<boolean> {
-    return runAction(async () => {
-      models.value = (await wailsApi.syncProviderModels(providerID)) ?? [];
-    }, 'Provider 模型已同步', 'testing');
+    return runAction(
+      async () => {
+        models.value = (await wailsApi.syncProviderModels(providerID)) ?? [];
+      },
+      'Provider 模型已同步',
+      'testing',
+    );
   }
 
   async function testModel(providerID: string, id: string): Promise<void> {
@@ -209,6 +224,8 @@ export const useWorkspaceStore = defineStore('workspace', () => {
     message,
     error,
     errorDetail,
+    activationStage,
+    activationRecovered,
     currentRoute,
     currentProvider,
     currentModel,

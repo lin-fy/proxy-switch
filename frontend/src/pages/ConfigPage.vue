@@ -209,7 +209,10 @@ async function testModel(item: ModelDTO): Promise<void> {
         />
       </div>
     </section>
-    <div v-if="workspace.error" class="notice notice-error">{{ workspace.message }}</div>
+    <div v-if="workspace.error" class="notice notice-error" role="alert">
+      {{ workspace.message }}
+      <span v-if="workspace.activationStage === 'error' && workspace.activationRecovered === true">已恢复上一次配置。</span>
+    </div>
     <div v-else-if="workspace.phase === 'loading' && !workspace.providers.length" class="loading-grid">
       <NSkeleton v-for="n in 3" :key="n" text :repeat="4" />
     </div>
@@ -238,19 +241,22 @@ async function testModel(item: ModelDTO): Promise<void> {
             </div>
             <NTag size="small" :bordered="false">{{ item.protocol }}</NTag
             ><NButton quaternary size="small" aria-label="测试 Provider" @click="testProvider(item.id)"
-              ><PlugZap :size="15"
-            /></NButton
+              ><PlugZap :size="15" /></NButton
             ><NButton quaternary size="small" aria-label="编辑 Provider" @click="openProvider(item)"
               ><Pencil :size="15"
             /></NButton>
             ><NDropdown
               trigger="click"
               :options="providerMenuOptions"
-              @select="(key) => { openProviderMenu(item); void selectProviderMenu(key); }"
-              ><NButton quaternary size="small" aria-label="Provider 更多操作"
-                ><MoreHorizontal :size="15"
-              /></NButton>
-            ></NDropdown>
+              @select="
+                (key) => {
+                  openProviderMenu(item);
+                  void selectProviderMenu(key);
+                }
+              "
+              ><NButton quaternary size="small" aria-label="Provider 更多操作"><MoreHorizontal :size="15" /></NButton>
+              ></NDropdown
+            >
           </div>
         </div>
       </NCard>
@@ -277,7 +283,9 @@ async function testModel(item: ModelDTO): Promise<void> {
             <NSwitch
               :value="item.enabled"
               size="small"
-              @update:value="(enabled) => workspace.saveModel({ ...item, enabled }, enabled ? 'Model 已启用' : 'Model 已停用')"
+              @update:value="
+                (enabled) => workspace.saveModel({ ...item, enabled }, enabled ? 'Model 已启用' : 'Model 已停用')
+              "
             /><NButton quaternary size="small" @click="testModel(item)"><PlugZap :size="15" /></NButton
             ><NButton quaternary size="small" @click="openModel(item)"><Pencil :size="15" /></NButton>
           </div>
