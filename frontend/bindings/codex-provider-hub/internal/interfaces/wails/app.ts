@@ -92,3 +92,7 @@ export function SaveRoute(item: $models.RouteDTO): $CancellablePromise<void> {
 export function SetAutostart(enabled: boolean): $CancellablePromise<void> {
     return $Call.ByID(1529005708, enabled);
 }
+
+export function TestProvider(id: string): $CancellablePromise<void> {
+    return $Call.ByID(1724053524, id);
+}

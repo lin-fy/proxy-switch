@@ -14,6 +14,10 @@ func (s *Service) List(ctx context.Context) ([]provider.Provider, error) {
 	return s.repo.List(ctx)
 }
 
+func (s *Service) Get(ctx context.Context, id string) (provider.Provider, error) {
+	return s.repo.Get(ctx, id)
+}
+
 func (s *Service) Create(ctx context.Context, id, name, baseURL, authRef string) (provider.Provider, error) {
 	item, err := provider.New(id, name, baseURL, authRef)
 	if err != nil {

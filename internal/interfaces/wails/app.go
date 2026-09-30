@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	modelapp "codex-provider-hub/internal/application/model"
+	"codex-provider-hub/internal/application/ports"
 	profileapp "codex-provider-hub/internal/application/profile"
 	providerapp "codex-provider-hub/internal/application/provider"
 	routeapp "codex-provider-hub/internal/application/route"
@@ -23,6 +24,7 @@ type App struct {
 	activator *routeapp.Activator
 	codex     *codexadapter.Adapter
 	autostart AutostartManager
+	tester    ports.ProviderTester
 }
 
 type AutostartManager interface {
@@ -41,8 +43,9 @@ func NewApp(
 	activator *routeapp.Activator,
 	codex *codexadapter.Adapter,
 	autostart AutostartManager,
+	tester ports.ProviderTester,
 ) *App {
-	return &App{providers: providers, models: models, routes: routes, profiles: profiles, activator: activator, codex: codex, autostart: autostart}
+	return &App{providers: providers, models: models, routes: routes, profiles: profiles, activator: activator, codex: codex, autostart: autostart, tester: tester}
 }
 
 type ProviderDTO struct {
@@ -96,6 +99,17 @@ func (a *App) SaveProvider(ctx context.Context, item ProviderDTO) error {
 
 func (a *App) DeleteProvider(ctx context.Context, id string) error {
 	return a.providers.Delete(ctx, id)
+}
+
+func (a *App) TestProvider(ctx context.Context, id string) error {
+	if a.tester == nil {
+		return errors.New("Provider 连接测试服务尚未就绪")
+	}
+	item, err := a.providers.Get(ctx, id)
+	if err != nil {
+		return err
+	}
+	return a.tester.Test(ctx, item)
 }
 
 func (a *App) ListModels(ctx context.Context) ([]ModelDTO, error) {

@@ -15,6 +15,7 @@ import (
 	routeapp "codex-provider-hub/internal/application/route"
 	"codex-provider-hub/internal/infrastructure/codex"
 	"codex-provider-hub/internal/infrastructure/config"
+	providerinfra "codex-provider-hub/internal/infrastructure/provider"
 	wailsui "codex-provider-hub/internal/interfaces/wails"
 )
 
@@ -96,5 +97,6 @@ func newApp(autostart wailsui.AutostartManager) (*wailsui.App, error) {
 		return nil, err
 	}
 	activator := routeapp.NewActivator(routes, providers, models, profiles, factory)
-	return wailsui.NewApp(providerService, modelService, routeService, profileService, activator, adapter, autostart), nil
+	tester := providerinfra.NewResponsesTester(nil)
+	return wailsui.NewApp(providerService, modelService, routeService, profileService, activator, adapter, autostart, tester), nil
 }
