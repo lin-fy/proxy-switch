@@ -15,6 +15,8 @@ import {
   NSwitch,
   NTag,
   NDropdown,
+  type FormInst,
+  type FormRules,
 } from 'naive-ui';
 import { MoreHorizontal, Pencil, Plus, PlugZap, Power, Trash2 } from 'lucide-vue-next';
 import { useWorkspaceStore } from '../stores/workspace';
@@ -30,6 +32,9 @@ const providerDraft = ref<ProviderDTO | null>(null);
 const modelDraft = ref<ModelDTO | null>(null);
 const routeDraft = ref<RouteDTO | null>(null);
 const providerMenuTarget = ref<ProviderDTO | null>(null);
+const providerFormRef = ref<FormInst | null>(null);
+const modelFormRef = ref<FormInst | null>(null);
+const routeFormRef = ref<FormInst | null>(null);
 const providerForm = ref({ id: '', name: '', baseURL: '', authRef: '' });
 const modelForm = ref({ providerID: '', id: '', name: '' });
 const routeForm = ref({ id: '', name: '', providerID: '', modelID: '', restart: false });
@@ -56,6 +61,20 @@ const providerMenuOptions = [
   { label: '编辑 Provider', key: 'edit' },
   { label: '删除 Provider', key: 'delete' },
 ];
+const providerRules: FormRules = {
+  id: { required: true, message: '请填写 Provider 标识', trigger: ['blur', 'input'] },
+  name: { required: true, message: '请填写 Provider 名称', trigger: ['blur', 'input'] },
+  baseURL: { required: true, message: '请填写 API 地址', trigger: ['blur', 'input'] },
+};
+const modelRules: FormRules = {
+  providerID: { required: true, message: '请选择 Provider', trigger: 'change' },
+  id: { required: true, message: '请填写模型 ID', trigger: ['blur', 'input'] },
+};
+const routeRules: FormRules = {
+  id: { required: true, message: '请填写路由标识', trigger: ['blur', 'input'] },
+  name: { required: true, message: '请填写路由名称', trigger: ['blur', 'input'] },
+  modelID: { required: true, message: '请选择模型', trigger: 'change' },
+};
 
 function providerName(id: string): string {
   return workspace.providers.find((item) => item.id === id)?.name ?? id;
@@ -100,6 +119,8 @@ function openRoute(item?: RouteDTO): void {
 }
 async function saveProvider(): Promise<void> {
   const f = providerForm.value;
+  const valid = await providerFormRef.value?.validate().then(() => true).catch(() => false);
+  if (valid === false) return;
   if (!f.id || !f.name || !f.baseURL) {
     message.warning('请填写标识、名称和 API 地址');
     return;
@@ -117,6 +138,8 @@ async function saveProvider(): Promise<void> {
 }
 async function saveModel(): Promise<void> {
   const f = modelForm.value;
+  const valid = await modelFormRef.value?.validate().then(() => true).catch(() => false);
+  if (valid === false) return;
   if (!f.providerID || !f.id) {
     message.warning('请选择 Provider 并填写模型 ID');
     return;
@@ -128,6 +151,8 @@ async function saveModel(): Promise<void> {
 }
 async function saveRoute(): Promise<void> {
   const f = routeForm.value;
+  const valid = await routeFormRef.value?.validate().then(() => true).catch(() => false);
+  if (valid === false) return;
   if (!f.id || !f.name || !f.providerID || !f.modelID) {
     message.warning('请填写路由信息');
     return;
@@ -328,7 +353,7 @@ async function testModel(item: ModelDTO): Promise<void> {
     :title="providerDraft ? '编辑 Provider' : '添加 Provider'"
     class="edit-modal"
   >
-    <NForm label-placement="top" @submit.prevent="saveProvider"
+    <NForm ref="providerFormRef" :model="providerForm" :rules="providerRules" label-placement="top" @submit.prevent="saveProvider"
       ><NFormItem label="标识"
         ><NInput v-model:value="providerForm.id" :disabled="!!providerDraft" placeholder="例如 openai" /></NFormItem
       ><NFormItem label="显示名称"><NInput v-model:value="providerForm.name" placeholder="例如 OpenAI" /></NFormItem
@@ -345,7 +370,7 @@ async function testModel(item: ModelDTO): Promise<void> {
     >
   </NModal>
   <NModal v-model:show="modelModal" preset="card" :title="modelDraft ? '编辑 Model' : '添加 Model'" class="edit-modal">
-    <NForm label-placement="top" @submit.prevent="saveModel"
+    <NForm ref="modelFormRef" :model="modelForm" :rules="modelRules" label-placement="top" @submit.prevent="saveModel"
       ><NFormItem label="Provider"
         ><NSelect
           v-model:value="modelForm.providerID"
@@ -363,7 +388,7 @@ async function testModel(item: ModelDTO): Promise<void> {
     >
   </NModal>
   <NModal v-model:show="routeModal" preset="card" :title="routeDraft ? '编辑 Route' : '添加 Route'" class="edit-modal">
-    <NForm label-placement="top" @submit.prevent="saveRoute"
+    <NForm ref="routeFormRef" :model="routeForm" :rules="routeRules" label-placement="top" @submit.prevent="saveRoute"
       ><NFormItem label="路由标识"
         ><NInput v-model:value="routeForm.id" :disabled="!!routeDraft" placeholder="例如 work" /></NFormItem
       ><NFormItem label="路由名称"><NInput v-model:value="routeForm.name" placeholder="例如 工作模型" /></NFormItem

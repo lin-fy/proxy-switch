@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { NButton, NCard, NEmpty, NForm, NFormItem, NInput, NModal, NTag, useDialog, useMessage } from 'naive-ui';
+import { NButton, NCard, NEmpty, NForm, NFormItem, NInput, NModal, NTag, useDialog, useMessage, type FormInst, type FormRules } from 'naive-ui';
 import { ArchiveRestore, Pencil, Plus, Trash2 } from 'lucide-vue-next';
 import { useWorkspaceStore } from '../stores/workspace';
 import type { ProfileDTO } from '../services/wails-api';
@@ -11,6 +11,11 @@ const message = useMessage();
 const modalOpen = ref(false);
 const draft = ref<ProfileDTO | null>(null);
 const form = ref({ id: '', name: '', configPath: '' });
+const formRef = ref<FormInst | null>(null);
+const formRules: FormRules = {
+  id: { required: true, message: '请填写档案标识', trigger: ['blur', 'input'] },
+  name: { required: true, message: '请填写档案名称', trigger: ['blur', 'input'] },
+};
 
 function openProfile(item?: ProfileDTO): void {
   draft.value = item ? { ...item } : null;
@@ -22,6 +27,8 @@ function openProfile(item?: ProfileDTO): void {
 
 async function saveProfile(): Promise<void> {
   const value = form.value;
+  const valid = await formRef.value?.validate().then(() => true).catch(() => false);
+  if (valid === false) return;
   if (!value.id.trim() || !value.name.trim()) {
     message.warning('请填写档案标识和名称');
     return;
@@ -111,7 +118,7 @@ function restoreProfile(item: ProfileDTO): void {
   </div>
 
   <NModal v-model:show="modalOpen" preset="card" :title="draft ? '编辑配置档案' : '新建配置档案'" class="edit-modal">
-    <NForm label-placement="top">
+    <NForm ref="formRef" :model="form" :rules="formRules" label-placement="top" @submit.prevent="saveProfile">
       <NFormItem label="档案标识"
         ><NInput v-model:value="form.id" :disabled="!!draft" placeholder="例如 work"
       /></NFormItem>
