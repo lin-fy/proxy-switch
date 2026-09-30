@@ -57,3 +57,14 @@ powershell -ExecutionPolicy Bypass -File build/windows/portable/package.ps1
 每次路由激活前，活动配置和选中的 Profile 配置都会写入同名 `.codex-provider-hub.bak` 备份。界面中的“恢复备份”会恢复最近一次备份；多文件写入中途失败时应用会自动回滚已写入文件。
 
 不要把 API Key 直接填入 Provider 名称、地址或普通 JSON 状态文件。状态文件只保存凭据引用。
+
+## 路由激活验收
+
+应用层测试覆盖以下关键顺序：
+
+1. 读取路由关联的 Provider、Model、全部 Provider 模型和 Codex Profile。
+2. 创建对应平台适配器并执行校验和配置准备。
+3. 只有路由勾选“激活时重启”时才启动 Codex。
+4. 配置准备成功后才把路由保存为默认路由。
+
+这组测试位于 `internal/application/route/activate_test.go`，用于防止界面层调整时破坏路由激活边界。

@@ -1,0 +1,141 @@
+package route
+
+import (
+	"context"
+	"errors"
+	"testing"
+
+	"codex-provider-hub/internal/application/ports"
+	"codex-provider-hub/internal/domain/model"
+	"codex-provider-hub/internal/domain/profile"
+	"codex-provider-hub/internal/domain/provider"
+	"codex-provider-hub/internal/domain/route"
+)
+
+type activationRoutes struct {
+	item  route.Route
+	saved []route.Route
+}
+
+func (r *activationRoutes) List(context.Context) ([]route.Route, error) {
+	return []route.Route{r.item}, nil
+}
+func (r *activationRoutes) Get(context.Context, string) (route.Route, error) { return r.item, nil }
+func (r *activationRoutes) Save(_ context.Context, item route.Route) error {
+	r.item = item
+	r.saved = append(r.saved, item)
+	return nil
+}
+func (r *activationRoutes) Delete(context.Context, string) error { return nil }
+
+type activationProviders struct{ item provider.Provider }
+
+func (r activationProviders) List(context.Context) ([]provider.Provider, error) {
+	return []provider.Provider{r.item}, nil
+}
+func (r activationProviders) Get(context.Context, string) (provider.Provider, error) {
+	return r.item, nil
+}
+func (r activationProviders) Save(context.Context, provider.Provider) error { return nil }
+func (r activationProviders) Delete(context.Context, string) error          { return nil }
+
+type activationModels struct {
+	selected model.Model
+	items    []model.Model
+}
+
+func (r activationModels) List(context.Context) ([]model.Model, error) { return r.items, nil }
+func (r activationModels) ListByProvider(context.Context, string) ([]model.Model, error) {
+	return r.items, nil
+}
+func (r activationModels) Get(context.Context, string, string) (model.Model, error) {
+	return r.selected, nil
+}
+func (r activationModels) Save(context.Context, model.Model) error      { return nil }
+func (r activationModels) Delete(context.Context, string, string) error { return nil }
+
+type activationProfiles struct{ item profile.Profile }
+
+func (r activationProfiles) List(context.Context) ([]profile.Profile, error) {
+	return []profile.Profile{r.item}, nil
+}
+func (r activationProfiles) Get(context.Context, string) (profile.Profile, error) { return r.item, nil }
+func (r activationProfiles) Save(context.Context, profile.Profile) error          { return nil }
+func (r activationProfiles) Delete(context.Context, string) error                 { return nil }
+
+type activationAdapter struct {
+	validated bool
+	prepared  bool
+	launched  bool
+}
+
+func (a *activationAdapter) Validate(context.Context, route.Route, provider.Provider, model.Model) error {
+	a.validated = true
+	return nil
+}
+func (a *activationAdapter) Prepare(_ context.Context, _ route.Route, _ provider.Provider, selected model.Model, models []model.Model, _ profile.Profile) error {
+	if selected.ID == "" || len(models) != 2 {
+		return errors.New("unexpected model selection")
+	}
+	a.prepared = true
+	return nil
+}
+func (a *activationAdapter) Launch(context.Context, route.Route) error {
+	a.launched = true
+	return nil
+}
+func (a *activationAdapter) IsRunning(context.Context) (bool, error) { return false, nil }
+
+type activationFactory struct{ adapter ports.PlatformAdapter }
+
+func (f activationFactory) Create(string) (ports.PlatformAdapter, error) { return f.adapter, nil }
+
+func TestActivatorPreparesAndMarksRouteDefault(t *testing.T) {
+	routes := &activationRoutes{item: route.Route{
+		ID: "route-a", Name: "Route A", PlatformID: route.PlatformCodex,
+		ProviderID: "provider-a", ModelID: "model-a",
+	}}
+	adapter := &activationAdapter{}
+	activator := NewActivator(
+		routes,
+		activationProviders{item: provider.Provider{ID: "provider-a", Name: "Provider A", BaseURL: "https://example.test", Protocol: provider.ProtocolResponses}},
+		activationModels{selected: model.Model{ProviderID: "provider-a", ID: "model-a"}, items: []model.Model{{ProviderID: "provider-a", ID: "model-a"}, {ProviderID: "provider-a", ID: "model-b"}}},
+		activationProfiles{item: profile.Profile{ID: "profile-a", Name: "Profile A"}},
+		activationFactory{adapter: adapter},
+	)
+
+	if err := activator.Activate(context.Background(), "route-a", "profile-a"); err != nil {
+		t.Fatal(err)
+	}
+	if !adapter.validated || !adapter.prepared {
+		t.Fatalf("adapter calls = validated:%v prepared:%v", adapter.validated, adapter.prepared)
+	}
+	if adapter.launched {
+		t.Fatal("route without restart flag should not launch Codex")
+	}
+	if !routes.item.Default || len(routes.saved) != 1 {
+		t.Fatalf("route default/save = %v/%d", routes.item.Default, len(routes.saved))
+	}
+}
+
+func TestActivatorLaunchesWhenRestartIsEnabled(t *testing.T) {
+	routes := &activationRoutes{item: route.Route{
+		ID: "route-a", Name: "Route A", PlatformID: route.PlatformCodex,
+		ProviderID: "provider-a", ModelID: "model-a", RestartOnActivate: true,
+	}}
+	adapter := &activationAdapter{}
+	activator := NewActivator(
+		routes,
+		activationProviders{item: provider.Provider{ID: "provider-a", Name: "Provider A", BaseURL: "https://example.test", Protocol: provider.ProtocolResponses}},
+		activationModels{selected: model.Model{ProviderID: "provider-a", ID: "model-a"}, items: []model.Model{{ProviderID: "provider-a", ID: "model-a"}, {ProviderID: "provider-a", ID: "model-b"}}},
+		activationProfiles{item: profile.Profile{ID: "profile-a", Name: "Profile A"}},
+		activationFactory{adapter: adapter},
+	)
+
+	if err := activator.Activate(context.Background(), "route-a", "profile-a"); err != nil {
+		t.Fatal(err)
+	}
+	if !adapter.launched {
+		t.Fatal("restart-enabled route should launch Codex")
+	}
+}
