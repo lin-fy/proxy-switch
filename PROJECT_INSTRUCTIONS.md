@@ -8,6 +8,15 @@
 
 V1 验收完成后关闭当前 goal。V1.1、V2 或其他平台支持必须创建新的独立 goal。
 
+## 文档关系
+
+- `PRODUCT_PLAN.md`：产品定位、范围和架构原则。
+- `docs/ROADMAP.md`：V1 的统一目标、里程碑、验收状态和当前下一步；目标模式每轮都必须读取并维护。
+- `docs/TECH_STACK.md`、`docs/UI_ARCHITECTURE_SPEC.md`：前端技术和界面实现规范。
+- `docs/BUILD_WINDOWS.md`：Windows 构建、安装和恢复操作说明。
+
+当聊天上下文与仓库文档不一致时，以代码和 `docs/ROADMAP.md` 的最新验证记录为准；发现差异先更新文档。
+
 ## 首轮初始化
 
 1. 初始化 Git，创建合理的 `.gitignore` 和初始基线提交。
