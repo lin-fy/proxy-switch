@@ -195,7 +195,15 @@ func (a *App) CodexRunning(ctx context.Context) (bool, error) {
 }
 
 func (a *App) StartCodex(ctx context.Context) error {
-	return a.codex.Launch(ctx, route.Route{PlatformID: route.PlatformCodex})
+	item := route.Route{PlatformID: route.PlatformCodex}
+	running, err := a.codex.IsRunning(ctx)
+	if err != nil {
+		return err
+	}
+	if running {
+		return a.codex.Restart(ctx, item)
+	}
+	return a.codex.Launch(ctx, item)
 }
 
 func (a *App) AutostartEnabled(context.Context) (bool, error) {

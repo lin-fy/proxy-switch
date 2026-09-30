@@ -66,7 +66,7 @@ powershell -ExecutionPolicy Bypass -File build/windows/portable/package.ps1
 
 1. 读取路由关联的 Provider、Model、全部 Provider 模型和 Codex Profile。
 2. 创建对应平台适配器并执行校验和配置准备。
-3. 只有路由勾选“激活时重启”时才启动 Codex。
+3. 只有路由勾选“激活时重启”时才重启 Codex；已有进程会先按配置的可执行文件名停止，再启动新进程。
 4. 配置准备成功后才把路由保存为默认路由。
 
 这组测试位于 `internal/application/route/activate_test.go`，用于防止界面层调整时破坏路由激活边界。

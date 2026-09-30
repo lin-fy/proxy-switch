@@ -141,8 +141,24 @@ func (a *Adapter) Launch(ctx context.Context, _ route.Route) error {
 	return nil
 }
 
+func (a *Adapter) Restart(ctx context.Context, r route.Route) error {
+	running, err := a.IsRunning(ctx)
+	if err != nil {
+		return err
+	}
+	if running {
+		image := a.executableImageName()
+		cmd := exec.CommandContext(ctx, "taskkill", "/IM", image, "/T", "/F")
+		if output, err := cmd.CombinedOutput(); err != nil {
+			return fmt.Errorf("stop Codex %q: %w: %s", image, err, strings.TrimSpace(string(output)))
+		}
+	}
+	return a.Launch(ctx, r)
+}
+
 func (a *Adapter) IsRunning(ctx context.Context) (bool, error) {
-	cmd := exec.CommandContext(ctx, "tasklist", "/FI", "IMAGENAME eq codex.exe")
+	image := a.executableImageName()
+	cmd := exec.CommandContext(ctx, "tasklist", "/FI", "IMAGENAME eq "+image)
 	out, err := cmd.Output()
 	if errors.Is(err, exec.ErrNotFound) {
 		return false, nil
@@ -150,7 +166,15 @@ func (a *Adapter) IsRunning(ctx context.Context) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	return strings.Contains(strings.ToLower(string(out)), "codex.exe"), nil
+	return strings.Contains(strings.ToLower(string(out)), strings.ToLower(image)), nil
+}
+
+func (a *Adapter) executableImageName() string {
+	image := filepath.Base(strings.TrimSpace(a.executable))
+	if filepath.Ext(image) == "" {
+		image += ".exe"
+	}
+	return image
 }
 
 func (a *Adapter) Restore(pr profile.Profile) error {

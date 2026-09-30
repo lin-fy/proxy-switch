@@ -67,6 +67,7 @@ type activationAdapter struct {
 	validated bool
 	prepared  bool
 	launched  bool
+	restarted bool
 }
 
 func (a *activationAdapter) Validate(context.Context, route.Route, provider.Provider, model.Model) error {
@@ -82,6 +83,10 @@ func (a *activationAdapter) Prepare(_ context.Context, _ route.Route, _ provider
 }
 func (a *activationAdapter) Launch(context.Context, route.Route) error {
 	a.launched = true
+	return nil
+}
+func (a *activationAdapter) Restart(context.Context, route.Route) error {
+	a.restarted = true
 	return nil
 }
 func (a *activationAdapter) IsRunning(context.Context) (bool, error) { return false, nil }
@@ -135,7 +140,7 @@ func TestActivatorLaunchesWhenRestartIsEnabled(t *testing.T) {
 	if err := activator.Activate(context.Background(), "route-a", "profile-a"); err != nil {
 		t.Fatal(err)
 	}
-	if !adapter.launched {
-		t.Fatal("restart-enabled route should launch Codex")
+	if !adapter.restarted || adapter.launched {
+		t.Fatalf("restart-enabled route calls = restarted:%v launched:%v", adapter.restarted, adapter.launched)
 	}
 }

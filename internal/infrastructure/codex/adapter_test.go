@@ -98,6 +98,25 @@ func TestFactoryRejectsUnknownPlatform(t *testing.T) {
 	}
 }
 
+func TestExecutableImageNameUsesConfiguredExecutable(t *testing.T) {
+	for _, test := range []struct {
+		name       string
+		executable string
+		want       string
+	}{
+		{name: "default command", executable: "codex", want: "codex.exe"},
+		{name: "configured exe", executable: `C:\\Apps\\Codex Desktop\\codex.exe`, want: "codex.exe"},
+		{name: "configured command", executable: "custom-codex", want: "custom-codex.exe"},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			adapter := &Adapter{executable: test.executable}
+			if got := adapter.executableImageName(); got != test.want {
+				t.Fatalf("image name = %q, want %q", got, test.want)
+			}
+		})
+	}
+}
+
 func TestPrepareKeepsProfilesInSeparateConfigFiles(t *testing.T) {
 	home := t.TempDir()
 	adapter, err := NewAdapter(home)

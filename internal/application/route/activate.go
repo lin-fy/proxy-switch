@@ -64,8 +64,8 @@ func (a *Activator) Activate(ctx context.Context, routeID, profileID string) err
 		return fmt.Errorf("prepare route: %w", err)
 	}
 	if r.RestartOnActivate {
-		if err := adapter.Launch(ctx, r); err != nil {
-			return fmt.Errorf("launch platform: %w", err)
+		if err := adapter.Restart(ctx, r); err != nil {
+			return fmt.Errorf("restart platform: %w", err)
 		}
 	}
 	r.Default = true
