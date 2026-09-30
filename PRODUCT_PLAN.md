@@ -314,6 +314,8 @@ profile-name.models.json
 - DDD 领域层和应用端口已通过 `go test ./...`。
 - Wails v3 vanilla-ts 壳已成功构建 Windows amd64 可执行文件，前端绑定使用 `@wailsio/runtime`。
 - 已实现 Codex 配置写入、写入前备份/失败恢复、模型目录同步和基础 Provider/Route 管理界面。
+- 多个 Profile 已支持独立配置文件；激活时同步写入活动 `config.toml`，兼容不支持 `--profile` 的 Codex Desktop。
+- 多文件写入失败会回滚已写入的活动配置，激活成功后路由会成为当前默认路由。
 - 已接入 Wails v3 系统托盘：关闭窗口隐藏、托盘单击切换、菜单显示/隐藏/退出。
 - 已接入 Wails v3 开机启动：Windows 使用 `HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run`，界面提供启用/禁用开关。
 - Go 测试、前端构建、Wails Windows amd64 构建和启动冒烟验证已通过。

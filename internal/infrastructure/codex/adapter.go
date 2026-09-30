@@ -80,17 +80,19 @@ func (a *Adapter) Prepare(_ context.Context, r route.Route, p provider.Provider,
 	if err := a.Validate(context.Background(), r, p, selected); err != nil {
 		return err
 	}
-	path := a.configPath(pr)
-	config, err := readConfig(path)
+	activePath := filepath.Join(a.homeDir, "config.toml")
+	profilePath := a.configPath(pr)
+	sourcePath := profilePath
+	if profilePath != activePath {
+		if _, err := os.Stat(profilePath); errors.Is(err, os.ErrNotExist) {
+			sourcePath = activePath
+		} else if err != nil {
+			return fmt.Errorf("stat Codex profile: %w", err)
+		}
+	}
+	config, err := readConfig(sourcePath)
 	if err != nil {
 		return err
-	}
-	if _, err := os.Stat(path); err == nil {
-		if err := copyFile(path, backupPath(path)); err != nil {
-			return fmt.Errorf("backup codex config: %w", err)
-		}
-	} else if !errors.Is(err, os.ErrNotExist) {
-		return fmt.Errorf("stat codex config: %w", err)
 	}
 
 	providers, err := table(config, "model_providers")
@@ -115,8 +117,18 @@ func (a *Adapter) Prepare(_ context.Context, r route.Route, p provider.Provider,
 		return fmt.Errorf("build model catalog: %w", err)
 	}
 	config["model_catalog_json"] = string(catalog)
-	if err := writeConfig(path, config); err != nil {
-		return fmt.Errorf("write codex config: %w", err)
+	targets := uniquePaths(activePath, profilePath)
+	existed, err := backupTargets(targets)
+	if err != nil {
+		return err
+	}
+	for _, path := range targets {
+		if err := writeConfig(path, config); err != nil {
+			if rollbackErr := rollbackTargets(targets, existed); rollbackErr != nil {
+				return fmt.Errorf("write Codex config %q: %w; rollback failed: %v", path, err, rollbackErr)
+			}
+			return fmt.Errorf("write Codex config %q: %w", path, err)
+		}
 	}
 	return nil
 }
@@ -142,15 +154,22 @@ func (a *Adapter) IsRunning(ctx context.Context) (bool, error) {
 }
 
 func (a *Adapter) Restore(pr profile.Profile) error {
-	path := a.configPath(pr)
-	backup := backupPath(path)
-	if _, err := os.Stat(backup); errors.Is(err, os.ErrNotExist) {
-		return ErrBackupNotFound
-	} else if err != nil {
-		return err
+	targets := uniquePaths(filepath.Join(a.homeDir, "config.toml"), a.configPath(pr))
+	restored := false
+	for _, path := range targets {
+		backup := backupPath(path)
+		if _, err := os.Stat(backup); errors.Is(err, os.ErrNotExist) {
+			continue
+		} else if err != nil {
+			return err
+		}
+		if err := copyFile(backup, path); err != nil {
+			return fmt.Errorf("restore Codex config %q: %w", path, err)
+		}
+		restored = true
 	}
-	if err := copyFile(backup, path); err != nil {
-		return fmt.Errorf("restore Codex config: %w", err)
+	if !restored {
+		return ErrBackupNotFound
 	}
 	return nil
 }
@@ -243,6 +262,48 @@ func copyFile(source, destination string) error {
 		return err
 	}
 	return os.WriteFile(destination, contents, 0o600)
+}
+
+func uniquePaths(paths ...string) []string {
+	result := make([]string, 0, len(paths))
+	seen := make(map[string]bool, len(paths))
+	for _, path := range paths {
+		path = filepath.Clean(path)
+		if !seen[path] {
+			seen[path] = true
+			result = append(result, path)
+		}
+	}
+	return result
+}
+
+func backupTargets(paths []string) (map[string]bool, error) {
+	existed := make(map[string]bool, len(paths))
+	for _, path := range paths {
+		if _, err := os.Stat(path); err == nil {
+			existed[path] = true
+			if err := copyFile(path, backupPath(path)); err != nil {
+				return nil, fmt.Errorf("backup Codex config %q: %w", path, err)
+			}
+		} else if !errors.Is(err, os.ErrNotExist) {
+			return nil, fmt.Errorf("stat Codex config %q: %w", path, err)
+		}
+	}
+	return existed, nil
+}
+
+func rollbackTargets(paths []string, existed map[string]bool) error {
+	var result error
+	for _, path := range paths {
+		if existed[path] {
+			result = errors.Join(result, copyFile(backupPath(path), path))
+			continue
+		}
+		if err := os.Remove(path); err != nil && !errors.Is(err, os.ErrNotExist) {
+			result = errors.Join(result, err)
+		}
+	}
+	return result
 }
 
 func backupPath(path string) string { return path + ".codex-provider-hub.bak" }

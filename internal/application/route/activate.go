@@ -68,5 +68,9 @@ func (a *Activator) Activate(ctx context.Context, routeID, profileID string) err
 			return fmt.Errorf("launch platform: %w", err)
 		}
 	}
+	r.Default = true
+	if err := a.routes.Save(ctx, r); err != nil {
+		return fmt.Errorf("save active route: %w", err)
+	}
 	return nil
 }

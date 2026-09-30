@@ -104,7 +104,9 @@ func (s *Store) update(ctx context.Context, fn func(*snapshot) error) error {
 
 type ProviderRepository struct{ store *Store }
 
-func NewProviderRepository(store *Store) *ProviderRepository { return &ProviderRepository{store: store} }
+func NewProviderRepository(store *Store) *ProviderRepository {
+	return &ProviderRepository{store: store}
+}
 
 func (r *ProviderRepository) List(ctx context.Context) ([]provider.Provider, error) {
 	var result []provider.Provider
@@ -239,6 +241,11 @@ func (r *RouteRepository) Get(ctx context.Context, id string) (route.Route, erro
 
 func (r *RouteRepository) Save(ctx context.Context, item route.Route) error {
 	return r.store.update(ctx, func(s *snapshot) error {
+		if item.Default {
+			for i := range s.Routes {
+				s.Routes[i].Default = false
+			}
+		}
 		for i := range s.Routes {
 			if s.Routes[i].ID == item.ID {
 				s.Routes[i] = item
