@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { RouterLink, RouterView, useRoute } from 'vue-router';
-import { NButton, NTag } from 'naive-ui';
+import { NButton, NSelect, NTag } from 'naive-ui';
 import { Activity, Boxes, CircleHelp, Cog, RefreshCw, Rocket, SlidersHorizontal } from 'lucide-vue-next';
 import { useWorkspaceStore } from '../stores/workspace';
 
@@ -15,6 +15,7 @@ const nav = [
   { name: 'profiles', label: '配置档案', hint: '切换 Codex 环境', icon: Boxes },
   { name: 'settings', label: '设置', hint: '应用与数据', icon: Cog },
 ];
+const profileOptions = computed(() => workspace.profiles.map((item) => ({ label: item.name, value: item.id })));
 </script>
 
 <template>
@@ -57,6 +58,14 @@ const nav = [
           <h1>{{ activeLabel }}</h1>
         </div>
         <div class="topbar-actions flex items-center gap-2">
+          <NSelect
+            v-model:value="workspace.selectedProfileID"
+            class="topbar-profile"
+            :options="profileOptions"
+            size="small"
+            placeholder="当前档案"
+            aria-label="当前 Codex 配置档案"
+          />
           <NTag size="small" :bordered="false" :type="workspace.codexRunning ? 'success' : 'default'">{{
             workspace.codexRunning ? 'Codex 运行中' : 'Codex 未运行'
           }}</NTag>

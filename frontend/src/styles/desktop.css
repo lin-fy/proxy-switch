@@ -166,6 +166,9 @@
   gap: 8px;
   align-items: center;
 }
+.topbar-profile {
+  width: 150px;
+}
 .desktop-main {
   min-width: 0;
   min-height: 0;
