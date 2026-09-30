@@ -323,6 +323,7 @@ profile-name.models.json
 - 凭据引用支持环境变量和 Windows Credential Manager 的 `credential:<target>` 形式，普通 JSON 状态文件只保存引用，不保存 API Key。
 - Codex 运行状态已暴露到界面，并提供启动/重新启动入口；实际可执行文件可通过 `CODEX_DESKTOP_EXECUTABLE` 配置。
 - Windows 构建元数据已改为正式产品信息（版本 `0.1.0`）；可执行文件构建通过。NSIS 安装器任务已验证到 `makensis` 步骤，但当前开发环境未安装 NSIS，因此安装包仍待补齐工具后完成。
+- 已补充并验证无管理员权限的 ZIP 用户级安装包：安装脚本复制 exe、创建开始菜单快捷方式，卸载脚本通过安装标记保护目标目录并可完整移除。
 
 ## 12. 实施顺序
 
