@@ -57,9 +57,9 @@ jobs:
         working-directory: frontend
         run: npm ci
 
-      - name: Run project verification
+      - name: Run model-independent project verification
         shell: pwsh
-        run: ./scripts/ci/verify.ps1 -BuildWindows
+        run: pwsh -NoProfile -File ./scripts/ci/verify.ps1 -BuildWindows
 
       - name: Upload Windows build
         uses: actions/upload-artifact@v4
