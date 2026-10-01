@@ -10,12 +10,15 @@
 
 ## 2026-10-01 · codex
 
-### docs(agents): allow local commits on isolated task branches
+### ci: standardize agent-independent verification entrypoints
 
-- **影响**：明确自己的 worktree/任务分支可以自由创建本地 commit；共享工作树、其他 agent 分支和 `dev` 禁止直接提交；远程 push、PR 创建/更新及合并仍需用户授权。
-- **关键文件**：`AGENTS.md`、`docs/agent-guide/git-rules.md`、`docs/agent-guide/workflow.md`
-- **后续**：按任务分支开发并通过目标为 `dev` 的 PR 集成。
-- **commit**：待提交后补充
+- **影响**：Codex、Pi、Claude Code 等 agent 共用 `task check:frontend`、`task check:backend` 和 `task ci`；GitHub Actions 继续只执行硬检查，不依赖 LLM。
+- **关键文件**：`Taskfile.yml`、`scripts/ci/verify.ps1`、`.github/workflows/ci.yml`、`docs/ops/CI_CD.md`、`AGENTS.md`
+- **验证**：前端/后端范围入口、完整 `task ci` 与 Windows amd64 exe/portable ZIP 生成均通过；Wails 从 `GOPATH\bin` 自动查找，仅修改验证进程的 PATH。
+- **后续**：如需 AI Review 或失败诊断，应作为独立可选工作流接入，不能替代 CI 结果。
+- **commit**：`ae7271b`
+
+## 2026-10-01 · codex
 
 ### fix(build): support user-local NSIS compiler
 
@@ -119,7 +122,7 @@
 
 ### fix(build): generate platform-specific icons
 
-- **影响**：Windows CI 和 Wails 默认资产统一使用 `darwin/icon.icns`；Windows 生成 PNG 转换的 ICNS，macOS 额外保留 Icon Composer 和 Assets.car 参数。
+- **影响**：Windows CI 不再尝试打开 macOS 专用的 `darwin/icons.icns` 路径；macOS 仍保留 ICNS 和 Assets.car 生成参数。
 - **关键文件**：`build/Taskfile.yml`
 - **后续**：等待 PR 的完整 Windows CI 通过再合并
 - **commit**：待下次文档提交回填
@@ -128,7 +131,7 @@
 
 ### perf(ui): split vendor chunks and name the profile selects
 
-- **影响**：vite `manualChunks` 把依赖拆为 naive-ui（437.74 kB）/ framework（129.50 kB）/ vendor（28.93 kB）/ icons（5.90 kB），业务代码 index 从 638.10 kB 降至 36.97 kB，单 chunk 全部低于 500 kB 警告线；桌面端经 go:embed 打包，总字节不变，收益是业务改动不再翻新库代码 hash。顶栏与设置页的配置档案 NSelect 在无档案时禁用（naive-ui 非过滤选择器空值时内部焦点 div 无可访问名称、attrs 无法透传到内部元素属上游限制），消除无名 tab stop；运行时审计三个页面可聚焦控件 0 个无名称
+- **影响**：vite `manualChunks` 把依赖拆为 naive-ui（437.74 kB）/ framework（129.50 kB）/ vendor（28.93 kB）/ icons（5.90 kB），业务代码 index 从 638.10 kB 降至 36.97 kB，单 chunk 全部低于 500 kB 警告线；桌面端经 go:embed 打包总字节不变，收益是业务改动不再翻新库代码 hash。顶栏与设置页的配置档案 NSelect 在无档案时禁用（naive-ui 非过滤选择器空值时内部焦点 div 无可访问名称、attrs 无法透传到内部元素属上游限制），消除无名 tab stop；运行时审计三个页面可聚焦控件 0 个无名称
 - **关键文件**：`frontend/vite.config.ts`、`frontend/src/components/DesktopShell.vue`、`frontend/src/pages/SettingsPage.vue`
 - **后续**：模态/对话框右上角 X 关闭按钮（NCard/NDialog 内部）无可访问名称为上游限制，可考虑向 naive-ui 反馈；`wails/custom.js` 404 为运行时探测可选文件的上游行为，与本次分包无关
-- **commit**：待 PR 集成后回填
+- **commit**：`65762fb`（PR #4）

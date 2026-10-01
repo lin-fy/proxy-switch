@@ -3,7 +3,7 @@
 > agent 协作的"单一事实源"。开工读，收工更新。只保留当前状态。
 > 详细规则见 [`agent-guide/workflow.md`](agent-guide/workflow.md)。
 
-最后更新：2026-10-01 · codex（明确独立任务分支提交与 PR 集成边界）
+最后更新：2026-10-01 · codex（模型无关 CI 入口）
 
 ## 一句话现状
 
@@ -15,9 +15,10 @@ V1 后端核心 + 桌面壳 + Vue 前端已完成并通过桌面原生验收（M
 2. GitHub 配置 `production` Environment + 签名 Secrets + `main` 分支保护，完成 Tag 发布演练（**需用户操作**）
 3. 完成 CPA、OpenAI、自定义 Provider 的真实端到端验收（**需用户提供凭据**）
 
+统一验证入口已补齐：`task check:frontend`、`task check:backend`、`task ci`；GitHub Actions 与本地入口均复用 `scripts/ci/verify.ps1`，不依赖任何 LLM。三个入口已通过，Windows exe/portable ZIP 已生成；本次通过分支 `codex/agent-independent-ci` 提交 PR。
+
 ## 当前卡点
 
-- GitHub PR #1 的 Windows CI 首轮格式检查已修复；后续发现 Wails 默认要求 `build/darwin/icon.icns`，已统一图标输出路径并等待重跑
 - 真实 CPA / OpenAI / 自定义 Provider 凭据（**需用户提供**）
 - GitHub 仓库 Secrets 配置（**需用户操作**）
 
@@ -28,10 +29,11 @@ V1 后端核心 + 桌面壳 + Vue 前端已完成并通过桌面原生验收（M
 ### 已裁决（归档）
 
 - 2026-10-01：TASKS.md codex 代记条目归属问题 → 删除，由 zcode 自己条目承担
+- 2026-10-01：CI 与开发 agent、模型解耦，AI Review/失败诊断仅作为可选分析层（ADR-0011）
 
 ## 长期注意事项
 
-- 当前 GitHub PR 流程：任务 agent 在自己的 worktree/分支自由创建本地 commit，交付前同步 `dev`、解决冲突并重新验证；获得用户授权后 push 分支并创建目标为 `dev` 的 PR。多个 agent 并行时由用户指定 reviewer/merger，只有一个活跃 agent 时允许自审并在分支保护允许时合并，但必须等待 CI 通过。不得在共享工作树或 `dev` 直接提交、合并或覆盖他人未提交改动。
+- 当前已切换 GitHub PR 流程：任务 agent 在自己的分支同步 `dev`、解决冲突、验证并创建 PR；多个 agent 并行时由用户指定 reviewer/merger，只有一个活跃 agent 时允许自审并在分支保护允许时合并，但必须等待 CI 通过。不得覆盖他人未提交改动。
 - `sources/` 下文件只读
 - 不得提交密钥、临时文件、构建产物、CodeGraph 缓存
 - 瞬时工作区状态直接 `git status`，不在本文档维护
