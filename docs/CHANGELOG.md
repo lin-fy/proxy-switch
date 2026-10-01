@@ -64,3 +64,11 @@
 - **关键文件**：`AGENTS.md`、`docs/agent-guide/`、`docs/planning/archive/M0-M2.md`、`docs/planning/ROADMAP.md`、`docs/CONTEXT.md`、`docs/TASKS.md`、`docs/README.md`、`.github/workflows/ci.yml`
 - **后续**：无
 - **commit**：ef01776（ci 跳过：8bd05b8；交叉引用与行尾整理：11df521，由 zcode 收尾提交）
+
+## 2026-10-01 · codex
+
+### docs(agents): let agents merge verified task branches
+
+- **影响**：按用户指示，已验收的并行任务由所属 agent 在主工作树自行合并到 `dev`，无需用户执行或再次确认；同步流程和示例，保留他人改动保护及远端推送授权要求。
+- **关键文件**：`AGENTS.md`、`docs/agent-guide/git-rules.md`、`docs/TASKS.md`、`docs/CONTEXT.md`
+- **commit**：待下次文档提交回填
