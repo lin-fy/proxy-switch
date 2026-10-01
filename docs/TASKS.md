@@ -14,9 +14,9 @@
 
 ### M4 — Vue 桌面界面收尾
 
-- [- by zcode 2026-10-01] Wails 桌面窗口尺寸、DPI、浮层行为验收（960×640 和 1120×760）
-- [- by zcode 2026-10-01] 键盘导航与 IME 输入在桌面端的验收
-- [- by zcode 2026-10-01] 真实后端流程端到端走查（Provider/Model/Route/Profile 全流程）
+- [x by zcode 2026-10-01] Wails 桌面窗口尺寸、DPI、浮层行为验收（960×640 和 1120×760）
+- [x by zcode 2026-10-01] 键盘导航与 IME 输入在桌面端的验收
+- [x by zcode 2026-10-01] 真实后端流程端到端走查（Provider/Model/Route/Profile 全流程）
 
 ### M5 — Windows 安装包
 
@@ -36,6 +36,7 @@
 
 ## 已完成
 
+- [x by zcode 2026-10-01] M4 桌面验收：窗口 1120×760/最小 960×640 落地与 DPI 实测、最小窗口裁切修复、Tab/Escape/IME 验证、Mock Responses 全链路走查（同步模型入口缺失与错误态清页两个 P1 修复）；分支 `zcode/m4-acceptance`
 - [x by codex 2026-10-01] 明确并行分支版本同步规则：开发期间允许落后，合并前在 agent worktree 合并最新 `dev` 并重新验证
 - [x by codex 2026-10-01] 按用户指示调整并行流程：任务验收通过后由 agent 自行合并到 dev
 - [x by codex 2026-10-01] 文档结构整理：建立多 agent 协作机制（AGENTS.md + 各 agent 入口 + docs/CONTEXT/TASKS/CHANGELOG/DECISIONS）

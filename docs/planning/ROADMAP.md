@@ -58,7 +58,7 @@ Proxy Switch
 | Wails 桌面壳 | [x] | Wails 3、窗口关闭隐藏、托盘显示/隐藏/退出已接入。 |
 | 开机启动 | [x] | Windows `HKCU\\...\\Run` 开关已接入。 |
 | 当前工作区构建 | [x] | `gofmt`、`go test ./...`、`go vet ./...`、前端格式检查、lint、生产构建和 Wails Windows amd64 构建均已复验；统一验证脚本还可生成 portable ZIP。2026-10-01 前端重构后桌面 exe 重新构建（约 11.4 MB）并完成启动冒烟：WebView2 初始化、窗口渲染真实后端空态、生产包确认不含浏览器预览演示数据。 |
-| Vue UI 迁移 | [-] | Vue 3、Pinia、Naive UI、Tailwind v4、配置/Profiles/Settings 页面和 Wails API 适配层已有可构建基线；浏览器预览模式下两尺寸截图走查通过（行列表溢出已修复），错误安全映射、错误摘要聚焦、激活消息保留已验证；Wails 桌面窗口、DPI、焦点、IME 和真实后端流程验收仍待完成。 |
+| Vue UI 迁移 | [x] | Vue 3、Pinia、Naive UI、Tailwind v4、配置/Profiles/Settings 页面和 Wails API 适配层已接入；错误安全映射、错误摘要聚焦、激活消息保留已验证；2026-10-01 桌面原生验收完成：窗口 1120×760/最小 960×640 实测、150% DPI 渲染、浮层/Tab/Escape/IME 验证、Mock Responses 全链路走查通过（详见 CHANGELOG）。 |
 | Windows 安装包 | [x] | 用户级 NSIS 安装包已生成，并完成安装、启动、升级/回滚和卸载验证；MSIX 作为可选路径保留。 |
 | 真实端到端验收 | [ ] | 仍需可用的 CPA、OpenAI 和自定义 Provider 以及 Codex Desktop 实际请求记录。 |
 
@@ -79,7 +79,7 @@ Proxy Switch
 
 ### M4 — Vue 桌面界面
 
-状态：`[-]`（前端基线已实现，浏览器走查通过；桌面原生验收待完成）
+状态：`[x]`（前端基线、浏览器走查与桌面原生验收全部完成）
 
 - [x] Vue 入口、Pinia workspace store、Wails API 适配层和 Naive UI 主题。
 - [x] 配置页的 Provider / Model / Route 列表、编辑和激活流程已接入。
@@ -90,7 +90,7 @@ Proxy Switch
 - [x] 创建 Route 时保留 `restart_on_activate`，并让激活 `recovered` 只来自明确后端证据（失败时保持 unknown 并提供恢复入口）。
 - [x] 将原始后端错误转换为安全提示（分类映射，浏览器 401 用例验证无原始异常泄漏）。
 - [x] 修正文字对比度（muted 调整为 `#8ca3a1`，所有表面 ≥ 4.5:1，计算证据）并按 960×640 / 1120×760 截图走查修复行列表溢出。
-- [ ] 完成窗口尺寸、DPI、浮层、键盘/IME 和真实后端流程验收（Wails Windows 构建与启动冒烟已复验，见「当前状态」）。
+- [x] 完成窗口尺寸、DPI、浮层、键盘/IME 和真实后端流程验收（2026-10-01 桌面原生验收：150% DPI 下默认 1680×1140 物理 = 1120×760 逻辑、最小跟踪尺寸 1440×960 物理 = 960×640 逻辑实测通过；浮层/Tab/Escape/IME 组合输入验证；本地 Mock Responses API 全链路走查通过，发现并修复最小窗口裁切、模型同步无 UI 入口、错误态清页三处缺陷，见 CHANGELOG）。
 
 出口标准：在 960 × 640 窗口中，Provider、Model、Route、Profile 和 Settings 全流程可操作，前端构建通过。
 
@@ -163,9 +163,9 @@ Proxy Switch
 
 只保留进入实现阶段后马上要做的三项：
 
-1. 完成窗口尺寸、DPI、浮层、焦点、键盘/IME 和真实后端流程验收（Wails Windows 构建与启动冒烟已复验，见 M4 与「当前状态」）。
-2. 在 GitHub 配置 `production` Environment、签名 Secrets 和 `main` 分支保护，完成一次 Tag 发布演练。
-3. 完成 CPA、OpenAI、自定义 Provider 的真实端到端验收。
+1. 发布 [`../ops/BUILD_WINDOWS.md`](../ops/BUILD_WINDOWS.md) 的最终步骤和故障恢复说明（M5 收尾，NSIS 全流程已验证）。
+2. 在 GitHub 配置 `production` Environment、签名 Secrets 和 `main` 分支保护，完成一次 Tag 发布演练（**需要用户操作**）。
+3. 完成 CPA、OpenAI、自定义 Provider 的真实端到端验收（**需要用户提供凭据**）。
 
 ## 6. 技术决策记录
 

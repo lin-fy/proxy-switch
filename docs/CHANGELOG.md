@@ -81,3 +81,13 @@
 - **关键文件**：`AGENTS.md`、`docs/agent-guide/workflow.md`、`docs/agent-guide/git-rules.md`、`docs/CONTEXT.md`、`docs/TASKS.md`、`docs/DECISIONS.md`
 - **后续**：补充新 worktree 的依赖和构建输入初始化入口
 - **commit**：待下次文档提交回填
+
+## 2026-10-01 · zcode
+
+### fix(desktop): M4 桌面原生验收与三处缺陷修复
+
+- **影响**：M4 三项验收全部完成。① 窗口规格落地：默认 1024×768 → 1120×760，新增最小 960×640（WM_GETMINMAXINFO 实测 1440×960 物理 @150% DPI = 960×640 逻辑，permonitorv2 生效）；② 最小窗口裁切修复：移除 `html/body/#app` 的 `min-width:960px`（视口比窗口逻辑尺寸小约 14px 系统边框，原规则致右侧内容被静默裁切）；③ 新增「同步模型」Provider 菜单入口（后端 /models 增量 Upsert 此前无 UI 触达路径）；④ 操作失败不再清空整个配置页（错误横幅内联、数据保留，仅无数据时独占页面）；⑤ 新增 `CPH_REMOTE_DEBUG_PORT` 门控 CDP 端口供自动化验收，默认关闭
+- **关键文件**：`main.go`、`frontend/src/styles/base.css`、`frontend/src/pages/ConfigPage.vue`
+- **验收证据**：CDP + 本地 Mock Responses API（127.0.0.1:8471）全链路走查：Provider 创建/持久化、测试连接（Bearer 凭据 → /models 200）、模型同步 2 条、Route 创建（级联选择、重启默认关）、Profile 创建自动选中、路由激活写入沙箱 CODEX_HOME 的 config.toml + 模型目录、备份恢复回到激活前状态、引用删除保护（Provider/Model 被引用时拒删且错误安全化）、Tab 顺序（侧栏→顶栏→主区）、Escape 关闭浮层、IME 组合输入提交；go test ./... 全过，dev 同步后重新构建冒烟通过；测试数据已清理（state.json 全空）
+- **后续**：M4 出口标准达成；真实外部 Provider（CPA/OpenAI）请求验证仍属 M6（需用户凭据）
+- **commit**：zcode/m4-acceptance 分支 d27e070、309f17f、49d6290（合并提交见下次回填）
