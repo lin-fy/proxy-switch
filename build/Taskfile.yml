@@ -198,10 +198,10 @@ tasks:
       - "appicon.png"
       - "appicon.icon"
     generates:
-      - "darwin/icons.icns"
+      - "darwin/icon.icns"
       - "windows/icon.ico"
     cmds:
-      - wails3 generate icons -input appicon.png -windowsfilename windows/icon.ico{{if eq OS "darwin"}} -macfilename darwin/icons.icns -iconcomposerinput appicon.icon -macassetdir darwin{{end}}
+      - wails3 generate icons -input appicon.png -macfilename darwin/icon.icns -windowsfilename windows/icon.ico{{if eq OS "darwin"}} -iconcomposerinput appicon.icon -macassetdir darwin{{end}}
 
   dev:frontend:
     summary: Runs the frontend in development mode
