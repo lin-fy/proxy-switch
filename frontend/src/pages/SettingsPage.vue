@@ -73,6 +73,7 @@ async function restoreSelected(): Promise<void> {
             :options="profileOptions"
             size="small"
             placeholder="选择档案"
+            :disabled="!workspace.profiles.length"
             aria-label="当前配置档案"
           />
         </div>
