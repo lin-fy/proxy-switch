@@ -22,6 +22,7 @@
 
 - [x by codex 2026-10-01] 补齐 NSIS 或 MSIX 安装包工具链
 - [x by codex 2026-10-01] 验证安装、启动、升级/回滚、卸载全流程
+- [x by codex 2026-10-01] 发布 `docs/ops/BUILD_WINDOWS.md` 最终步骤和故障恢复说明（M5 收尾）
 
 ### M6 — V1 验收
 
