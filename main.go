@@ -26,12 +26,18 @@ var assets embed.FS
 var trayIcon []byte
 
 func main() {
+	// CDP remote debugging for automated acceptance runs; disabled unless set.
+	windowsOpts := application.WindowsOptions{}
+	if port := os.Getenv("CPH_REMOTE_DEBUG_PORT"); port != "" {
+		windowsOpts.AdditionalBrowserArgs = []string{"--remote-debugging-port=" + port}
+	}
 	app := application.New(application.Options{
 		Name:        "codex-provider-hub",
 		Description: "Codex Provider Hub",
 		Assets: application.AssetOptions{
 			Handler: application.AssetFileServerFS(assets),
 		},
+		Windows: windowsOpts,
 	})
 	ui, err := newApp(app.Autostart)
 	if err != nil {
@@ -41,8 +47,10 @@ func main() {
 
 	window := app.Window.NewWithOptions(application.WebviewWindowOptions{
 		Title:            "Codex Provider Hub",
-		Width:            1024,
-		Height:           768,
+		Width:            1120,
+		Height:           760,
+		MinWidth:         960,
+		MinHeight:        640,
 		BackgroundColour: application.NewRGB(27, 38, 54),
 		URL:              "/",
 		DevToolsEnabled:  false,
