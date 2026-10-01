@@ -9,7 +9,10 @@ import (
 	"codex-provider-hub/internal/domain/route"
 )
 
-var ErrInvalidReference = errors.New("route provider or model does not exist")
+var (
+	ErrInvalidReference = errors.New("route provider or model does not exist")
+	ErrModelDisabled    = errors.New("route model is disabled")
+)
 
 type Service struct {
 	repo      route.Repository
@@ -65,8 +68,12 @@ func (s *Service) validateReferences(ctx context.Context, item route.Route) erro
 		}
 	}
 	if s.models != nil {
-		if _, err := s.models.Get(ctx, item.ProviderID, item.ModelID); err != nil {
+		m, err := s.models.Get(ctx, item.ProviderID, item.ModelID)
+		if err != nil {
 			return ErrInvalidReference
+		}
+		if !m.Enabled {
+			return ErrModelDisabled
 		}
 	}
 	return nil

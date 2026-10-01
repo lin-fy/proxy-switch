@@ -102,6 +102,7 @@ const SAFE_ERROR_PATTERNS: Array<[RegExp, string]> = [
   [/404|not found|no such|path|endpoint/i, '服务端接口不存在。请确认 Responses API 地址包含版本路径(如 /v1)。'],
   [/429|rate limit|too many|quota|额度/i, '请求过于频繁或额度不足。请稍后重试,或检查 Provider 额度。'],
   [/profile|档案/i, '配置档案不可用。请选择有效的档案后重试。'],
+  [/disabled|停用|未启用/i, '所选模型已停用。请先在 Provider 中启用该模型，再创建或激活路由。'],
   [
     /toml|config|backup|restore|rollback|备份|恢复/i,
     'Codex 配置写入或恢复出现问题。可在「配置档案」页恢复最近备份后重试。',
