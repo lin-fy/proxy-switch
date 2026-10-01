@@ -25,7 +25,7 @@
 - [ ] `build/windows/msix/app_manifest.xml`、`template.xml` → `Version="X.Y.Z.0"`（MSIX 路径使用）
 - [ ] 界面尾栏版本（`frontend/src/components/DesktopShell.vue`）仅为展示，不参与校验
 
-V1 已统一为 `1.0.0`（见 PR 记录）。
+版本号在发布演练前统一即可（当前基线 `0.1.0`；发布时确定目标版本并同步以上全部位置，`wails.exe.manifest` 为三段、MSIX 为四段格式）。
 
 ### 已知问题
 

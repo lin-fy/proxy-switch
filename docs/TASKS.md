@@ -26,7 +26,7 @@
 
 ### M6 — V1 验收
 
-- [- by zcode 2026-10-01] M6 发布准备：版本号统一 1.0.0、README 刷新、发布说明草稿与发布演练清单（ROADMAP「清理文档临时状态，更新版本号、README 和发布说明」的 agent 侧部分）
+- [- by zcode 2026-10-01] M6 发布准备：README 刷新、发布说明草稿与发布演练清单（版本统一与 Tag 演练按用户决定滞后，待新任务/目标后启动）
 - [ ] 在 GitHub 配置 `production` Environment、签名 Secrets、`main` 分支保护（**需要用户操作**）
 - [ ] 完成一次 Tag 发布演练
 - [ ] 用真实 CPA、OpenAI、自定义 Provider 完成端到端验收（**需要用户提供凭据**）

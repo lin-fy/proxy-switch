@@ -147,9 +147,9 @@
 
 ## 2026-10-01 · zcode
 
-### build(release): M6 发布准备：版本统一 1.0.0、README 刷新、发布清单与说明
+### docs(release): M6 发布准备：README 刷新、发布清单与说明草稿（版本统一滞后，按用户决定）
 
-- **影响**：发布版本号统一为 1.0.0（`build/config.yml`、`build/windows/info.json` file_version 与 ProductVersion、`build/windows/nsis/wails_tools.nsh` INFO_PRODUCTVERSION，并同步 `wails.exe.manifest` assemblyIdentity 与 MSIX 两个清单文件，与 UI 尾栏展示一致），满足 `scripts/ci/validate-release.ps1` 对 tag `v1.0.0` 的四点校验；README「当前状态」与开发环境要求刷新（Go 1.25+/Node 22+）；新增 `docs/ops/RELEASE_CHECKLIST.md`（production Environment/签名 Secrets/main 分支保护等用户侧一次性配置 + 版本自检 + 发布流程 + 演练说明）与 `docs/ops/RELEASE_NOTES.md`（V1 用户发布说明草稿）
-- **关键文件**：`build/config.yml`、`build/windows/info.json`、`build/windows/nsis/wails_tools.nsh`、`README.md`、`docs/ops/RELEASE_CHECKLIST.md`（新）、`docs/ops/RELEASE_NOTES.md`（新）、`docs/planning/ROADMAP.md`、`build/windows/wails.exe.manifest`、`build/windows/msix/app_manifest.xml`、`build/windows/msix/template.xml`、`docs/TASKS.md`
-- **后续**：Tag 发布演练仍需用户先配置 production Environment 与签名 Secrets（见 RELEASE_CHECKLIST 第 1 节）；exe「属性 → 详细信息」版本显示为空为 winres/wails3 上游问题（版本资源字节已嵌入但 API 读不到），可向上游反馈
+- **影响**：发布前置文档准备（版本统一按用户决定滞后，当前保持 0.1.0 基线）：梳理出发布流水线版本校验共 6 处需保持一致（`build/config.yml`、`build/windows/info.json` 两处、`build/windows/nsis/wails_tools.nsh`，另加 `wails.exe.manifest` 与 MSIX 两清单为建议同步点），发布时按 RELEASE_CHECKLIST 逐项统一；README 当前状态与环境要求刷新（Go 1.25+/Node 22+）；新增 `scripts/ci/validate-release.ps1` 对 tag `v1.0.0` 的四点校验；README「当前状态」与开发环境要求刷新（Go 1.25+/Node 22+）；新增 `docs/ops/RELEASE_CHECKLIST.md`（production Environment/签名 Secrets/main 分支保护等用户侧一次性配置 + 版本自检 + 发布流程 + 演练说明）与 `docs/ops/RELEASE_NOTES.md`（V1 用户发布说明草稿）
+- **关键文件**：`README.md`、`docs/ops/RELEASE_CHECKLIST.md`（新）、`docs/ops/RELEASE_NOTES.md`（新）、`docs/planning/ROADMAP.md`、`build/windows/wails.exe.manifest`、`build/windows/msix/app_manifest.xml`、`build/windows/msix/template.xml`、`docs/TASKS.md`
+- **后续**：Tag 发布演练与版本号统一按用户决定滞后，待新增任务/目标落地后再启动；演练仍需用户先配置 production Environment 与签名 Secrets（见 RELEASE_CHECKLIST 第 1 节）；exe「属性 → 详细信息」版本显示为空为 winres/wails3 上游问题（版本资源字节已嵌入但 API 读不到），可向上游反馈
 - **commit**：待 PR 合并后回填

@@ -6,7 +6,7 @@ Windows 桌面工具：管理 Codex Desktop 的 Responses API Provider、Model�
 
 ## 当前状态
 
-V1（1.0.0）功能开发与验收基本完成：后端核心、桌面壳、Vue 前端已通过桌面原生验收（窗口/DPI/浮层/键盘/IME），Windows 用户级 NSIS 安装包全流程验证通过。剩余验收事项依赖真实凭据与 GitHub 仓库配置，见 [`docs/planning/ROADMAP.md`](docs/planning/ROADMAP.md)。
+V1 功能开发与验收基本完成：后端核心、桌面壳、Vue 前端已通过桌面原生验收（窗口/DPI/浮层/键盘/IME），Windows 用户级 NSIS 安装包全流程验证通过。剩余验收事项依赖真实凭据与 GitHub 仓库配置，见 [`docs/planning/ROADMAP.md`](docs/planning/ROADMAP.md)。
 
 ## 快速开始
 
