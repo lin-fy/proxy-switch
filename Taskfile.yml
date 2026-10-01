@@ -40,6 +40,11 @@ tasks:
     cmds:
       - task: windows:install:msix:tools
 
+  install:nsis:tools:
+    summary: Installs tools required for Windows NSIS packaging
+    cmds:
+      - task: windows:install:nsis:tools
+
   setup:docker:
     summary: Builds Docker image for cross-compilation (~800MB download)
     cmds:

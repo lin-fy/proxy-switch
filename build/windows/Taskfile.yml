@@ -127,6 +127,8 @@ tasks:
     internal: true
     dir: build/windows/nsis
     preconditions:
+      - sh: command -v makensis >/dev/null 2>&1
+        msg: "makensis.exe is required. Install NSIS, reopen the terminal, then rerun this task."
       - sh: '[ "{{.INSTALL_SCOPE}}" = "user" ] || [ "{{.INSTALL_SCOPE}}" = "machine" ]'
         msg: "INSTALL_SCOPE must be 'user' or 'machine', got '{{.INSTALL_SCOPE}}'"
     cmds:
@@ -168,6 +170,14 @@ tasks:
     summary: Installs tools required for MSIX packaging
     cmds:
       - wails3 tool msix-install-tools
+
+  install:nsis:tools:
+    summary: Installs NSIS with Chocolatey
+    preconditions:
+      - sh: command -v choco >/dev/null 2>&1
+        msg: "Chocolatey is required to install NSIS automatically. Install it or install NSIS manually, then rerun the packaging task."
+    cmds:
+      - choco install nsis -y --no-progress
 
   run:
     cmds:
