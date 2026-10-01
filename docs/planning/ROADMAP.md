@@ -113,7 +113,7 @@ Proxy Switch
 - [ ] 运行 Go 测试、`go vet`、前端类型检查和生产构建。
 - [ ] 完成 CPA → Proxy Switch → Codex Desktop → 模型请求的真实链路。
 - [ ] 完成 OpenAI、CPA、自定义 Provider 和两个 Codex Profile 的验收记录。
-- [ ] 清理文档中的临时状态，更新版本号、README 和发布说明。
+- [x] 清理文档中的临时状态，刷新 README 和发布说明（2026-10-01：README 状态与环境要求刷新；新增 docs/ops/RELEASE_CHECKLIST.md 发布演练清单——含发布时需统一的 6 处版本位置——与 docs/ops/RELEASE_NOTES.md 发布说明草稿；版本号统一与 Tag 演练按用户决定滞后）。
 - [ ] 将验收后的 `dev` 合并到 `main`，关闭 V1 goal。
 
 ### CI/CD 实施状态
