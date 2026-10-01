@@ -3,18 +3,19 @@
 > agent 协作的"单一事实源"。开工读，收工更新。只保留当前状态。
 > 详细规则见 [`agent-guide/workflow.md`](agent-guide/workflow.md)。
 
-最后更新：2026-10-02 · codex（同步 dev 的 PowerShell 5.1 CI 兼容；修复停用模型仍可被 Route 激活）
+最后更新：2026-10-02 · codex（完成 M6 目标树/验收证据矩阵与发布状态对齐）
 
 ## 一句话现状
 
-V1 后端核心 + 桌面壳 + Vue 前端已完成并通过桌面原生验收（M4 全部完成，含窗口/DPI/浮层/键盘/IME 与 Mock 全链路走查）；NSIS 安装包全流程验收与 `BUILD_WINDOWS.md` 最终文档定稿完成，M5 全部完成。剩余 M6 验收与发布，依赖用户凭据与 GitHub 配置。
+V1 后端核心 + 桌面壳 + Vue 前端已完成并通过桌面原生验收（M4 全部完成，含窗口/DPI/浮层/键盘/IME 与 Mock 全链路走查）；NSIS 安装包全流程验收与 `BUILD_WINDOWS.md` 最终文档定稿完成，M5 全部完成。M6-A/B 的目标、证据矩阵和本地确定性验证已完成；剩余 M6-C/D/E 依赖真实 Provider、GitHub 配置和正式发布操作。
 
-## 下一步两项
+## 下一步三项
 
-1. GitHub 配置 `production` Environment + 签名 Secrets + `main` 分支保护，完成 Tag 发布演练（**需用户操作**）
-2. 完成 CPA、OpenAI、自定义 Provider 的真实端到端验收（**需用户提供凭据**）
+1. 提供 CPA、OpenAI、自定义 Provider 凭据和 Codex Desktop 环境，完成真实端到端验收（**需用户提供**）
+2. GitHub 配置 `production` Environment + 签名 Secrets + `main` 分支保护，完成 Tag 发布演练（**需用户操作**）
+3. M6-C/D 通过后统一切换 `1.0.0`、合并 `main` 并发布正式安装包
 
-统一验证入口已补齐：`task check:frontend`、`task check:backend`、`task ci`；GitHub Actions 与本地入口均复用 `scripts/ci/verify.ps1`，兼容 Windows PowerShell 5.1，不依赖任何 LLM。
+统一验证入口已补齐：`task check:frontend`、`task check:backend`、`task ci`；GitHub Actions 与本地入口均复用 `scripts/ci/verify.ps1`，兼容 Windows PowerShell 5.1，并在 Windows 构建时自动搜索 `GOPATH\bin` 的 Wails CLI。2026-10-02 本地完整验证通过并生成 portable ZIP。
 
 ## 当前卡点
 

@@ -10,6 +10,14 @@
 
 ## 2026-10-02 · codex
 
+### docs(planning): align V1.0 goal tree and M6 acceptance gates
+
+- **影响**：修正 ROADMAP 中已完成的 Provider/Route/自动重启状态，新增 M6-A 到 M6-E 的执行顺序与验收证据矩阵，并同步产品状态与 CI/CD 的 `v1.0.0` 发布目标。
+- **关键文件**：`docs/planning/ROADMAP.md`、`docs/product.md`、`docs/ops/CI_CD.md`、`docs/CONTEXT.md`、`docs/TASKS.md`
+- **验证**：`scripts/ci/verify.ps1 -BuildWindows` 通过；生成 Windows amd64 portable ZIP；工作区无生成文件改动。
+- **后续**：M6-C 需要真实 Provider 凭据，M6-D 需要 GitHub Environment、签名 Secrets 和分支保护。
+- **commit**：待提交后补充
+
 ### fix(ci): support Windows PowerShell 5.1 in verification scripts
 
 - **影响**：CI 验证、发布版本守卫及其测试不再要求 PowerShell 7.3；通过显式检查原生命令退出码，保留 5.1 下的失败检测行为。
