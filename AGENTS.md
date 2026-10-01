@@ -15,6 +15,142 @@
 
 ---
 
+## 并行开发流程（多 agent 同时干活）
+
+当多个 agent 需要同时开发时，使用 git worktree 隔离工作区。
+
+### 核心原则
+
+- **代码改动**：在 agent 自己的工作树，提交到 agent 自己的分支
+- **文档更新**（TASKS/CONTEXT/CHANGELOG/DECISIONS）：**只在主工作树**，提交到 dev 分支
+- **合并**：由用户在主工作树执行 `git merge`
+
+### 工作树结构
+
+```
+H:/code/proxy-switch              # 主工作树（dev 分支）
+├── 用途：文档更新、最终合并
+└── 提交：docs(tasks): ... / docs(collab): ...
+
+H:/code/proxy-switch-codex        # codex 的工作树（codex/<任务> 分支）
+├── 用途：代码开发
+└── 提交：feat(...): ... / fix(...): ...
+
+H:/code/proxy-switch-zcode        # zcode 的工作树（zcode/<任务> 分支）
+├── 用途：代码开发
+└── 提交：feat(...): ... / fix(...): ...
+```
+
+### 命名规范
+
+- **工作树路径**：`../proxy-switch-<agent名>`（如 `../proxy-switch-codex`）
+- **分支名**：`<agent名>/<任务简称>`（如 `codex/m5-nsis`、`zcode/m4-dpi-fix`）
+
+### 完整流程
+
+#### 1. 认领任务（在主工作树）
+
+```bash
+cd H:/code/proxy-switch
+# 编辑 docs/TASKS.md，把任务从 [ ] 改为 [- by <agent名> <日期>]
+git add docs/TASKS.md
+git commit -m "docs(tasks): <agent名> claims <任务名>"
+```
+
+#### 2. 创建工作树（在主工作树）
+
+```bash
+git worktree add ../proxy-switch-<agent名> -b <agent名>/<任务简称>
+```
+
+#### 3. 开发代码（在自己的工作树）
+
+```bash
+cd ../proxy-switch-<agent名>
+# 改代码...
+git add <具体文件>
+git commit -m "feat(<scope>): <改动说明>"
+# 可以多次提交
+```
+
+#### 4. 完成后更新文档（回到主工作树）
+
+```bash
+cd H:/code/proxy-switch
+# 编辑 docs/TASKS.md，把任务从 [- by <agent名>] 改为 [x by <agent名> <日期>]
+# 追加 docs/CHANGELOG.md（格式见 agent-guide/workflow.md）
+# 更新 docs/CONTEXT.md（如有需要）
+git add docs/TASKS.md docs/CHANGELOG.md docs/CONTEXT.md
+git commit -m "docs(collab): record <agent名> <任务简称> completion"
+```
+
+#### 5. 请求合并
+
+告诉用户："我在 `<分支名>` 完成了 `<任务>`，请合并。"
+
+#### 6. 用户合并（在主工作树）
+
+```bash
+cd H:/code/proxy-switch
+git merge <agent名>/<任务简称>
+git push origin dev
+```
+
+#### 7. 清理工作树（可选，由用户执行）
+
+```bash
+git worktree remove ../proxy-switch-<agent名>
+git branch -d <agent名>/<任务简称>
+```
+
+### 规则
+
+- 不要改其他 agent 的工作树
+- 不要在自己的工作树更新 docs/ 下的协作文档（TASKS/CONTEXT/CHANGELOG/DECISIONS）
+- 协作文档只在主工作树更新
+- 代码提交用 Conventional Commits（feat/fix/refactor 等）
+- 文档提交用 `docs(tasks):` / `docs(collab):`
+
+### 示例
+
+```bash
+# zcode 认领 M4 DPI 验收任务
+cd H:/code/proxy-switch
+# 编辑 TASKS.md: [- by zcode 2026-10-02] M4 DPI 验收
+git add docs/TASKS.md
+git commit -m "docs(tasks): zcode claims M4 DPI acceptance"
+
+# zcode 建工作树
+git worktree add ../proxy-switch-zcode -b zcode/m4-dpi-fix
+
+# zcode 在自己的工作树开发
+cd ../proxy-switch-zcode
+# ... 改代码 ...
+git add frontend/src/pages/ConfigPage.vue
+git commit -m "fix(ui): correct DPI scaling on 960x640 window"
+
+# zcode 完成后回到主工作树更新文档
+cd H:/code/proxy-switch
+# 编辑 TASKS.md: [x by zcode 2026-10-02]
+# 追加 CHANGELOG.md
+git add docs/TASKS.md docs/CHANGELOG.md
+git commit -m "docs(collab): record zcode m4-dpi-fix completion"
+
+# zcode 告诉用户："我在 zcode/m4-dpi-fix 完成了 M4 DPI 验收，请合并"
+
+# 用户合并
+git merge zcode/m4-dpi-fix
+git push origin dev
+
+# 用户清理（可选）
+git worktree remove ../proxy-switch-zcode
+git branch -d zcode/m4-dpi-fix
+```
+
+---
+
+---
+
 ## 按需查阅
 
 | 场景 | 文件 |
