@@ -80,7 +80,7 @@
 - **影响**：并行 worktree 的版本同步和合并前验收流程
 - **关键文件**：`AGENTS.md`、`docs/agent-guide/workflow.md`、`docs/agent-guide/git-rules.md`、`docs/CONTEXT.md`、`docs/TASKS.md`、`docs/DECISIONS.md`
 - **后续**：补充新 worktree 的依赖和构建输入初始化入口
-- **commit**：待下次文档提交回填
+- **commit**：918de3f
 
 ## 2026-10-01 · zcode
 
@@ -91,3 +91,12 @@
 - **验收证据**：CDP + 本地 Mock Responses API（127.0.0.1:8471）全链路走查：Provider 创建/持久化、测试连接（Bearer 凭据 → /models 200）、模型同步 2 条、Route 创建（级联选择、重启默认关）、Profile 创建自动选中、路由激活写入沙箱 CODEX_HOME 的 config.toml + 模型目录、备份恢复回到激活前状态、引用删除保护（Provider/Model 被引用时拒删且错误安全化）、Tab 顺序（侧栏→顶栏→主区）、Escape 关闭浮层、IME 组合输入提交；go test ./... 全过，dev 同步后重新构建冒烟通过；测试数据已清理（state.json 全空）
 - **后续**：M4 出口标准达成；真实外部 Provider（CPA/OpenAI）请求验证仍属 M6（需用户凭据）
 - **commit**：zcode/m4-acceptance 分支 d27e070、309f17f、49d6290（合并提交见下次回填）
+
+## 2026-10-01 · codex
+
+### docs(agents): switch to user-assigned GitHub PR integration
+
+- **影响**：并行分支交付、公共文档审查和 `dev` 集成职责
+- **关键文件**：`AGENTS.md`、`docs/agent-guide/git-rules.md`、`docs/agent-guide/workflow.md`、`docs/CONTEXT.md`、`docs/TASKS.md`、`docs/DECISIONS.md`
+- **后续**：用户人工指定 reviewer/merger；后续可配置分支保护和 Merge Queue
+- **commit**：待下次文档提交回填

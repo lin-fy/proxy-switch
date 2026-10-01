@@ -16,11 +16,11 @@
 
 发现上下文与仓库实际状态不一致时，以仓库代码 + `docs/planning/ROADMAP.md` 最新记录为准，并主动更新文档。
 
-并行开发时，agent 分支在开发期间可以暂时落后于 `dev`。准备合并前，必须在自己的 worktree 执行 `git merge dev`，在该分支解决冲突并重新验证；验证通过后才能合并到主工作树。
+并行开发时，agent 分支在开发期间可以暂时落后于 `dev`。准备交付前，必须在自己的 worktree 执行 `git merge dev`，在该分支解决冲突并重新验证；验证通过后更新公共文档并创建目标为 `dev` 的 GitHub PR。用户人工指定 reviewer/merger；未指定前不合并。
 
 ## 二、任务认领
 
-- 开始非平凡任务前，在 `docs/TASKS.md` 把对应条目从 `[ ]` 改为 `[- by <agent名> <日期>]`。
+- 开始非平凡任务前，由 root/Codex 在主工作树把对应条目从 `[ ]` 改为 `[- by <agent名> <日期>]`。
 - 格式：`[- by codex 2026-10-01] 补齐 NSIS 安装包`。
 - 看到其他 agent 的 `[- by xxx]`：**不接管、不修改、不并行重做**。冲突记入 `docs/CONTEXT.md` "待协调事项"。
 - 完成改为 `[x by <agent名> <完成日期>]`。

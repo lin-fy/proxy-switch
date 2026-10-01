@@ -9,7 +9,7 @@
 
 1. **开工前必读**：[`docs/CONTEXT.md`](docs/CONTEXT.md) + [`docs/TASKS.md`](docs/TASKS.md)，然后 `git status` + `git log --oneline -10`。
 2. **不越权**：不动其他 agent 标记 `[- by xxx]` 的任务；不修改、不覆盖、不回滚他人未提交的改动；TASKS.md "已完成"区只能本人写入，发现归属有误记入 CONTEXT.md "待协调事项"，不改原条目。
-3. **提交前更新文档**：完成工作 → 更新 TASKS.md → 追加 CHANGELOG.md →（如涉决策）追加 DECISIONS.md → 更新 CONTEXT.md → 再提交。提交信息必须遵循 [Conventional Commits](https://www.conventionalcommits.org/)。
+3. **提交前更新文档**：任务 agent 在自己的分支完成代码和验证后，更新 TASKS.md → 追加 CHANGELOG.md →（如涉决策）追加 DECISIONS.md → 更新 CONTEXT.md，再创建 GitHub PR。由用户指定的 reviewer/merger 审查并合并 PR。提交信息必须遵循 [Conventional Commits](https://www.conventionalcommits.org/)。
 4. **Git 禁区**：禁止 `git add .` / `git add -A` / `git reset --hard` / `git clean -fd` / force push / 未经用户允许 commit。允许 `git reset --soft` 撤销本地未推送提交。
 5. **安全**：密钥、Token、密码不写入代码、配置、日志、文档或提交；凭据用引用机制（环境变量 / Windows Credential Manager）。
 
@@ -22,8 +22,8 @@
 ### 核心原则
 
 - **代码改动**：在 agent 自己的工作树，提交到 agent 自己的分支
-- **文档更新**（TASKS/CONTEXT/CHANGELOG/DECISIONS）：**只在主工作树**，提交到 dev 分支
-- **合并**：任务验收通过后，由负责该任务的 agent 在主工作树自行合并到 `dev`，无需用户执行或再次确认
+- **文档更新**（TASKS/CONTEXT/CHANGELOG/DECISIONS）：任务相关更新在 agent 分支完成并随 PR 审查；用户指定的 reviewer/merger 负责合并 PR 到 `dev`
+- **合并**：任务 agent 只负责自己的分支、同步、冲突处理、验证和创建 PR；未获指定的 agent 不得直接合并 PR 或在主工作树合并分支
 
 ### 工作树结构
 
@@ -48,11 +48,11 @@ H:/code/proxy-switch-zcode        # zcode 的工作树（zcode/<任务> 分支�
 
 ### 完整流程
 
-#### 1. 认领任务（在主工作树）
+#### 1. 认领任务（由 root/Codex 在主工作树）
 
 ```bash
 cd H:/code/proxy-switch
-# 编辑 docs/TASKS.md，把任务从 [ ] 改为 [- by <agent名> <日期>]
+# root/Codex 编辑 docs/TASKS.md，把任务从 [ ] 改为 [- by <agent名> <日期>]
 git add docs/TASKS.md
 git commit -m "docs(tasks): <agent名> claims <任务名>"
 ```
@@ -88,32 +88,31 @@ git merge dev
 # 解决后重新运行本任务的测试和构建
 ```
 
-同步后的分支必须重新验证通过，才能进入主工作树合并。不得用重置、删除文件或覆盖他人修改的方式解决版本落后问题。
+同步后的分支必须重新验证通过，才能创建 PR。不得用重置、删除文件或覆盖他人修改的方式解决版本落后问题。
 
-#### 4. 完成后更新文档（回到主工作树）
+#### 4. 完成代码和文档（在自己的工作树）
 
 ```bash
-cd H:/code/proxy-switch
-# 编辑 docs/TASKS.md，把任务从 [- by <agent名>] 改为 [x by <agent名> <日期>]
-# 追加 docs/CHANGELOG.md（格式见 agent-guide/workflow.md）
-# 更新 docs/CONTEXT.md（如有需要）
-git add docs/TASKS.md docs/CHANGELOG.md docs/CONTEXT.md
+cd ../proxy-switch-<agent名>
+git status --short
+git log --oneline -n 3
+# 更新 TASKS.md、CHANGELOG.md、DECISIONS.md（如有需要）、CONTEXT.md
+# 将自己的任务改为 [x by <agent名> <完成日期>]
+git add <当前任务涉及的具体文件>
 git commit -m "docs(collab): record <agent名> <任务简称> completion"
 ```
 
-#### 5. 合并前检查
+任务 agent 在 PR 描述中报告分支、提交、验证命令和结果；公共文档随 PR 一起审查。用户可以人工指定 reviewer 和 merger；未指定前不合并。
 
-agent 确认自己的分支已经合并最新 `dev` 并完成验证；随后确认主工作树处于 `dev`、工作区干净，并检查待合并差异和任务验收结果。不得覆盖他人未提交的改动。
+#### 5. 创建 PR
 
-#### 6. agent 自行合并（在主工作树）
+任务 agent 确认自己的分支已经合并最新 `dev` 并完成验证，然后创建目标为 `dev` 的 GitHub PR。PR 描述必须包含改动范围、验证结果和未完成事项。
 
-```bash
-cd H:/code/proxy-switch
-git merge --no-ff <agent名>/<任务简称> -m "<type>(<scope>): merge <任务简称>"
-git status --short
-```
+#### 6. root/Codex 审查并合并 PR
 
-合并后检查结果，并向用户报告合并提交和验证情况。推送远端仍按用户授权执行。出现涉及他人工作或需求取舍的冲突时，按冲突处理规则协调，不覆盖或回滚他人改动。
+用户指定的 reviewer 检查 PR 差异、验证记录和目标分支最新状态；指定的 merger 在审查通过后于 GitHub 合并 PR。未通过或有冲突时退回 agent 分支处理，不能直接覆盖或绕过审查。
+
+合并后确认 `dev` 状态和 CI 结果，再向用户报告合并提交。远端推送和发布仍按用户授权执行。
 
 #### 7. 清理工作树（可选，由所属 agent 执行）
 
@@ -127,8 +126,8 @@ git branch -d <agent名>/<任务简称>
 ### 规则
 
 - 不要改其他 agent 的工作树
-- 不要在自己的工作树更新 docs/ 下的协作文档（TASKS/CONTEXT/CHANGELOG/DECISIONS）
-- 协作文档只在主工作树更新
+- 任务相关的 docs/ 协作文档在自己的分支更新并随 PR 审查
+- 不要直接在主工作树合并分支或绕过 PR 修改任务相关协作文档
 - 代码提交用 Conventional Commits（feat/fix/refactor 等）
 - 文档提交用 `docs(tasks):` / `docs(collab):`
 
@@ -154,18 +153,8 @@ git commit -m "fix(ui): correct DPI scaling on 960x640 window"
 git merge dev
 # 解决冲突后重新运行验收
 
-# zcode 完成后回到主工作树更新文档
-cd H:/code/proxy-switch
-# 编辑 TASKS.md: [x by zcode 2026-10-02]
-# 追加 CHANGELOG.md
-git add docs/TASKS.md docs/CHANGELOG.md
-git commit -m "docs(collab): record zcode m4-dpi-fix completion"
-
-# zcode 检查主工作树状态和任务验收结果后自行合并
-git status --short
-git merge --no-ff zcode/m4-dpi-fix -m "fix(ui): merge M4 DPI acceptance"
-git status --short
-# 向用户报告合并结果；推送远端按用户授权执行
+# zcode 更新 TASKS/CHANGELOG/CONTEXT 并创建 GitHub PR（目标 dev）
+# 用户指定 reviewer 审查，指定 merger 确认 CI 后在 GitHub 合并
 
 # zcode 清理自己的已合并、干净工作树（可选）
 git worktree remove ../proxy-switch-zcode
