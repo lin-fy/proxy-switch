@@ -8,6 +8,15 @@
 
 ---
 
+## 2026-10-02 · codex
+
+### fix(ci): support Windows PowerShell 5.1 in verification scripts
+
+- **影响**：CI 验证、发布版本守卫及其测试不再要求 PowerShell 7.3；通过显式检查原生命令退出码，保留 5.1 下的失败检测行为。
+- **关键文件**：`scripts/ci/verify.ps1`、`scripts/ci/validate-release.ps1`、`scripts/ci/validate-release.test.ps1`、`.agents/skills/review-pr/scripts/review-checks.ps1`
+- **后续**：在目标分支的完整 GitHub Windows CI 中复验。
+- **commit**：待提交后补充
+
 ## 2026-10-01 · codex
 
 ### fix(route): reject disabled model when creating or activating routes
