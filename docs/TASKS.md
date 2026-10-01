@@ -14,9 +14,9 @@
 
 ### M4 — Vue 桌面界面收尾
 
-- [ ] Wails 桌面窗口尺寸、DPI、浮层行为验收（960×640 和 1120×760）
-- [ ] 键盘导航与 IME 输入在桌面端的验收
-- [ ] 真实后端流程端到端走查（Provider/Model/Route/Profile 全流程）
+- [- by zcode 2026-10-01] Wails 桌面窗口尺寸、DPI、浮层行为验收（960×640 和 1120×760）
+- [- by zcode 2026-10-01] 键盘导航与 IME 输入在桌面端的验收
+- [- by zcode 2026-10-01] 真实后端流程端到端走查（Provider/Model/Route/Profile 全流程）
 
 ### M5 — Windows 安装包
 
