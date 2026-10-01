@@ -3,7 +3,7 @@
 > agent 协作的"单一事实源"。开工读，收工更新。只保留当前状态。
 > 详细规则见 [`agent-guide/workflow.md`](agent-guide/workflow.md)。
 
-最后更新：2026-10-01 · codex（M5 收尾：BUILD_WINDOWS.md 定稿）
+最后更新：2026-10-01 · codex（修复停用模型仍可被 Route 激活）
 
 ## 一句话现状
 
