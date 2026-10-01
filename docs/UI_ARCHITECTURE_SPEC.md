@@ -1,8 +1,10 @@
 # Codex Provider Hub：UI 页面框架与实现规范
 
-> 状态：实现规范（部分已落地）  
-> 配套原型：[`UI_PROTOTYPE.md`](UI_PROTOTYPE.md)  
+> 状态：设计规范；现有实现为部分基线，尚未完成验收
+> 配套原型：[`UI_PROTOTYPE.md`](UI_PROTOTYPE.md)
 > 目标：在不改变 Go 业务接口的前提下，把当前单文件 DOM 页面重构为可维护的 Vue 3 桌面工具界面。
+
+本阶段只更新设计与实施计划，不安装依赖、不修改前端源码、Go API 或生成绑定。后续实施与验收以 [`FRONTEND_IMPLEMENTATION_PLAN.md`](FRONTEND_IMPLEMENTATION_PLAN.md) 为准；已有代码和历史构建结果不代表完整验收通过。
 
 ## 1. 约束与目标
 
@@ -32,7 +34,7 @@
 
 ## 2. 页面与路由模型
 
-使用 Vue Router 5 的 `createMemoryHistory()` 管理一级页面。Memory history 不在桌面窗口显示 URL，重启后由本地设置恢复默认页即可。
+使用 Vue Router 5 的 `createMemoryHistory()` 管理一级页面。启动时显式进入 `/config`；记忆上次页面不在本阶段范围内。
 
 ```text
 /config       配置切换首页（默认）
@@ -48,7 +50,7 @@
 - 从列表打开编辑弹窗时保留背景页面滚动位置。
 - 保存或删除成功后关闭弹窗，回到原列表位置并刷新对应资源。
 - 直接触发激活不会改变当前页面。
-- 切换页面时取消未完成的列表刷新请求；激活流程不可被普通页面切换取消。
+- 页面切换复用 workspace store 中的刷新结果；过期请求不得覆盖新结果。激活流程不可被普通页面切换取消。
 
 ## 3. 推荐目录结构
 
@@ -83,13 +85,9 @@ frontend/src/
 │       ├── SettingsSection.vue
 │       └── SettingRow.vue
 ├── stores/
-│   ├── workspace.store.ts          # providers/models/routes/profiles 汇总
-│   ├── shell.store.ts              # 当前页、当前 profile、消息、窗口状态
-│   └── settings.store.ts           # autostart 等设置
+│   └── workspace.store.ts          # providers/models/routes/profiles 与异步状态汇总
 ├── services/
-│   ├── wails-api.ts                # 生成绑定的唯一适配层
-│   ├── workspace-service.ts        # 组合刷新和激活流程
-│   └── error-message.ts            # 错误转用户可读文本
+│   └── wails-api.ts                # 生成绑定的唯一适配层
 ├── components/
 │   ├── ui/                         # Naive UI 的业务级封装，不重复造基础控件
 │   └── icons/                      # Lucide Vue 图标封装（如需统一尺寸）
@@ -190,7 +188,7 @@ export const wailsApi = {
 - 顶部短消息和 `role=alert` 错误消息；
 - 弹窗打开状态和正在编辑的对象 ID。
 
-组件只能调用 store 的动作，例如 `workspace.activateRoute(routeId)`，不在模板中拼接 `Promise.all` 或捕获原始错误。
+组件只能调用 store 的动作，例如 `workspace.activateRoute(routeId)`，不在模板中拼接 `Promise.all` 或捕获原始错误。只有当独立状态和复用行为确实出现时，才再拆分 shell/settings store 或额外 service。
 
 ## 6. Naive UI 接入规范
 
@@ -244,10 +242,10 @@ idle
  ├─ refresh → loading → ready | loadError
  ├─ create/edit → saving → ready | saveError
  ├─ test → testing → testPassed | testFailed
- └─ activate → backingUp → writing → restarting? → ready | activateError
+ └─ activate → updating → ready | activateError
 ```
 
-每个状态只能有一个用户可读的主消息。`activateError` 必须带 `stage` 和 `recovered` 字段，页面据此显示“已恢复备份”或“需要手动恢复”。
+每个状态只有一个用户可读的主消息。上述备份、写入和重启是后端执行顺序，不等于前端可以观测到的阶段。现有 `ActivateRoute` 是单次调用，前端只显示“正在更新 Codex 配置”。错误状态保留 `stage`（可为未知）和 `recovered`（true / false / unknown）；只在后端已有明确证据时显示“已恢复备份”，禁止根据错误消息中出现“恢复”或“restore”推断恢复成功。详见实施计划。
 
 ## 10. 无障碍与桌面操作
 

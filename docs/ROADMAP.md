@@ -55,8 +55,8 @@ Proxy Switch
 | Provider 连通性 | [x] | 支持 `/models` 和最小 `/responses` 请求，凭据只使用引用。 |
 | Wails 桌面壳 | [x] | Wails 3、窗口关闭隐藏、托盘显示/隐藏/退出已接入。 |
 | 开机启动 | [x] | Windows `HKCU\\...\\Run` 开关已接入。 |
-| 当前工作区构建 | [!] | `go test ./...` / `go vet ./...` 被 `PlatformAdapter.Launch/Restart` 签名与调用方不一致阻塞；`npm run build` 被 `ConfigPage.vue` 类型错误和缺失页面阻塞。 |
-| Vue UI 迁移 | [-] | Vue 3、Pinia、Naive UI、配置页和 Wails API 适配层已开始落地；当前前端构建仍被 `ConfigPage.vue` 类型错误和缺失的 Profiles/Settings 页面阻塞。 |
+| 当前工作区构建 | [!] | Go 测试和 vet 仍被 `PlatformAdapter.Launch/Restart` 签名与调用方不一致阻塞；`frontend` 的 `vue-tsc --noEmit` 与 `npm run build` 已通过（最近构建约 636 kB raw / 192 kB gzip）；Wails Windows 构建尚未复验。 |
+| Vue UI 迁移 | [-] | Vue 3、Pinia、Naive UI、Tailwind v4、配置/Profiles/Settings 页面和 Wails API 适配层已有可构建基线；浏览器窗口和导航冒烟检查已完成，Wails、DPI、焦点、IME、对比度和完整流程验收仍待完成。 |
 | Windows 安装包 | [-] | 用户级 ZIP 安装/卸载已验证；NSIS 和 MSIX 仍待工具链补齐。 |
 | 真实端到端验收 | [ ] | 仍需可用的 CPA、OpenAI 和自定义 Provider 以及 Codex Desktop 实际请求记录。 |
 
@@ -108,14 +108,14 @@ Proxy Switch
 
 ### M4 — Vue 桌面界面
 
-状态：`[-]`
+状态：`[-]`（前端基线已实现，桌面验收待完成）
 
 - [x] Vue 入口、Pinia workspace store、Wails API 适配层和 Naive UI 主题。
-- [x] 配置页的 Provider / Model / Route 列表、编辑和激活流程已开始接入。
-- [ ] 修复当前 TypeScript 编译错误，保持 `npm run build` 通过。
-- [ ] 完成 Profiles 页面：档案切换、创建、删除和恢复备份。
-- [ ] 完成 Settings 页面：Codex 状态、启动、自动启动和路径/恢复入口。
-- [ ] 完成加载、保存、测试、激活、错误和恢复状态的统一反馈。
+- [x] 配置页的 Provider / Model / Route 列表、编辑和激活流程已接入。
+- [x] Profiles 页面：档案切换、创建、删除和恢复备份的前端基线已接入。
+- [x] Settings 页面：Codex 状态、启动、自动启动和恢复入口的前端基线已接入。
+- [x] 加载、保存、测试、激活、错误和恢复状态的统一反馈已接入。
+- [ ] 完成 Wails Windows 构建、窗口尺寸、DPI、浮层、焦点、键盘/IME、对比度和真实后端流程验收。
 
 出口标准：在 960 × 640 窗口中，Provider、Model、Route、Profile 和 Settings 全流程可操作，前端构建通过。
 
@@ -177,13 +177,11 @@ Proxy Switch
 
 ## 5. 当前下一步 Next
 
-只保留马上要做的三项：
+只保留进入实现阶段后马上要做的三项：
 
 1. 同步 `PlatformAdapter.Launch/Restart` 的调用方和实现，让 `go test ./...` 与 `go vet ./...` 通过。
-2. 修复 `frontend/src/pages/ConfigPage.vue` 的 TypeScript 错误，并让 `npm run build` 通过。
-3. 新增并接通 `ProfilesPage.vue` 和 `SettingsPage.vue`，然后重新运行 Go/前端/Wails 验证，再处理 NSIS/MSIX 安装包。
-
-完成这三项后，更新本节和 M4/M5 状态，不要把后续端到端验收任务提前塞进 Next。
+2. 重新运行 Wails Windows 构建，并按 960 × 640、1120 × 760、125% / 150% DPI 验证壳层、浮层和主区滚动。
+3. 完成表单焦点、键盘/IME、对比度、reduced-motion 和 Provider → Codex 的真实流程验收，再处理 NSIS/MSIX 安装包。
 
 ## 6. 技术决策记录
 

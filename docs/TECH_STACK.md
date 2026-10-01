@@ -1,6 +1,6 @@
 # Codex Provider Hub：桌面工具技术栈
 
-> 状态：技术选型基线（UI 迁移进行中）  
+> 状态：已确认选型；本阶段仅完善设计与实施计划
 > 目标：让前端看起来像桌面配置工具，同时保持现有 Wails + Go 业务链路，不把应用迁移成远程网页。
 
 ## 1. 最终推荐栈
@@ -16,9 +16,9 @@
 | 全局状态 | Pinia 4.x | 管理 Provider / Model / Route / Profile 汇总和激活状态 |
 | UI 组件库 | Naive UI 2.45.x | 提供 Dialog、Form、Select、Message、Notification、Skeleton 等完整控件；用主题覆盖适配桌面令牌 |
 | 图标 | `lucide-vue-next` 1.x | 统一 SVG 图标风格、尺寸和可访问名称 |
-| 样式 | 原生 CSS + Naive UI `themeOverrides` | 自有桌面工具布局和语义令牌，不引入 Tailwind 的大量工具类 |
-| 字体 | 本地打包 IBM Plex Sans + JetBrains Mono | 避免运行时请求 Google Fonts；UI 和模型/URL 数据分开用字形 |
-| 测试 | 现有 Go 测试；后续给 store 增加 Vitest | 只测试异步状态和数据转换，不为静态模板堆快照测试 |
+| 样式 | Tailwind CSS v4 + Naive UI `themeOverrides` | Tailwind 管布局与视觉令牌，Naive UI 管交互控件；不加载 Preflight |
+| 字体 | Windows 本地系统字体；可选随包字体 | UI 使用 Segoe UI / 中文系统回退，数据使用 Consolas；禁止远程字体，不把系统字体别名宣称为已打包字体 |
+| 测试 | 类型检查、构建、store 行为检查、桌面验收 | 优先验证失败回滚、刷新和激活等业务状态，不预先增加测试框架 |
 
 ## 2. 为什么不换 Tauri
 
@@ -63,7 +63,9 @@ CC Switch 使用 Tauri，但它的视觉形态来自 React 组件架构、页面
 
 ```json
 {
-  "@vitejs/plugin-vue": "^6.0.0",
+  "@vitejs/plugin-vue": "^6.0.9",
+  "tailwindcss": "^4.3.3",
+  "@tailwindcss/vite": "^4.3.3",
   "vue-tsc": "^3.3.11"
 }
 ```
@@ -72,7 +74,6 @@ CC Switch 使用 Tauri，但它的视觉形态来自 React 组件架构、页面
 
 ### 暂不增加
 
-- Tailwind CSS：当前界面需要稳定的桌面令牌和少量布局规则，工具类会把壳层结构拆散。
 - Reka UI / shadcn-vue：它们适合自建组件系统；当前项目已有完整控件需求，暂不承担额外的基础组件维护成本。比较依据见 [`UI_LIBRARY_COMPARISON.md`](UI_LIBRARY_COMPARISON.md)。
 - Nuxt：应用没有 SSR、SEO 或远程页面需求。
 - VueUse：首版的窗口和异步能力用 Vue / Wails 原生 API 即可。
@@ -121,7 +122,7 @@ vue-tsc --noEmit
 
 ### 唯一后端入口
 
-Vue 页面只能调用 `src/services/wails-api.ts`，不得直接导入自动生成的 Wails 绑定。自动生成目录保持原样，重新生成后不需要手动合并业务 UI 代码。
+Vue 页面只调用 Pinia 的语义动作；store 调用 `src/services/wails-api.ts`，适配层是生成绑定的唯一入口。页面不得调用适配层或直接导入自动生成绑定。自动生成目录保持原样。
 
 ### DTO 策略
 
@@ -172,7 +173,7 @@ Go Application Service
 
 ## 7. UI 组件基线
 
-首批只需要以下业务封装（底层控件来自 Naive UI）：
+以下是控件职责，不要求为每种基础控件再创建包装组件；只有拥有独立业务状态或复用行为时才提取封装（底层控件来自 Naive UI）：
 
 - `Button`：primary / secondary / ghost / danger；
 - `IconButton`：必须有可访问名称；
@@ -183,7 +184,7 @@ Go Application Service
 - `EmptyState`、`ListSkeleton`、`ErrorState`；
 - `ProviderIcon`：首字母或后续接入的可信品牌资源。
 
-这些组件使用项目语义令牌，不直接暴露一堆颜色和间距 props。需要新的视觉变化时先扩展令牌或变体，而不是在页面里临时写样式。
+这些结构使用项目语义令牌，不直接暴露一堆颜色和间距 props。Tailwind v4 使用 `@tailwindcss/vite`；不创建旧版 Tailwind 或 PostCSS 配置。完整边界、实施次序与验收记录见 [`FRONTEND_IMPLEMENTATION_PLAN.md`](FRONTEND_IMPLEMENTATION_PLAN.md)。
 
 ## 8. 技术验收标准
 
