@@ -28,7 +28,16 @@ NSIS 安装包：
 wails3 task windows:create:nsis:installer INSTALL_SCOPE=user
 ```
 
-此命令需要 `makensis.exe`。用户级安装会写入 `%LOCALAPPDATA%\Programs\Codex Provider Hub`，不会要求管理员权限。
+此命令需要 `makensis.exe`。如果没有管理员权限或不希望安装系统级 NSIS，可以把官方安装程序安装到用户目录：
+
+```powershell
+$nsis = "$env:LOCALAPPDATA\proxy-switch-tools\nsis"
+Start-Process .\nsis-3.12-setup.exe -Wait -ArgumentList "/S", "/D=$nsis"
+$env:MAKENSIS = "$nsis\makensis.exe"
+wails3 task windows:create:nsis:installer INSTALL_SCOPE=user MAKENSIS=$env:MAKENSIS
+```
+
+`MAKENSIS` 也可以直接指向现有的 `makensis.exe`，不需要修改系统 `PATH`。用户级安装会写入 `%LOCALAPPDATA%\Programs\Codex Provider Hub`，不会要求管理员权限。
 
 MSIX 安装包：
 

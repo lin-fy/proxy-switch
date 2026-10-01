@@ -59,7 +59,7 @@ Proxy Switch
 | 开机启动 | [x] | Windows `HKCU\\...\\Run` 开关已接入。 |
 | 当前工作区构建 | [x] | `gofmt`、`go test ./...`、`go vet ./...`、前端格式检查、lint、生产构建和 Wails Windows amd64 构建均已复验；统一验证脚本还可生成 portable ZIP。2026-10-01 前端重构后桌面 exe 重新构建（约 11.4 MB）并完成启动冒烟：WebView2 初始化、窗口渲染真实后端空态、生产包确认不含浏览器预览演示数据。 |
 | Vue UI 迁移 | [-] | Vue 3、Pinia、Naive UI、Tailwind v4、配置/Profiles/Settings 页面和 Wails API 适配层已有可构建基线；浏览器预览模式下两尺寸截图走查通过（行列表溢出已修复），错误安全映射、错误摘要聚焦、激活消息保留已验证；Wails 桌面窗口、DPI、焦点、IME 和真实后端流程验收仍待完成。 |
-| Windows 安装包 | [-] | 用户级 ZIP 安装/卸载已验证；NSIS 和 MSIX 仍待工具链补齐。 |
+| Windows 安装包 | [-] | 用户级 NSIS 安装包已生成，并完成安装、启动、卸载验证；升级/回滚和 MSIX 仍待验证。 |
 | 真实端到端验收 | [ ] | 仍需可用的 CPA、OpenAI 和自定义 Provider 以及 Codex Desktop 实际请求记录。 |
 
 ## 3. 里程碑 Milestones
@@ -100,7 +100,8 @@ Proxy Switch
 
 - [x] Windows amd64 可执行文件构建和启动冒烟验证。
 - [x] 无管理员权限的用户级 ZIP 安装和卸载验证。
-- [ ] 补齐 NSIS 或 MSIX 安装包，并验证安装、启动、升级/回滚和卸载。
+- [x] 补齐 NSIS 用户级安装包，并验证安装、启动和卸载。
+- [ ] 验证安装包升级/回滚，并补充 MSIX 路径。
 - [ ] 发布 [`../ops/BUILD_WINDOWS.md`](../ops/BUILD_WINDOWS.md) 的最终步骤和故障恢复说明。
 
 出口标准：干净 Windows 环境可以按文档安装并启动 V1。
