@@ -145,6 +145,9 @@ Store 并行刷新四种资源，计算明确的已激活路由，管理 loading
 | Modal 焦点 | 记录打开时 activeElement、Tab/Shift+Tab 圈定、Esc、关闭后焦点 | 未完整验收 |
 | 校验与保留输入 | 空值、空白、无效 URL、后端失败；错误摘要聚焦且输入不丢失 | 待做，已有规则声明不足以证明 |
 | NForm 字段语义 | 逐项核对每个 `NFormItem` 的 `path`、label/id、错误摘要和失败后焦点；保存字段输入 | 当前基线已声明 rules，但 Profile 表单仍需补齐显式 `path` 并完成焦点验证 |
+| Route 创建语义 | 新建 Route 后核对 `restart_on_activate` 与用户输入一致，且不新增后端 API | 当前基线调用 `CreateRoute` 时未传递该字段；需使用现有 DTO/保存方法补齐并验证 |
+| 激活恢复状态 | 仅使用后端明确证据设置 `recovered`；错误文案不能作为状态协议 | 当前基线从错误文本中查找“恢复/restore”来推断状态；待移除并保留 unknown |
+| 错误信息边界 | 将后端异常转换为安全、可操作的中文提示，不把原始异常直接放入界面 | 当前基线 `describeError` 直接返回原始 `Error.message`；待建立安全映射 |
 | 键盘与 IME | 键盘导航、Enter 提交、Escape 取消、中文候选确认不提交 | 未完整验收 |
 | 对比度 | 计算文字对所有实际背景比率，含 muted、selected、占位符、控件 | 未验收，目标 ≥4.5:1 |
 | reduced-motion | 启用系统减少动效，检查实际过渡/动画不位移 | 声明存在；运行行为待验证 |
