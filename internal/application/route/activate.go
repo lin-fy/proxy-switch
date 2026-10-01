@@ -51,6 +51,9 @@ func (a *Activator) Activate(ctx context.Context, routeID, profileID string) err
 	if err != nil {
 		return fmt.Errorf("get model: %w", err)
 	}
+	if !m.Enabled {
+		return fmt.Errorf("activate route: %w", ErrModelDisabled)
+	}
 	models, err := a.models.ListByProvider(ctx, r.ProviderID)
 	if err != nil {
 		return fmt.Errorf("list provider models: %w", err)

@@ -19,12 +19,21 @@
 
 ## 2026-10-01 · codex
 
+### fix(route): reject disabled model when creating or activating routes
+
+- **影响**：修复 V1 主链路不变量漏洞。前端只允许选择已启用 Model，但后端 `route.Service` 创建/保存与 `Activator` 激活都不校验 `Enabled`，已停用模型的旧 Route 仍可被激活并写入 Codex 配置。现新增 `ErrModelDisabled`，`Create`/`Save`/`Activate` 均在可达性检查、配置写入和重启之前拦截。
+- **关键文件**：`internal/application/route/service.go`、`internal/application/route/activate.go`、`internal/application/route/service_test.go`、`internal/application/route/activate_test.go`、`frontend/src/services/wails-api.ts`
+- **后续**：无。激活失败时前端按安全映射提示“所选模型已停用”。
+- **commit**：`078bf92`
+
+## 2026-10-01 · codex
+
 ### docs(ops): finalize Windows build, install and recovery guide
 
 - **影响**：M5 收尾。`docs/ops/BUILD_WINDOWS.md` 由开发笔记升级为最终操作说明，补齐工具链前提、统一验证入口、NSIS/portable/MSIX 三条打包路径、签名与发布、运行时配置、卸载残留清理，以及构建/安装升级/启动/Codex 配置/发布分阶段故障恢复和 V1 安装验收清单。
 - **关键文件**：`docs/ops/BUILD_WINDOWS.md`、`docs/TASKS.md`、`docs/planning/ROADMAP.md`、`docs/CONTEXT.md`
 - **后续**：M5 全部完成；剩余 M6 依赖用户配置 GitHub `production` Environment、签名 Secrets、`main` 分支保护和真实 Provider 凭据。
-- **commit**：待提交后补充
+- **commit**：`336a7dd`（PR #3）
 
 ## 2026-10-01 · codex
 

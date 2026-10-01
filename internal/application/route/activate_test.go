@@ -42,6 +42,7 @@ func (r activationProviders) Delete(context.Context, string) error          { re
 type activationModels struct {
 	selected model.Model
 	items    []model.Model
+	disabled bool
 }
 
 func (r activationModels) List(context.Context) ([]model.Model, error) { return r.items, nil }
@@ -49,7 +50,9 @@ func (r activationModels) ListByProvider(context.Context, string) ([]model.Model
 	return r.items, nil
 }
 func (r activationModels) Get(context.Context, string, string) (model.Model, error) {
-	return r.selected, nil
+	item := r.selected
+	item.Enabled = !r.disabled
+	return item, nil
 }
 func (r activationModels) Save(context.Context, model.Model) error      { return nil }
 func (r activationModels) Delete(context.Context, string, string) error { return nil }
@@ -110,6 +113,30 @@ func (t *activationTester) TestModel(context.Context, provider.Provider, string)
 }
 func (t *activationTester) ListModels(context.Context, provider.Provider) ([]ports.RemoteModel, error) {
 	return nil, nil
+}
+
+func TestActivatorRejectsDisabledModel(t *testing.T) {
+	routes := &activationRoutes{item: route.Route{
+		ID: "route-a", Name: "Route A", PlatformID: route.PlatformCodex,
+		ProviderID: "provider-a", ModelID: "model-a",
+	}}
+	adapter := &activationAdapter{}
+	tester := &activationTester{}
+	activator := NewActivator(
+		routes,
+		activationProviders{item: provider.Provider{ID: "provider-a", Name: "Provider A", BaseURL: "https://example.test", Protocol: provider.ProtocolResponses}},
+		activationModels{selected: model.Model{ProviderID: "provider-a", ID: "model-a"}, disabled: true, items: []model.Model{{ProviderID: "provider-a", ID: "model-a"}}},
+		activationProfiles{item: profile.Profile{ID: "profile-a", Name: "Profile A"}},
+		activationFactory{adapter: adapter}, tester,
+	)
+
+	err := activator.Activate(context.Background(), "route-a", "profile-a")
+	if !errors.Is(err, ErrModelDisabled) {
+		t.Fatalf("disabled model error = %v", err)
+	}
+	if tester.calls != 0 || adapter.validated || adapter.prepared || len(routes.saved) != 0 || routes.item.Default {
+		t.Fatalf("disabled model calls = tester:%d validated:%v prepared:%v saved:%d default:%v", tester.calls, adapter.validated, adapter.prepared, len(routes.saved), routes.item.Default)
+	}
 }
 
 func TestActivatorPreparesAndMarksRouteDefault(t *testing.T) {
