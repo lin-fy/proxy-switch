@@ -10,6 +10,15 @@
 
 ## 2026-10-01 · codex
 
+### build(windows): add NSIS toolchain setup and preflight
+
+- **影响**：Windows 打包任务提供 NSIS 安装入口，并在生成安装器前给出明确的 `makensis.exe` 缺失提示。
+- **关键文件**：`Taskfile.yml`、`build/windows/Taskfile.yml`
+- **后续**：在具备 NSIS 的 Windows 环境完成真实安装、启动、升级/回滚和卸载验收；当前分支未改变系统级 Wails/NSIS 安装。
+- **commit**：108cdc2（代码分支 `codex/m5-installer-toolchain`）
+
+## 2026-10-01 · codex
+
 ### docs(agents): 建立多 agent 协作机制并明确提交前文档更新硬规则
 
 - **影响**：所有 agent 协作流程
