@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"codex-provider-hub/internal/application/ports"
 	domainprovider "codex-provider-hub/internal/domain/provider"
 	"codex-provider-hub/internal/infrastructure/credential"
 )
@@ -27,20 +28,25 @@ func NewResponsesTester(client *http.Client) *ResponsesTester {
 }
 
 func (t *ResponsesTester) Test(ctx context.Context, p domainprovider.Provider) error {
+	_, err := t.ListModels(ctx, p)
+	return err
+}
+
+func (t *ResponsesTester) ListModels(ctx context.Context, p domainprovider.Provider) ([]ports.RemoteModel, error) {
 	if err := p.Validate(); err != nil {
-		return err
+		return nil, err
 	}
 	token, err := credential.Resolve(p.AuthRef)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	endpoint, err := modelsEndpoint(p.BaseURL)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	request, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, nil)
 	if err != nil {
-		return fmt.Errorf("create provider request: %w", err)
+		return nil, fmt.Errorf("create provider request: %w", err)
 	}
 	for key, value := range p.Headers {
 		request.Header.Set(key, value)
@@ -53,17 +59,38 @@ func (t *ResponsesTester) Test(ctx context.Context, p domainprovider.Provider) e
 		query.Set(key, value)
 	}
 	request.URL.RawQuery = query.Encode()
-
 	response, err := t.client.Do(request)
 	if err != nil {
-		return fmt.Errorf("provider request failed: %w", err)
+		return nil, fmt.Errorf("provider request failed: %w", err)
 	}
 	defer response.Body.Close()
-	_, _ = io.Copy(io.Discard, io.LimitReader(response.Body, 64<<10))
 	if response.StatusCode < http.StatusOK || response.StatusCode >= http.StatusMultipleChoices {
-		return fmt.Errorf("provider returned HTTP %d", response.StatusCode)
+		_, _ = io.Copy(io.Discard, io.LimitReader(response.Body, 64<<10))
+		return nil, fmt.Errorf("provider returned HTTP %d", response.StatusCode)
 	}
-	return nil
+	var payload struct {
+		Data []struct {
+			ID   string `json:"id"`
+			Name string `json:"name"`
+		} `json:"data"`
+	}
+	decoder := json.NewDecoder(io.LimitReader(response.Body, 2<<20))
+	if err := decoder.Decode(&payload); err != nil {
+		return nil, fmt.Errorf("decode provider models: %w", err)
+	}
+	models := make([]ports.RemoteModel, 0, len(payload.Data))
+	for _, item := range payload.Data {
+		id := strings.TrimSpace(item.ID)
+		if id == "" {
+			continue
+		}
+		name := strings.TrimSpace(item.Name)
+		if name == "" {
+			name = id
+		}
+		models = append(models, ports.RemoteModel{ID: id, Name: name})
+	}
+	return models, nil
 }
 
 func (t *ResponsesTester) TestModel(ctx context.Context, p domainprovider.Provider, modelID string) error {

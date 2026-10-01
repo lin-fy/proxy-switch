@@ -12,8 +12,8 @@ import (
 type PlatformAdapter interface {
 	Validate(context.Context, route.Route, provider.Provider, model.Model) error
 	Prepare(context.Context, route.Route, provider.Provider, model.Model, []model.Model, profile.Profile) error
-	Launch(context.Context, route.Route) error
-	Restart(context.Context, route.Route) error
+	Launch(context.Context, route.Route, provider.Provider) error
+	Restart(context.Context, route.Route, provider.Provider) error
 	IsRunning(context.Context) (bool, error)
 }
 

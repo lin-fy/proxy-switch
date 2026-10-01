@@ -261,7 +261,11 @@ func (r *RouteRepository) Delete(ctx context.Context, id string) error {
 	return r.store.update(ctx, func(s *snapshot) error {
 		for i := range s.Routes {
 			if s.Routes[i].ID == id {
+				wasDefault := s.Routes[i].Default
 				s.Routes = append(s.Routes[:i], s.Routes[i+1:]...)
+				if wasDefault && len(s.Routes) > 0 {
+					s.Routes[0].Default = true
+				}
 				return nil
 			}
 		}

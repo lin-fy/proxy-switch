@@ -17,6 +17,7 @@ import (
 	"codex-provider-hub/internal/domain/profile"
 	"codex-provider-hub/internal/domain/provider"
 	"codex-provider-hub/internal/domain/route"
+	"codex-provider-hub/internal/infrastructure/credential"
 )
 
 var (
@@ -105,7 +106,11 @@ func (a *Adapter) Prepare(_ context.Context, r route.Route, p provider.Provider,
 		"wire_api": p.Protocol,
 	}
 	if p.AuthRef != "" {
-		providerConfig["env_key"] = p.AuthRef
+		envName, err := credential.EnvName(p.AuthRef)
+		if err != nil {
+			return err
+		}
+		providerConfig["env_key"] = envName
 	}
 	providers[p.ID] = providerConfig
 	config["model_providers"] = providers
@@ -116,13 +121,20 @@ func (a *Adapter) Prepare(_ context.Context, r route.Route, p provider.Provider,
 	if err != nil {
 		return fmt.Errorf("build model catalog: %w", err)
 	}
-	config["model_catalog_json"] = string(catalog)
-	targets := uniquePaths(activePath, profilePath)
+	catalogPath := a.catalogPath(pr)
+	config["model_catalog_json"] = catalogPath
+	targets := uniquePaths(activePath, profilePath, catalogPath)
 	existed, err := backupTargets(targets)
 	if err != nil {
 		return err
 	}
-	for _, path := range targets {
+	if err := writeCatalog(catalogPath, catalog); err != nil {
+		if rollbackErr := rollbackTargets(targets, existed); rollbackErr != nil {
+			return fmt.Errorf("write Codex model catalog: %w; rollback failed: %v", err, rollbackErr)
+		}
+		return fmt.Errorf("write Codex model catalog: %w", err)
+	}
+	for _, path := range uniquePaths(activePath, profilePath) {
 		if err := writeConfig(path, config); err != nil {
 			if rollbackErr := rollbackTargets(targets, existed); rollbackErr != nil {
 				return fmt.Errorf("write Codex config %q: %w; rollback failed: %v", path, err, rollbackErr)
@@ -133,15 +145,22 @@ func (a *Adapter) Prepare(_ context.Context, r route.Route, p provider.Provider,
 	return nil
 }
 
-func (a *Adapter) Launch(ctx context.Context, _ route.Route) error {
-	cmd := exec.CommandContext(ctx, a.executable)
+func (a *Adapter) Launch(ctx context.Context, _ route.Route, p provider.Provider) error {
+	cmd, err := a.command(ctx, p)
+	if err != nil {
+		return err
+	}
 	if err := cmd.Start(); err != nil {
 		return fmt.Errorf("start Codex: %w", err)
 	}
 	return nil
 }
 
-func (a *Adapter) Restart(ctx context.Context, r route.Route) error {
+func (a *Adapter) Restart(ctx context.Context, r route.Route, p provider.Provider) error {
+	cmd, err := a.command(ctx, p)
+	if err != nil {
+		return err
+	}
 	running, err := a.IsRunning(ctx)
 	if err != nil {
 		return err
@@ -153,7 +172,43 @@ func (a *Adapter) Restart(ctx context.Context, r route.Route) error {
 			return fmt.Errorf("stop Codex %q: %w: %s", image, err, strings.TrimSpace(string(output)))
 		}
 	}
-	return a.Launch(ctx, r)
+	if err := cmd.Start(); err != nil {
+		return fmt.Errorf("start Codex: %w", err)
+	}
+	return nil
+}
+
+func (a *Adapter) command(ctx context.Context, p provider.Provider) (*exec.Cmd, error) {
+	cmd := exec.CommandContext(ctx, a.executable)
+	if err := injectCredential(cmd, p); err != nil {
+		return nil, err
+	}
+	return cmd, nil
+}
+
+func injectCredential(cmd *exec.Cmd, p provider.Provider) error {
+	if strings.TrimSpace(p.AuthRef) == "" {
+		return nil
+	}
+	value, err := credential.Resolve(p.AuthRef)
+	if err != nil {
+		return fmt.Errorf("resolve provider credential: %w", err)
+	}
+	name, err := credential.EnvName(p.AuthRef)
+	if err != nil {
+		return err
+	}
+	env := os.Environ()
+	for i := range env {
+		key, _, _ := strings.Cut(env[i], "=")
+		if strings.EqualFold(key, name) {
+			env[i] = name + "=" + value
+			cmd.Env = env
+			return nil
+		}
+	}
+	cmd.Env = append(env, name+"="+value)
+	return nil
 }
 
 func (a *Adapter) IsRunning(ctx context.Context) (bool, error) {
@@ -178,27 +233,59 @@ func (a *Adapter) executableImageName() string {
 }
 
 func (a *Adapter) Restore(pr profile.Profile) error {
-	targets := uniquePaths(filepath.Join(a.homeDir, "config.toml"), a.configPath(pr))
-	restored := false
+	targets := uniquePaths(filepath.Join(a.homeDir, "config.toml"), a.configPath(pr), a.catalogPath(pr))
+	backups := make(map[string][]byte, len(targets))
+	missing := make(map[string]bool, len(targets))
 	for _, path := range targets {
 		backup := backupPath(path)
-		if _, err := os.Stat(backup); errors.Is(err, os.ErrNotExist) {
+		if marker, err := os.Stat(missingBackupPath(path)); err == nil {
+			if !marker.Mode().IsRegular() {
+				return fmt.Errorf("invalid missing-file backup marker %q", path)
+			}
+			missing[path] = true
 			continue
-		} else if err != nil {
+		} else if !errors.Is(err, os.ErrNotExist) {
 			return err
 		}
-		if err := copyFile(backup, path); err != nil {
-			return fmt.Errorf("restore Codex config %q: %w", path, err)
+		contents, err := os.ReadFile(backup)
+		if errors.Is(err, os.ErrNotExist) {
+			return ErrBackupNotFound
 		}
-		restored = true
+		if err != nil {
+			return fmt.Errorf("read Codex backup %q: %w", backup, err)
+		}
+		backups[path] = contents
 	}
-	if !restored {
-		return ErrBackupNotFound
+	originals := make(map[string][]byte, len(targets))
+	existed := make(map[string]bool, len(targets))
+	for _, path := range targets {
+		if contents, err := os.ReadFile(path); err == nil {
+			originals[path], existed[path] = contents, true
+		} else if !errors.Is(err, os.ErrNotExist) {
+			return err
+		}
+	}
+	for i, path := range targets {
+		var err error
+		if missing[path] {
+			err = os.Remove(path)
+			if errors.Is(err, os.ErrNotExist) {
+				err = nil
+			}
+		} else {
+			err = writeCatalog(path, backups[path])
+		}
+		if err != nil {
+			rollbackErr := rollbackFiles(originals, existed, targets[:i])
+			return errors.Join(fmt.Errorf("restore Codex file %q: %w", path, err), rollbackErr)
+		}
 	}
 	return nil
 }
 
 func (a *Adapter) ConfigPath(pr profile.Profile) string { return a.configPath(pr) }
+
+func (a *Adapter) CatalogPath(pr profile.Profile) string { return a.catalogPath(pr) }
 
 func (a *Adapter) configPath(pr profile.Profile) string {
 	if strings.TrimSpace(pr.ConfigPath) == "" {
@@ -208,6 +295,16 @@ func (a *Adapter) configPath(pr profile.Profile) string {
 		return filepath.Clean(pr.ConfigPath)
 	}
 	return filepath.Join(a.homeDir, filepath.Clean(pr.ConfigPath))
+}
+
+func (a *Adapter) catalogPath(pr profile.Profile) string {
+	if strings.TrimSpace(pr.ModelCatalogPath) == "" {
+		return filepath.Join(a.homeDir, pr.ID+".models.json")
+	}
+	if filepath.IsAbs(pr.ModelCatalogPath) {
+		return filepath.Clean(pr.ModelCatalogPath)
+	}
+	return filepath.Join(a.homeDir, filepath.Clean(pr.ModelCatalogPath))
 }
 
 func resolveHomeDir() (string, error) {
@@ -277,6 +374,30 @@ func writeConfig(path string, config map[string]any) error {
 	return os.Rename(tmpName, path)
 }
 
+func writeCatalog(path string, catalog []byte) error {
+	if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
+		return err
+	}
+	tmp, err := os.CreateTemp(filepath.Dir(path), ".codex-provider-hub-*.tmp")
+	if err != nil {
+		return err
+	}
+	tmpName := tmp.Name()
+	defer os.Remove(tmpName)
+	if err := tmp.Chmod(0o600); err != nil {
+		_ = tmp.Close()
+		return err
+	}
+	if _, err := tmp.Write(catalog); err != nil {
+		_ = tmp.Close()
+		return err
+	}
+	if err := tmp.Close(); err != nil {
+		return err
+	}
+	return os.Rename(tmpName, path)
+}
+
 func copyFile(source, destination string) error {
 	contents, err := os.ReadFile(source)
 	if err != nil {
@@ -306,11 +427,22 @@ func backupTargets(paths []string) (map[string]bool, error) {
 	for _, path := range paths {
 		if _, err := os.Stat(path); err == nil {
 			existed[path] = true
+			_ = os.Remove(missingBackupPath(path))
 			if err := copyFile(path, backupPath(path)); err != nil {
 				return nil, fmt.Errorf("backup Codex config %q: %w", path, err)
 			}
 		} else if !errors.Is(err, os.ErrNotExist) {
 			return nil, fmt.Errorf("stat Codex config %q: %w", path, err)
+		} else {
+			if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
+				return nil, fmt.Errorf("create Codex config directory %q: %w", path, err)
+			}
+			if err := os.WriteFile(missingBackupPath(path), nil, 0o600); err != nil {
+				return nil, fmt.Errorf("mark missing Codex config %q: %w", path, err)
+			}
+			if err := os.Remove(backupPath(path)); err != nil && !errors.Is(err, os.ErrNotExist) {
+				return nil, fmt.Errorf("remove stale Codex backup %q: %w", path, err)
+			}
 		}
 	}
 	return existed, nil
@@ -330,28 +462,52 @@ func rollbackTargets(paths []string, existed map[string]bool) error {
 	return result
 }
 
+func rollbackFiles(originals map[string][]byte, existed map[string]bool, paths []string) error {
+	var result error
+	for _, path := range paths {
+		if existed[path] {
+			result = errors.Join(result, writeCatalog(path, originals[path]))
+		} else if err := os.Remove(path); err != nil && !errors.Is(err, os.ErrNotExist) {
+			result = errors.Join(result, err)
+		}
+	}
+	return result
+}
+
 func backupPath(path string) string { return path + ".codex-provider-hub.bak" }
+
+func missingBackupPath(path string) string { return backupPath(path) + ".missing" }
 
 type modelCatalog struct {
 	Models []catalogModel `json:"models"`
 }
 
 type catalogModel struct {
-	Slug                      string           `json:"slug"`
-	DisplayName               string           `json:"display_name"`
-	Description               string           `json:"description"`
-	DefaultReasoningLevel     string           `json:"default_reasoning_level"`
-	SupportedReasoningLevels  []reasoningLevel `json:"supported_reasoning_levels"`
-	ShellType                 string           `json:"shell_type"`
-	Visibility                string           `json:"visibility"`
-	SupportedInAPI            bool             `json:"supported_in_api"`
-	InputModalities           []string         `json:"input_modalities"`
-	SupportsParallelToolCalls bool             `json:"supports_parallel_tool_calls"`
+	Priority                   int              `json:"priority"`
+	SupportVerbosity           bool             `json:"support_verbosity"`
+	BaseInstructions           string           `json:"base_instructions"`
+	TruncationPolicy           truncationPolicy `json:"truncation_policy"`
+	ExperimentalSupportedTools []string         `json:"experimental_supported_tools"`
+	Slug                       string           `json:"slug"`
+	DisplayName                string           `json:"display_name"`
+	Description                string           `json:"description"`
+	DefaultReasoningLevel      string           `json:"default_reasoning_level"`
+	SupportedReasoningLevels   []reasoningLevel `json:"supported_reasoning_levels"`
+	ShellType                  string           `json:"shell_type"`
+	Visibility                 string           `json:"visibility"`
+	SupportedInAPI             bool             `json:"supported_in_api"`
+	InputModalities            []string         `json:"input_modalities"`
+	SupportsParallelToolCalls  bool             `json:"supports_parallel_tool_calls"`
 }
 
 type reasoningLevel struct {
 	Effort      string `json:"effort"`
 	Description string `json:"description"`
+}
+
+type truncationPolicy struct {
+	Mode  string `json:"mode"`
+	Limit int    `json:"limit"`
 }
 
 func buildCatalog(selected model.Model, models []model.Model) ([]byte, error) {
@@ -382,7 +538,11 @@ func buildCatalog(selected model.Model, models []model.Model) ([]byte, error) {
 			name = item.ID
 		}
 		catalog.Models = append(catalog.Models, catalogModel{
-			Slug: item.ID, DisplayName: name, Description: "Provider model",
+			BaseInstructions:           "You are Codex, an AI coding assistant. Follow the user's instructions and use the available tools to complete tasks.",
+			Priority:                   len(catalog.Models),
+			TruncationPolicy:           truncationPolicy{Mode: "bytes", Limit: 10000},
+			ExperimentalSupportedTools: []string{},
+			Slug:                       item.ID, DisplayName: name, Description: "Provider model",
 			DefaultReasoningLevel: "medium", SupportedReasoningLevels: levels,
 			ShellType: "shell_command", Visibility: "list", SupportedInAPI: true,
 			InputModalities: []string{"text", "image"}, SupportsParallelToolCalls: true,

@@ -84,9 +84,9 @@ func newApp(autostart wailsui.AutostartManager) (*wailsui.App, error) {
 	models := config.NewModelRepository(store)
 	routes := config.NewRouteRepository(store)
 	profiles := config.NewProfileRepository(store)
-	providerService := providerapp.NewService(providers)
-	modelService := modelapp.NewService(models)
-	routeService := routeapp.NewService(routes)
+	providerService := providerapp.NewService(providers, models, routes)
+	modelService := modelapp.NewService(models, routes)
+	routeService := routeapp.NewService(routes, providers, models)
 	profileService := profile.NewService(profiles)
 	adapter, err := codex.NewAdapter("")
 	if err != nil {
@@ -96,7 +96,7 @@ func newApp(autostart wailsui.AutostartManager) (*wailsui.App, error) {
 	if err != nil {
 		return nil, err
 	}
-	activator := routeapp.NewActivator(routes, providers, models, profiles, factory)
 	tester := providerinfra.NewResponsesTester(nil)
+	activator := routeapp.NewActivator(routes, providers, models, profiles, factory, tester)
 	return wailsui.NewApp(providerService, modelService, routeService, profileService, activator, adapter, autostart, tester), nil
 }

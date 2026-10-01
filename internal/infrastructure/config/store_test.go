@@ -58,3 +58,27 @@ func TestRouteRepositoryKeepsOneDefault(t *testing.T) {
 		t.Fatalf("defaults = %#v", items)
 	}
 }
+
+func TestRouteRepositoryPromotesAnotherRouteWhenDefaultIsDeleted(t *testing.T) {
+	store := NewStore(filepath.Join(t.TempDir(), "state.json"))
+	repo := NewRouteRepository(store)
+	first, _ := route.New("first", "First", "cpa", "model-a")
+	first.Default = true
+	second, _ := route.New("second", "Second", "cpa", "model-b")
+	if err := repo.Save(context.Background(), first); err != nil {
+		t.Fatal(err)
+	}
+	if err := repo.Save(context.Background(), second); err != nil {
+		t.Fatal(err)
+	}
+	if err := repo.Delete(context.Background(), first.ID); err != nil {
+		t.Fatal(err)
+	}
+	items, err := repo.List(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(items) != 1 || !items[0].Default || items[0].ID != second.ID {
+		t.Fatalf("routes after default deletion = %#v", items)
+	}
+}
