@@ -23,7 +23,7 @@
 | Tailwind | `tailwindcss ^4.3.3`、`@tailwindcss/vite ^4.3.3` |
 | Vue 类型检查 | `vue-tsc ^3.3.11` |
 
-保留现有 TypeScript、Vite 与 Wails runtime。本阶段不调整它们的版本。正式实施时检查 Wails runtime 与 Go 侧锁定版本的兼容性，不能仅依赖 `latest` 的名称判断。
+保留现有 TypeScript、Vite 与 Wails runtime。本阶段不调整它们的版本。正式实施时检查 Wails runtime 与 Go 侧锁定版本的兼容性，不能仅依赖 `latest` 的名称判断。当前基线的 `package.json` 使用 `@wailsio/runtime: latest`，lockfile 实际解析为 `3.0.0-beta.26`；发布前必须确认并固定这组版本，避免生产构建随 registry 漂移。
 
 `frontend/vite.config.ts` 使用 `vue()` 与 `tailwindcss()`；构建脚本为 `vue-tsc --noEmit && vite build`。不创建 `tailwind.config.js` 或 PostCSS 配置。实施时使用 lockfile 固定实际解析版本。
 
