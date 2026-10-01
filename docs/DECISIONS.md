@@ -71,3 +71,13 @@
   8. `PRODUCT_PLAN.md` 改名 `docs/product.md`，`PROJECT_INSTRUCTIONS.md` 改名 `CODEX.md`。
 - 理由：统一入口降低 agent 接入成本；状态、任务、日志、决策四类高频更新文档单独成文避免相互污染；按主题归档让 docs/ 结构清晰。
 - 后果：所有 agent 必须遵守新规则；历史文档引用路径已全部更新；后续新增文档需遵循同一分类约定。
+
+## ADR-0007：浏览器预览演示数据模式（仅开发构建生效）
+
+- 日期：2026-10-01
+- 决策人：zcode 实现，用户确认（交付物是桌面工具而非网页）
+- 状态：accepted
+- 背景：前端界面走查需要可运行的数据环境，但应用能力依赖 Wails 宿主；纯浏览器打开生产构建只能看到后端错误态，无法走查界面状态。
+- 决策：`frontend/src/services/wails-api.ts` 仅在「开发构建（`import.meta.env.DEV`）且检测不到 Wails runtime（`window._wails.environment`）」时启用内存演示数据（`services/demo-data.ts`），界面在侧栏与底部状态栏显示「预览数据」标记。生产构建经产物检查确认演示数据被完整剔除。
+- 理由：不修改 Go API 与绑定，让 `npm run dev` 成为界面开发的快速预览环境；最终交付形态保持为 Wails 桌面工具。
+- 后果：浏览器 `npm run dev` 中看到的是演示数据而非真实配置；任何真实行为验证必须在 `wails3 build` 产出的桌面 exe 中进行。
