@@ -38,6 +38,8 @@
 
 ## 已完成
 
+- [x by codex 2026-10-02] 补齐 Provider/Model 删除引用保护、`store.go` 并发写入与损坏 JSON 安全失败的针对性测试；本机无 C 编译器，并发安全性用去锁变异测试证明（去锁后两个并发用例失败）
+
 - [x by codex 2026-10-01] 后端强制「Route 只能引用已启用 Model」：`route.Service` 创建/保存与 `Activator` 激活时校验 `Enabled`，阻止停用模型仍被激活；补 `ErrModelDisabled` 与前端安全错误映射
 
 - [x by zcode 2026-10-01] 前端产物分包与可访问性标签：manualChunks 拆分（业务 index 638→37 kB，单 chunk 回到警告线内）、配置档案选择器空态无名 tab stop 修复；CI 通过后 PR #4 合并

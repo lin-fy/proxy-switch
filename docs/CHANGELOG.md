@@ -10,6 +10,16 @@
 
 ## 2026-10-02 · codex
 
+### test(config): cover reference guards, concurrent writes and corrupt state
+
+- **影响**：补齐三类高风险后端路径的针对性测试，不修改生产代码。① Provider/Model 删除引用保护：分别覆盖被 Model、被 Route、同名模型属其他 Provider、无引用可删除；② `store.go` 并发：32 个并发 Save 无丢失更新并从磁盘重读验证，并发 Save/List 混合访问保持数据一致；③ 损坏 JSON：读写均返回 `decode state` 错误且原文件不被静默覆盖，另覆盖缺失状态文件目录可写。
+- **关键文件**：`internal/application/provider/service_test.go`（新）、`internal/application/model/service_test.go`、`internal/infrastructure/config/store_test.go`
+- **验证**：变异测试确认并发用例有效（临时禁用 `Store` 锁后两个并发用例失败，已还原）；本机无 C 编译器，`go test -race` 不可用，并发安全性由去锁变异测试而非 race detector 证明。
+- **后续**：无。
+- **commit**：`08ffe9c`
+
+## 2026-10-02 · codex
+
 ### fix(ci): support Windows PowerShell 5.1 in verification scripts
 
 - **影响**：CI 验证、发布版本守卫及其测试不再要求 PowerShell 7.3；通过显式检查原生命令退出码，保留 5.1 下的失败检测行为。

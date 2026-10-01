@@ -3,7 +3,7 @@
 > agent 协作的"单一事实源"。开工读，收工更新。只保留当前状态。
 > 详细规则见 [`agent-guide/workflow.md`](agent-guide/workflow.md)。
 
-最后更新：2026-10-02 · codex（同步 dev 的 PowerShell 5.1 CI 兼容；修复停用模型仍可被 Route 激活）
+最后更新：2026-10-02 · codex（补齐删除引用保护、store 并发与损坏 JSON 针对性测试）
 
 ## 一句话现状
 
