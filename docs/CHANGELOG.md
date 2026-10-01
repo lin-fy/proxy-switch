@@ -144,3 +144,12 @@
 - **关键文件**：`frontend/vite.config.ts`、`frontend/src/components/DesktopShell.vue`、`frontend/src/pages/SettingsPage.vue`
 - **后续**：模态/对话框右上角 X 关闭按钮（NCard/NDialog 内部）无可访问名称为上游限制，可考虑向 naive-ui 反馈；`wails/custom.js` 404 为运行时探测可选文件的上游行为，与本次分包无关
 - **commit**：`65762fb`（PR #4）
+
+## 2026-10-01 · zcode
+
+### build(release): M6 发布准备：版本统一 1.0.0、README 刷新、发布清单与说明
+
+- **影响**：发布版本号统一为 1.0.0（`build/config.yml`、`build/windows/info.json` file_version 与 ProductVersion、`build/windows/nsis/wails_tools.nsh` INFO_PRODUCTVERSION，并同步 `wails.exe.manifest` assemblyIdentity 与 MSIX 两个清单文件，与 UI 尾栏展示一致），满足 `scripts/ci/validate-release.ps1` 对 tag `v1.0.0` 的四点校验；README「当前状态」与开发环境要求刷新（Go 1.25+/Node 22+）；新增 `docs/ops/RELEASE_CHECKLIST.md`（production Environment/签名 Secrets/main 分支保护等用户侧一次性配置 + 版本自检 + 发布流程 + 演练说明）与 `docs/ops/RELEASE_NOTES.md`（V1 用户发布说明草稿）
+- **关键文件**：`build/config.yml`、`build/windows/info.json`、`build/windows/nsis/wails_tools.nsh`、`README.md`、`docs/ops/RELEASE_CHECKLIST.md`（新）、`docs/ops/RELEASE_NOTES.md`（新）、`docs/planning/ROADMAP.md`、`build/windows/wails.exe.manifest`、`build/windows/msix/app_manifest.xml`、`build/windows/msix/template.xml`、`docs/TASKS.md`
+- **后续**：Tag 发布演练仍需用户先配置 production Environment 与签名 Secrets（见 RELEASE_CHECKLIST 第 1 节）；exe「属性 → 详细信息」版本显示为空为 winres/wails3 上游问题（版本资源字节已嵌入但 API 读不到），可向上游反馈
+- **commit**：待 PR 合并后回填
