@@ -1,45 +1,41 @@
 # 项目当前状态快照
 
-> 本文档是 agent 协作的"单一事实源"。每次工作会话**开始**时读它，**结束**时更新它。只保留当前状态，历史记录写到 [`CHANGELOG.md`](CHANGELOG.md)。
+> agent 协作的"单一事实源"。开工读，收工更新。只保留当前状态。
+> 详细规则见 [`agent-guide/workflow.md`](agent-guide/workflow.md)。
 
-最后更新：2026-10-01 · zcode（工作区提交整理）
+最后更新：2026-10-01 · codex（文档精简）
 
 ## 一句话现状
 
-V1 后端核心与 Windows 桌面壳已完成，Vue 前端迁移基线已建立并通过浏览器走查，桌面原生验收、安装包和真实端到端验收未完成。
+V1 后端核心 + 桌面壳 + Vue 前端基线已完成；桌面原生验收、安装包、真实端到端验收未完成。工作区已提交干净。
 
-## 当前里程碑
+## 下一步三项
 
-详见 [`planning/ROADMAP.md`](planning/ROADMAP.md)。当前活跃里程碑：
-
-- **M4 — Vue 桌面界面**：前端基线已实现，浏览器走查通过；Wails 桌面窗口、DPI、浮层、键盘/IME、真实后端流程验收待完成
-- **M5 — Windows 构建与安装**：ZIP 安装/卸载已验证；NSIS / MSIX 工具链待补齐
-- **M6 — V1 验收与发布**：未开始
-
-## 最近三项工作
-
-1. 2026-10-01 · zcode — 按用户确认的 6 组方案提交工作区全部未提交改动（backend/ci 两组为整理 codex 之前未提交的工作）
-2. 2026-10-01 · zcode — 前端基线缺口修复与视觉重做，浏览器两尺寸走查通过
-3. 2026-10-01 · zcode — Wails 桌面 exe 重新构建并启动冒烟，生产包确认剔除预览演示数据
-
-## 下一步（按优先级）
-
-1. 完成 Wails 桌面窗口、DPI、浮层、键盘/IME 和真实后端流程验收（M4 收尾）
-2. 在 GitHub 配置 `production` Environment、签名 Secrets 和 `main` 分支保护，完成一次 Tag 发布演练
-3. 补齐 NSIS 或 MSIX 安装包，验证安装、启动、升级/回滚、卸载
+1. M4 收尾：Wails 桌面窗口、DPI、浮层、键盘/IME、真实后端流程验收
+2. GitHub 配置 `production` Environment + 签名 Secrets + `main` 分支保护，完成 Tag 发布演练（**需用户操作**）
+3. 补齐 NSIS / MSIX 安装包并验证
 
 ## 当前卡点
 
-- 需要真实 CPA / OpenAI / 自定义 Provider 凭据才能完成端到端验收（M3 出口标准未达成）
-- GitHub 仓库 Secrets 和 Environment 配置需要用户手动操作
+- 真实 CPA / OpenAI / 自定义 Provider 凭据（**需用户提供**）
+- GitHub 仓库 Secrets 配置（**需用户操作**）
 
 ## 待协调事项
 
-> 多 agent 协作中出现的冲突、模糊、需要用户裁决的事项写在这里。
+- <暂无>
 
-- 2026-10-01 · zcode 提出：`TASKS.md` "已完成"区中，codex 记录了两条实际由 zcode 完成的工作（前端错误安全映射验证、桌面构建冒烟验证）。zcode 未动原条目，已补充自己的条目。请用户裁决是否调整 codex 的两条记录归属。
+### 已裁决（归档）
 
-## 工作区状态提示
+- 2026-10-01：TASKS.md codex 代记条目归属问题 → 删除，由 zcode 自己条目承担
 
-- 工作区长期注意事项：sources/ 下文件只读；不得提交密钥、临时文件、构建产物、CodeGraph 缓存。
-- 瞬时状态（如未提交文件清单）请直接看 `git status`，不要在本文档里手动维护。
+## 长期注意事项
+
+- `sources/` 下文件只读
+- 不得提交密钥、临时文件、构建产物、CodeGraph 缓存
+- 瞬时工作区状态直接 `git status`，不在本文档维护
+
+---
+
+**详细里程碑与验收状态**：[`planning/ROADMAP.md`](planning/ROADMAP.md)
+**任务认领看板**：[`TASKS.md`](TASKS.md)
+**变更历史**：`git log` + [`CHANGELOG.md`](CHANGELOG.md)

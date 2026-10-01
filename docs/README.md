@@ -16,14 +16,15 @@
 
 | 目录 | 内容 |
 |---|---|
-| [`planning/`](planning/) | 里程碑规划、实施计划 |
+| [`agent-guide/`](agent-guide/) | agent 详细规则（按需查阅） |
+| [`planning/`](planning/) | 里程碑规划、实施计划；`archive/` 存已完成里程碑 |
 | [`architecture/`](architecture/) | 技术栈、架构规范 |
 | [`design/`](design/) | UI 原型、设计选型 |
 | [`ops/`](ops/) | 构建、CI/CD、运维 |
 
 ## Agent 入口
 
-仓库根目录的 `AGENTS.md` 是所有 AI agent 的通用规则。各家 agent 的专属差异约定按需放在根目录的 `<AGENT名>.md` 中（当前仅有 `CODEX.md`），没有专属文件的 agent 直接遵守 `AGENTS.md`。**任何 agent 进入仓库都应先读 `AGENTS.md`。**
+仓库根目录的 `AGENTS.md` 是五条铁律（每次开工必读，约 600 token）。详细规则在 [`agent-guide/`](agent-guide/) 按需查阅。各家 agent 的专属差异约定按需放在根目录 `<AGENT名>.md`（当前仅 `CODEX.md`）。
 
 ## 写作约定
 
@@ -31,3 +32,26 @@
 - 时间格式统一 `YYYY-MM-DD`。
 - 路径引用使用相对路径，跨目录引用时检查链接有效性。
 - 文档移动或改名后必须更新所有引用它的地方（用 `grep -rln "<旧文件名>" --include="*.md"` 检查）。
+
+## 字符与格式约定
+
+所有 Markdown 文档必须遵守：
+
+- **编码**：UTF-8（不带 BOM）
+- **行尾符**：LF（`\n`），不用 CRLF
+- **文件结尾**：以单个换行符结尾
+- **标点**：
+  - 中文句子里用中文标点（，。；：？！）
+  - 英文句子和代码里用英文标点（,.;:?!
+  - 不混用（避免“中文句子用英文逗号”或反之）
+- **引号**：统一用直角引号 `「」` 或英文双引号 `"`，不用弯引号 `“”‘’`
+- **破折号**：用两个连字符 `--` 或中文破折号 `——`，不用 en-dash `–` 或 em-dash `—`
+- **省略号**：中文用 `……`，英文用 `...`，不用 `…`
+- **空格**：
+  - 中英文之间加一个空格（如“使用 Vue 3”）
+  - 中文与半角标点之间不加空格
+  - 全角标点前后不加空格
+
+## 工具
+
+仓库根目录 `.editorconfig` 已声明 `end_of_line = lf`、`charset = utf-8`、`insert_final_newline = true`。编辑器应自动遵守；手工编辑后用 `file <path>` 检查。

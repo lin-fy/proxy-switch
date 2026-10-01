@@ -37,8 +37,6 @@
 ## 已完成
 
 - [x by codex 2026-10-01] 文档结构整理：建立多 agent 协作机制（AGENTS.md + 各 agent 入口 + docs/CONTEXT/TASKS/CHANGELOG/DECISIONS）
-- [x by codex 2026-10-01] 前端生产构建 + Wails 桌面 exe 启动冒烟验证
-- [x by codex 2026-10-01] 前端错误安全映射、错误摘要聚焦、激活消息保留验证
 - [x by zcode 2026-10-01] 前端基线缺口修复与视觉重做（令牌单一来源、错误安全映射、表单 path/错误摘要、懒加载、960/1120 走查）
 - [x by zcode 2026-10-01] 桌面构建复验与用户级 Go 1.25 工具链安装（wails3 build + 启动冒烟 + 生产包演示数据剔除检查）
 - [x by zcode 2026-10-01] 提交工作区全部未提交改动（6 组方案经用户确认；backend/ci 两组为整理 codex 之前未提交的工作）
