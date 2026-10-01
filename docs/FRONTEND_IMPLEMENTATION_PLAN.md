@@ -136,7 +136,7 @@ Store 并行刷新四种资源，计算明确的已激活路由，管理 loading
 | --- | --- | --- |
 | 类型与生产构建 | 单独运行 `vue-tsc --noEmit`、`npm run build`，保存退出码和产物 | 2026-10-01 通过；4428 modules，JS 636.18 kB raw / 192.47 kB gzip，仍有单 chunk 超过 500 kB 的 Vite 提示 |
 | Wails Windows 构建 | 沿用项目 Windows task、生成 exe 并启动 WebView | 未验收；此前工具不在 PATH，须查实际安装路径 |
-| 本地资源 | 检查生产 HTML/CSS/JS 加载入口，离线运行并检查资源请求；SVG namespace 和文档链接不等于远程加载 | 仅历史 HTML/CSS检查，完整运行验证待做 |
+| 本地资源 | 检查生产 HTML/CSS/JS 加载入口，离线运行并检查资源请求；SVG namespace 和文档链接不等于远程加载 | 2026-10-01 静态检查仅发现随包字体和用户输入的 URL 占位符；离线运行与 WebView 请求记录仍待做 |
 | 令牌与字体单一来源 | 检查 `themeOverrides` 是否从 `tokens.css` 的计算值生成，且字体确实为系统字体或随包资源；不得维护第二套硬编码颜色 | 当前基线的 `src/app/theme.ts` 仍有硬编码颜色，并声明 IBM Plex Sans / JetBrains Mono；待实施阶段收敛并记录字体资源 |
 | 960 × 640 / 1120 × 760 | 两尺寸下空态、长列表、弹窗、菜单、通知截图；检查壳层高度和滚动区域 | 960 空/错误态历史检查；长列表和推荐窗口未完整验收 |
 | Windows 125% / 150% | 原生 Windows/WebView 在两缩放下检查焦点、文字、浮层边界 | 未验收；浏览器 viewport 不能冒充 DPI 测试 |
