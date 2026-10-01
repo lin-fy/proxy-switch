@@ -9,6 +9,7 @@
 ## 进行中
 
 - [- by codex 2026-10-01] 审查并集成 GitHub PR #1；修复 Windows CI 检出换行符导致的格式检查失败，等待完整 CI 验证
+- [- by zcode 2026-10-01] 前端产物分包与可访问性标签：manualChunks 拆分超限 chunk（637 kB > 500 kB 警告线），补齐图标按钮/选择器的 aria-label（源自 M4 验收发现）
 
 ## 待认领（按优先级排序）
 
