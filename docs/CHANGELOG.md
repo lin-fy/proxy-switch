@@ -32,8 +32,8 @@
 
 ### ops(github): create production Environment
 
-- **影响**：已在 `lin-fy/proxy-switch` 创建 `production` Environment；当前没有保护规则或签名 Secrets。
-- **后续**：需要受信任的 Windows Authenticode PFX 证书和密码，才能配置签名 Secrets 并进行正式发布。
+- **影响**：已在 `lin-fy/proxy-switch` 创建 `production` Environment，并写入 `WINDOWS_CERTIFICATE_BASE64` 自签名测试证书；当前没有保护规则，PFX 密码 Secret 尚未配置。
+- **后续**：用户需在本机输入 PFX 密码；正式发布仍需替换为受信任的 Windows Authenticode PFX 证书。
 
 ### fix(ci): support Windows PowerShell 5.1 in verification scripts
 
