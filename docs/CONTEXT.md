@@ -3,7 +3,7 @@
 > agent 协作的"单一事实源"。开工读，收工更新。只保留当前状态。
 > 详细规则见 [`agent-guide/workflow.md`](agent-guide/workflow.md)。
 
-最后更新：2026-10-02 · codex（已创建 GitHub production Environment）
+最后更新：2026-10-02 · codex（已配置 GitHub 测试签名 Secrets）
 
 ## 一句话现状
 
@@ -20,7 +20,7 @@ V1 后端核心 + 桌面壳 + Vue 前端已完成并通过桌面原生验收（M
 ## 当前卡点
 
 - 真实 CPA / OpenAI / 自定义 Provider 凭据（**需用户提供**）
-- GitHub `production` Environment 已创建，`WINDOWS_CERTIFICATE_BASE64` 已配置为自签名测试证书；`WAILS_WINDOWS_CERT_PASSWORD` 尚未配置（**需用户在本机输入密码**）
+- GitHub `production` Environment 已创建，`WINDOWS_CERTIFICATE_BASE64` 与 `WAILS_WINDOWS_CERT_PASSWORD` 均已配置；证书为自签名测试证书，不能作为正式公开发布凭据
 - 当前仓库为私有仓库，GitHub API 对 `main` 分支保护和 Rulesets 返回 403，提示需要 GitHub Pro 或将仓库设为公开（**需用户裁决**）
 
 ## 待协调事项
