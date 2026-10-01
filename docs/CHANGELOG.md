@@ -12,7 +12,7 @@
 
 ### fix(build): support user-local NSIS compiler
 
-- **影响**：Windows NSIS 任务可通过 `MAKENSIS` 使用用户目录中的便携编译器，不再依赖 Chocolatey 或系统 `PATH`；已实际生成 amd64 用户级安装包，并验证安装、启动和卸载。
+- **影响**：Windows NSIS 任务可通过 `MAKENSIS` 使用用户目录中的便携编译器，不再依赖 Chocolatey 或系统 `PATH`；已实际生成 amd64 用户级安装包，并验证安装、启动、升级、回滚和卸载。
 - **关键文件**：`Taskfile.yml`、`build/windows/Taskfile.yml`、`docs/ops/BUILD_WINDOWS.md`
 - **后续**：继续验证安装包升级/回滚，并补充 MSIX 路径。
 - **commit**：24be915（代码分支 `codex/m5-installer-toolchain`）

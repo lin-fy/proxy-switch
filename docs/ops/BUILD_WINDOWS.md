@@ -59,6 +59,8 @@ powershell -ExecutionPolicy Bypass -File build/windows/portable/package.ps1
 
 最新 Windows amd64 ZIP 已实际验证：安装脚本能复制可执行文件并创建开始菜单快捷方式，卸载脚本能移除安装目录。
 
+NSIS 用户级安装包已实际验证安装、启动、升级、回滚和静默卸载；卸载后 `%LOCALAPPDATA%\Programs\Codex Provider Hub` 目录会被移除。
+
 ## 运行时配置
 
 - `CODEX_HOME`：覆盖 Codex 配置目录；未设置时使用用户目录下的 `.codex`。

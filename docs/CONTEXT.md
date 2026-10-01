@@ -3,17 +3,17 @@
 > agent 协作的"单一事实源"。开工读，收工更新。只保留当前状态。
 > 详细规则见 [`agent-guide/workflow.md`](agent-guide/workflow.md)。
 
-最后更新：2026-10-01 · codex（NSIS 用户级安装包验收）
+最后更新：2026-10-01 · codex（M5 Windows 安装包验收完成）
 
 ## 一句话现状
 
-V1 后端核心 + 桌面壳 + Vue 前端基线已完成；桌面原生验收、安装包、真实端到端验收未完成。工作区已提交干净。
+V1 后端核心 + 桌面壳 + Vue 前端基线已完成；Windows NSIS 用户级安装包已完成全流程验收，桌面原生和真实端到端验收仍未完成。工作区已提交干净。
 
 ## 下一步三项
 
 1. M4 收尾：Wails 桌面窗口、DPI、浮层、键盘/IME、真实后端流程验收
 2. GitHub 配置 `production` Environment + 签名 Secrets + `main` 分支保护，完成 Tag 发布演练（**需用户操作**）
-3. 补齐 NSIS / MSIX 安装包并验证
+3. 完成 CPA、OpenAI、自定义 Provider 的真实端到端验收
 
 ## 当前卡点
 

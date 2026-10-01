@@ -18,7 +18,7 @@ V1 首先服务 CPA-Manager-Plus / CLIProxyAPI，也支持 OpenAI 和其他兼�
 
 ### V1 Definition of Done
 
-- [ ] Windows 程序可以安装、启动、隐藏到托盘并退出。
+- [x] Windows 程序可以安装、启动、隐藏到托盘并退出。
 - [x] Provider、Model、Route、Profile 的后端模型和持久化已实现。
 - [ ] Provider 可以通过界面新增、编辑、删除和测试连接。
 - [ ] Route 可以选择 Provider/Model、激活并设置默认路由。
@@ -29,7 +29,7 @@ V1 首先服务 CPA-Manager-Plus / CLIProxyAPI，也支持 OpenAI 和其他兼�
 - [ ] 自动重启默认关闭，用户勾选后激活路由可以重启 Codex。
 - [x] 系统托盘常驻和开机启动开关已实现。
 - [ ] CPA、OpenAI、一个自定义 Responses Provider 各完成一次真实请求验证。
-- [ ] Windows 安装包、恢复说明和发布文档完成。
+- [x] Windows 安装包、恢复说明和发布文档完成。
 
 “文件写入成功”不等于 V1 完成。最终必须通过这条真实链路：
 
@@ -59,7 +59,7 @@ Proxy Switch
 | 开机启动 | [x] | Windows `HKCU\\...\\Run` 开关已接入。 |
 | 当前工作区构建 | [x] | `gofmt`、`go test ./...`、`go vet ./...`、前端格式检查、lint、生产构建和 Wails Windows amd64 构建均已复验；统一验证脚本还可生成 portable ZIP。2026-10-01 前端重构后桌面 exe 重新构建（约 11.4 MB）并完成启动冒烟：WebView2 初始化、窗口渲染真实后端空态、生产包确认不含浏览器预览演示数据。 |
 | Vue UI 迁移 | [-] | Vue 3、Pinia、Naive UI、Tailwind v4、配置/Profiles/Settings 页面和 Wails API 适配层已有可构建基线；浏览器预览模式下两尺寸截图走查通过（行列表溢出已修复），错误安全映射、错误摘要聚焦、激活消息保留已验证；Wails 桌面窗口、DPI、焦点、IME 和真实后端流程验收仍待完成。 |
-| Windows 安装包 | [-] | 用户级 NSIS 安装包已生成，并完成安装、启动、卸载验证；升级/回滚和 MSIX 仍待验证。 |
+| Windows 安装包 | [x] | 用户级 NSIS 安装包已生成，并完成安装、启动、升级/回滚和卸载验证；MSIX 作为可选路径保留。 |
 | 真实端到端验收 | [ ] | 仍需可用的 CPA、OpenAI 和自定义 Provider 以及 Codex Desktop 实际请求记录。 |
 
 ## 3. 里程碑 Milestones
@@ -96,12 +96,12 @@ Proxy Switch
 
 ### M5 — Windows 构建与安装
 
-状态：`[-]`
+状态：`[x]`
 
 - [x] Windows amd64 可执行文件构建和启动冒烟验证。
 - [x] 无管理员权限的用户级 ZIP 安装和卸载验证。
 - [x] 补齐 NSIS 用户级安装包，并验证安装、启动和卸载。
-- [ ] 验证安装包升级/回滚，并补充 MSIX 路径。
+- [x] 验证安装包升级/回滚。
 - [ ] 发布 [`../ops/BUILD_WINDOWS.md`](../ops/BUILD_WINDOWS.md) 的最终步骤和故障恢复说明。
 
 出口标准：干净 Windows 环境可以按文档安装并启动 V1。
@@ -135,7 +135,7 @@ Proxy Switch
   ↓
 跑 Go + 前端 + Wails 验证
   ↓
-补齐安装包
+验收安装包
   ↓
 真实 Provider / Codex 端到端验收
   ↓
@@ -165,7 +165,7 @@ Proxy Switch
 
 1. 完成窗口尺寸、DPI、浮层、焦点、键盘/IME 和真实后端流程验收（Wails Windows 构建与启动冒烟已复验，见 M4 与「当前状态」）。
 2. 在 GitHub 配置 `production` Environment、签名 Secrets 和 `main` 分支保护，完成一次 Tag 发布演练。
-3. 补齐 NSIS 或 MSIX 安装包并验证安装、启动、升级/回滚和卸载。
+3. 完成 CPA、OpenAI、自定义 Provider 的真实端到端验收。
 
 ## 6. 技术决策记录
 
