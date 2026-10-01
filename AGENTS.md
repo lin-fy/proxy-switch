@@ -9,8 +9,8 @@
 
 1. **开工前必读**：[`docs/CONTEXT.md`](docs/CONTEXT.md) + [`docs/TASKS.md`](docs/TASKS.md)，然后 `git status` + `git log --oneline -10`。
 2. **不越权**：不动其他 agent 标记 `[- by xxx]` 的任务；不修改、不覆盖、不回滚他人未提交的改动；TASKS.md "已完成"区只能本人写入，发现归属有误记入 CONTEXT.md "待协调事项"，不改原条目。
-3. **提交前更新文档**：任务 agent 在自己的分支完成代码和验证后，更新 TASKS.md → 追加 CHANGELOG.md →（如涉决策）追加 DECISIONS.md → 更新 CONTEXT.md，再创建 GitHub PR。多个 agent 并行时由用户指定 reviewer/merger；只有一个活跃 agent 时，该 agent 可自审并在分支保护允许时合并 PR，但仍必须通过 CI。提交信息必须遵循 [Conventional Commits](https://www.conventionalcommits.org/)。
-4. **Git 禁区**：禁止 `git add .` / `git add -A` / `git reset --hard` / `git clean -fd` / force push / 未经用户允许 commit。允许 `git reset --soft` 撤销本地未推送提交。
+3. **提交前更新文档**：任务 agent 在自己的 worktree 和分支完成代码、验证及文档更新后，可以创建本地 commit；准备交付前必须同步最新 `dev` 并重新验证，再通过 PR 集成。多个 agent 并行时由用户指定 reviewer/merger；只有一个活跃 agent 时，该 agent 可自审并在分支保护允许时合并 PR，但仍必须通过 CI。提交信息必须遵循 [Conventional Commits](https://www.conventionalcommits.org/)。
+4. **Git 禁区**：禁止在共享工作树、其他 agent 的 worktree 或 `dev` 分支直接 commit；禁止 `git add .` / `git add -A` / `git reset --hard` / `git clean -fd` / force push。自己的任务分支可以自由创建本地 commit，但只能包含自己的任务文件。远程 push、创建或更新 PR、合并 PR 必须获得用户授权。允许 `git reset --soft` 撤销本地未推送提交。
 5. **安全**：密钥、Token、密码不写入代码、配置、日志、文档或提交；凭据用引用机制（环境变量 / Windows Credential Manager）。
 
 ---
@@ -23,14 +23,14 @@
 
 - **代码改动**：在 agent 自己的工作树，提交到 agent 自己的分支
 - **文档更新**（TASKS/CONTEXT/CHANGELOG/DECISIONS）：任务相关更新在 agent 分支完成并随 PR 审查
-- **合并**：多个 agent 并行时由用户指定 reviewer/merger；只有一个活跃 agent 时，该 agent 可自审并在分支保护允许时合并自己的 PR。任何情况下都必须通过 PR，禁止直接在主工作树合并分支
+- **合并**：多个 agent 并行时由用户指定 reviewer/merger；只有一个活跃 agent 时，该 agent 可自审并在分支保护允许时合并自己的 PR。任何情况下都必须通过 PR，禁止在主工作树或 `dev` 分支直接合并任务分支
 
 ### 工作树结构
 
 ```
 H:/code/proxy-switch              # 主工作树（dev 分支）
-├── 用途：文档更新、最终合并
-└── 提交：docs(tasks): ... / docs(collab): ...
+├── 用途：查看、协调和同步版本
+└── 不直接提交或合并任务分支
 
 H:/code/proxy-switch-codex        # codex 的工作树（codex/<任务> 分支）
 ├── 用途：代码开发
@@ -48,13 +48,11 @@ H:/code/proxy-switch-zcode        # zcode 的工作树（zcode/<任务> 分支�
 
 ### 完整流程
 
-#### 1. 认领任务（由 root/Codex 在主工作树）
+#### 1. 认领任务（由 root/Codex 在自己的 worktree）
 
 ```bash
-cd H:/code/proxy-switch
-# root/Codex 编辑 docs/TASKS.md，把任务从 [ ] 改为 [- by <agent名> <日期>]
-git add docs/TASKS.md
-git commit -m "docs(tasks): <agent名> claims <任务名>"
+# root/Codex 在自己的 worktree 编辑 docs/TASKS.md，
+# 把任务从 [ ] 改为 [- by <agent名> <日期>] 后提交到自己的分支
 ```
 
 #### 2. 创建工作树（在主工作树）
@@ -102,17 +100,17 @@ git add <当前任务涉及的具体文件>
 git commit -m "docs(collab): record <agent名> <任务简称> completion"
 ```
 
-任务 agent 在 PR 描述中报告分支、提交、验证命令和结果；公共文档随 PR 一起审查。多个 agent 并行时用户人工指定 reviewer 和 merger；只有一个活跃 agent 时，任务 agent 可自审并在分支保护允许时合并，但必须等待 CI 通过。
+任务 agent 在 PR 描述中报告分支、提交、验证命令和结果；公共文档随 PR 一起审查。多个 agent 并行时用户人工指定 reviewer 和 merger；只有一个活跃 agent 时，任务 agent 可自审并在分支保护允许时合并，但必须等待 CI 通过。远程 push、创建/更新 PR 和合并 PR 必须获得用户授权。
 
 #### 5. 创建 PR
 
-任务 agent 确认自己的分支已经合并最新 `dev` 并完成验证，然后创建目标为 `dev` 的 GitHub PR。PR 描述必须包含改动范围、验证结果和未完成事项。
+任务 agent 确认自己的分支已经合并最新 `dev` 并完成验证，获得用户授权后创建目标为 `dev` 的 GitHub PR。PR 描述必须包含改动范围、验证结果和未完成事项。
 
 #### 6. 审查并合并 PR
 
 多个 agent 并行时，用户指定的 reviewer 检查 PR 差异、验证记录和目标分支最新状态，指定的 merger 在审查通过后于 GitHub 合并 PR。只有一个活跃 agent 时，该 agent 可以执行同样的自审流程，并在分支保护允许时合并自己的 PR；如果分支保护要求独立批准，仍需由用户指定 reviewer。未通过或有冲突时退回 agent 分支处理，不能直接覆盖或绕过审查。
 
-合并后确认 `dev` 状态和 CI 结果，再向用户报告合并提交。远端推送和发布仍按用户授权执行。
+合并后确认 `dev` 状态和 CI 结果，再向用户报告合并提交。远程 push、发布和 PR 合并仍按用户授权执行。
 
 #### 7. 清理工作树（可选，由所属 agent 执行）
 
@@ -134,17 +132,17 @@ git branch -d <agent名>/<任务简称>
 ### 示例
 
 ```bash
-# zcode 认领 M4 DPI 验收任务
+# zcode 建自己的 worktree 和任务分支
 cd H:/code/proxy-switch
+git worktree add ../proxy-switch-zcode -b zcode/m4-dpi-fix
+
+# zcode 在自己的分支认领 M4 DPI 验收任务
+cd ../proxy-switch-zcode
 # 编辑 TASKS.md: [- by zcode 2026-10-02] M4 DPI 验收
 git add docs/TASKS.md
 git commit -m "docs(tasks): zcode claims M4 DPI acceptance"
 
-# zcode 建工作树
-git worktree add ../proxy-switch-zcode -b zcode/m4-dpi-fix
-
 # zcode 在自己的工作树开发
-cd ../proxy-switch-zcode
 # ... 改代码 ...
 git add frontend/src/pages/ConfigPage.vue
 git commit -m "fix(ui): correct DPI scaling on 960x640 window"
@@ -153,7 +151,8 @@ git commit -m "fix(ui): correct DPI scaling on 960x640 window"
 git merge dev
 # 解决冲突后重新运行验收
 
-# zcode 更新 TASKS/CHANGELOG/CONTEXT 并创建 GitHub PR（目标 dev）
+# zcode 更新 TASKS/CHANGELOG/CONTEXT 并在自己的分支提交
+# 获得用户授权后 push 分支并创建目标为 dev 的 GitHub PR
 # 多 agent 时由用户指定 reviewer/merger；单 agent 时 zcode 自审，等待 CI，并在分支保护允许时合并
 
 # zcode 清理自己的已合并、干净工作树（可选）

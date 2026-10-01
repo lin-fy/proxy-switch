@@ -16,7 +16,7 @@
 
 发现上下文与仓库实际状态不一致时，以仓库代码 + `docs/planning/ROADMAP.md` 最新记录为准，并主动更新文档。
 
-并行开发时，agent 分支在开发期间可以暂时落后于 `dev`。准备交付前，必须在自己的 worktree 执行 `git merge dev`，在该分支解决冲突并重新验证；验证通过后更新公共文档并创建目标为 `dev` 的 GitHub PR。多个 agent 并行时由用户人工指定 reviewer/merger；只有一个活跃 agent 时允许该 agent 自审并在分支保护允许时合并自己的 PR，但必须等待 CI 通过；若分支保护要求独立批准，仍需指定 reviewer。
+并行开发时，agent 必须在自己的 worktree 和分支开发，可以自由创建本地 commit，但只能提交自己的任务文件。分支在开发期间可以暂时落后于 `dev`；准备交付前，必须在自己的 worktree 执行 `git merge dev`，在该分支解决冲突并重新验证；验证通过后更新公共文档。获得用户授权后 push 分支并创建目标为 `dev` 的 GitHub PR。多个 agent 并行时由用户人工指定 reviewer/merger；只有一个活跃 agent 时允许该 agent 自审并在分支保护允许时合并自己的 PR，但必须等待 CI 通过；若分支保护要求独立批准，仍需指定 reviewer。
 
 ## 二、任务认领
 
@@ -57,7 +57,7 @@
 
 `<type>` 取值：`feat` / `fix` / `docs` / `refactor` / `test` / `chore` / `perf` / `build` / `ci`。
 
-**操作顺序**：完成工作 → TASKS → CHANGELOG（hash 留空）→ DECISIONS（如涉决策）→ CONTEXT → 提交 → 接力回填 hash。
+**操作顺序**：完成工作 → TASKS → CHANGELOG（hash 留空）→ DECISIONS（如涉决策）→ CONTEXT → 在自己的分支提交 → 获得授权后 push/创建 PR → 接力回填 hash。
 
 **接力回填**：本次文档提交 hash 留空，下次任何 agent 提交文档时顺手补回上次的 hash。
 

@@ -3,7 +3,7 @@
 > agent 协作的"单一事实源"。开工读，收工更新。只保留当前状态。
 > 详细规则见 [`agent-guide/workflow.md`](agent-guide/workflow.md)。
 
-最后更新：2026-10-01 · codex（切换 GitHub PR 流程）
+最后更新：2026-10-01 · codex（明确独立任务分支提交与 PR 集成边界）
 
 ## 一句话现状
 
@@ -17,7 +17,7 @@ V1 后端核心 + 桌面壳 + Vue 前端已完成并通过桌面原生验收（M
 
 ## 当前卡点
 
-- GitHub PR #1 的 Windows CI 首轮格式检查已修复；第二轮发现 Wails 图标任务在 Windows 仍传入 macOS `darwin/icons.icns` 路径，已改为按平台生成并等待重跑
+- GitHub PR #1 的 Windows CI 首轮格式检查已修复；后续发现 Wails 默认要求 `build/darwin/icon.icns`，已统一图标输出路径并等待重跑
 - 真实 CPA / OpenAI / 自定义 Provider 凭据（**需用户提供**）
 - GitHub 仓库 Secrets 配置（**需用户操作**）
 
@@ -31,7 +31,7 @@ V1 后端核心 + 桌面壳 + Vue 前端已完成并通过桌面原生验收（M
 
 ## 长期注意事项
 
-- 当前已切换 GitHub PR 流程：任务 agent 在自己的分支同步 `dev`、解决冲突、验证并创建 PR；多个 agent 并行时由用户指定 reviewer/merger，只有一个活跃 agent 时允许自审并在分支保护允许时合并，但必须等待 CI 通过。不得覆盖他人未提交改动。
+- 当前 GitHub PR 流程：任务 agent 在自己的 worktree/分支自由创建本地 commit，交付前同步 `dev`、解决冲突并重新验证；获得用户授权后 push 分支并创建目标为 `dev` 的 PR。多个 agent 并行时由用户指定 reviewer/merger，只有一个活跃 agent 时允许自审并在分支保护允许时合并，但必须等待 CI 通过。不得在共享工作树或 `dev` 直接提交、合并或覆盖他人未提交改动。
 - `sources/` 下文件只读
 - 不得提交密钥、临时文件、构建产物、CodeGraph 缓存
 - 瞬时工作区状态直接 `git status`，不在本文档维护

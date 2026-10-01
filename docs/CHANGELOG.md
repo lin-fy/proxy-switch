@@ -10,6 +10,13 @@
 
 ## 2026-10-01 · codex
 
+### docs(agents): allow local commits on isolated task branches
+
+- **影响**：明确自己的 worktree/任务分支可以自由创建本地 commit；共享工作树、其他 agent 分支和 `dev` 禁止直接提交；远程 push、PR 创建/更新及合并仍需用户授权。
+- **关键文件**：`AGENTS.md`、`docs/agent-guide/git-rules.md`、`docs/agent-guide/workflow.md`
+- **后续**：按任务分支开发并通过目标为 `dev` 的 PR 集成。
+- **commit**：待提交后补充
+
 ### fix(build): support user-local NSIS compiler
 
 - **影响**：Windows NSIS 任务可通过 `MAKENSIS` 使用用户目录中的便携编译器，不再依赖 Chocolatey 或系统 `PATH`；已实际生成 amd64 用户级安装包，并验证安装、启动、升级、回滚和卸载。
@@ -112,7 +119,7 @@
 
 ### fix(build): generate platform-specific icons
 
-- **影响**：Windows CI 不再尝试打开 macOS 专用的 `darwin/icons.icns` 路径；macOS 仍保留 ICNS 和 Assets.car 生成参数。
+- **影响**：Windows CI 和 Wails 默认资产统一使用 `darwin/icon.icns`；Windows 生成 PNG 转换的 ICNS，macOS 额外保留 Icon Composer 和 Assets.car 参数。
 - **关键文件**：`build/Taskfile.yml`
 - **后续**：等待 PR 的完整 Windows CI 通过再合并
 - **commit**：待下次文档提交回填
