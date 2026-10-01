@@ -10,6 +10,16 @@
 
 ## 2026-10-01 · codex
 
+### ci: standardize agent-independent verification entrypoints
+
+- **影响**：Codex、Pi、Claude Code 等 agent 共用 `task check:frontend`、`task check:backend` 和 `task ci`；GitHub Actions 继续只执行硬检查，不依赖 LLM。
+- **关键文件**：`Taskfile.yml`、`scripts/ci/verify.ps1`、`.github/workflows/ci.yml`、`docs/ops/CI_CD.md`、`AGENTS.md`
+- **验证**：前端/后端范围入口、完整 `task ci` 与 Windows amd64 exe/portable ZIP 生成均通过；Wails 从 `GOPATH\bin` 自动查找，仅修改验证进程的 PATH。
+- **后续**：如需 AI Review 或失败诊断，应作为独立可选工作流接入，不能替代 CI 结果。
+- **commit**：`ae7271b`
+
+## 2026-10-01 · codex
+
 ### fix(build): support user-local NSIS compiler
 
 - **影响**：Windows NSIS 任务可通过 `MAKENSIS` 使用用户目录中的便携编译器，不再依赖 Chocolatey 或系统 `PATH`；已实际生成 amd64 用户级安装包，并验证安装、启动、升级、回滚和卸载。
