@@ -37,3 +37,12 @@
 - **影响**：工作区 88 个路径分 6 组提交完毕。其中 `feat(backend)`（2d2f821）与 `build(ci)`（417d4d6）两组是**整理 codex 之前未提交的工作**（后端 Provider 模型同步/引用完整性/凭据引用助手 + GitHub Actions/打包脚本），zcode 仅做分组、命名与提交，未改动代码内容；`chore(frontend)`（2046906）为前端 lint/format 工具链配置
 - **关键文件**：见 `git log` 对应提交
 - **commit**：f8a718e
+
+## 2026-10-01 · codex (recorded by zcode)
+
+### docs(agents): split rules into agent-guide and archive completed milestones
+
+- **影响**：AGENTS.md 瘦身为通用规则入口，细则拆分到 docs/agent-guide/（code-rules / escalation / git-rules / scope / workflow）；ROADMAP 已完成的 M0–M2 里程碑归档到 docs/planning/archive/；相关文档交叉引用与行尾同步整理；CI 增加 paths-ignore 对纯文档变更跳过构建
+- **关键文件**：`AGENTS.md`、`docs/agent-guide/`、`docs/planning/archive/M0-M2.md`、`docs/planning/ROADMAP.md`、`docs/CONTEXT.md`、`docs/TASKS.md`、`docs/README.md`、`.github/workflows/ci.yml`
+- **后续**：无
+- **commit**：ef01776（ci 跳过：8bd05b8；交叉引用与行尾整理：11df521，由 zcode 收尾提交）
