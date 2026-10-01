@@ -10,6 +10,15 @@
 
 ## 2026-10-01 · codex
 
+### docs(ops): finalize Windows build, install and recovery guide
+
+- **影响**：M5 收尾。`docs/ops/BUILD_WINDOWS.md` 由开发笔记升级为最终操作说明，补齐工具链前提、统一验证入口、NSIS/portable/MSIX 三条打包路径、签名与发布、运行时配置、卸载残留清理，以及构建/安装升级/启动/Codex 配置/发布分阶段故障恢复和 V1 安装验收清单。
+- **关键文件**：`docs/ops/BUILD_WINDOWS.md`、`docs/TASKS.md`、`docs/planning/ROADMAP.md`、`docs/CONTEXT.md`
+- **后续**：M5 全部完成；剩余 M6 依赖用户配置 GitHub `production` Environment、签名 Secrets、`main` 分支保护和真实 Provider 凭据。
+- **commit**：待提交后补充
+
+## 2026-10-01 · codex
+
 ### ci: standardize agent-independent verification entrypoints
 
 - **影响**：Codex、Pi、Claude Code 等 agent 共用 `task check:frontend`、`task check:backend` 和 `task ci`；GitHub Actions 继续只执行硬检查，不依赖 LLM。

@@ -102,7 +102,7 @@ Proxy Switch
 - [x] 无管理员权限的用户级 ZIP 安装和卸载验证。
 - [x] 补齐 NSIS 用户级安装包，并验证安装、启动和卸载。
 - [x] 验证安装包升级/回滚。
-- [ ] 发布 [`../ops/BUILD_WINDOWS.md`](../ops/BUILD_WINDOWS.md) 的最终步骤和故障恢复说明。
+- [x] 发布 [`../ops/BUILD_WINDOWS.md`](../ops/BUILD_WINDOWS.md) 的最终步骤和故障恢复说明。
 
 出口标准：干净 Windows 环境可以按文档安装并启动 V1。
 
@@ -161,11 +161,10 @@ Proxy Switch
 
 ## 5. 当前下一步 Next
 
-只保留进入实现阶段后马上要做的三项：
+只保留进入实现阶段后马上要做的两项：
 
-1. 发布 [`../ops/BUILD_WINDOWS.md`](../ops/BUILD_WINDOWS.md) 的最终步骤和故障恢复说明（M5 收尾，NSIS 全流程已验证）。
-2. 在 GitHub 配置 `production` Environment、签名 Secrets 和 `main` 分支保护，完成一次 Tag 发布演练（**需要用户操作**）。
-3. 完成 CPA、OpenAI、自定义 Provider 的真实端到端验收（**需要用户提供凭据**）。
+1. 在 GitHub 配置 `production` Environment、签名 Secrets 和 `main` 分支保护，完成一次 Tag 发布演练（**需要用户操作**）。
+2. 完成 CPA、OpenAI、自定义 Provider 的真实端到端验收（**需要用户提供凭据**）。
 
 ## 6. 技术决策记录
 
