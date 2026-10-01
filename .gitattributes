@@ -1,0 +1,2 @@
+# Match EditorConfig and Prettier on Windows as well as other platforms.
+* text=auto eol=lf

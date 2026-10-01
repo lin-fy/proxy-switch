@@ -100,3 +100,12 @@
 - **关键文件**：`AGENTS.md`、`docs/agent-guide/git-rules.md`、`docs/agent-guide/workflow.md`、`docs/CONTEXT.md`、`docs/TASKS.md`、`docs/DECISIONS.md`
 - **后续**：多个 agent 并行时由用户人工指定 reviewer/merger；单 agent 可在分支保护允许时自审并合并，但必须等待 CI；后续可配置分支保护和 Merge Queue
 - **commit**：待下次文档提交回填
+
+## 2026-10-01 · codex
+
+### fix(ci): keep checkout line endings consistent on Windows
+
+- **影响**：GitHub PR #1 的 Windows CI 在格式检查阶段报 17 个文件失败；本地以 `core.autocrlf=true` 检出可复现。新增 `.gitattributes`，让文本文件统一使用 LF，与 EditorConfig、Prettier 保持一致，二进制仍由 Git 自动识别。
+- **关键文件**：`.gitattributes`
+- **后续**：等待 PR 的完整 Windows CI 通过再合并
+- **commit**：待下次文档提交回填
