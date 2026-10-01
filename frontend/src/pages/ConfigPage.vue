@@ -286,6 +286,12 @@ async function testProvider(item: ProviderDTO): Promise<void> {
   else message.error(workspace.message);
 }
 
+async function syncProviderModels(item: ProviderDTO): Promise<void> {
+  const ok = await workspace.syncProviderModels(item.id);
+  if (ok) message.success(workspace.message);
+  else message.error(workspace.message);
+}
+
 async function testModel(item: ModelDTO): Promise<void> {
   const ok = await workspace.testModel(item.provider_id, item.id);
   if (ok) message.success(workspace.message);
@@ -299,6 +305,7 @@ async function toggleModel(item: ModelDTO, enabled: boolean): Promise<void> {
 
 const providerMenuOptions = [
   { label: '测试连接', key: 'test' },
+  { label: '同步模型', key: 'sync' },
   { label: '编辑 Provider', key: 'edit' },
   { label: '删除 Provider', key: 'delete', props: { class: 'dropdown-danger' } },
 ];
@@ -314,6 +321,7 @@ const modelMenuOptions = [
 
 function onProviderMenu(key: string, item: ProviderDTO): void {
   if (key === 'test') void testProvider(item);
+  if (key === 'sync') void syncProviderModels(item);
   if (key === 'edit') openProvider(item);
   if (key === 'delete') removeProvider(item);
 }
@@ -338,10 +346,8 @@ function onModelMenu(key: string, item: ModelDTO): void {
         无法确认 Codex 配置是否已恢复。如果 Codex 无法使用,请到「配置档案」页恢复最近备份。
       </p>
     </div>
-    <div v-else-if="workspace.phase === 'loading' && !workspace.providers.length" class="loading-grid">
-      <NSkeleton v-for="n in 3" :key="n" text :repeat="3" />
-    </div>
-    <template v-else>
+    <!-- 错误横幅始终内联展示;有数据时页面内容保留,只在无数据可显示时才让错误/骨架独占页面 -->
+    <template v-if="workspace.providers.length || (!workspace.error && workspace.phase !== 'loading')">
       <section class="current-card" :class="{ 'is-empty': !workspace.currentRoute }">
         <div class="current-icon">
           {{ workspace.currentProvider?.name.slice(0, 1).toUpperCase() || '·' }}
@@ -547,6 +553,9 @@ function onModelMenu(key: string, item: ModelDTO): void {
       </section>
       <p class="page-footnote">配置写入前会自动保留备份。所有请求都在本机 Wails 进程中完成,凭据只以引用形式使用。</p>
     </template>
+    <div v-else-if="workspace.phase === 'loading'" class="loading-grid">
+      <NSkeleton v-for="n in 3" :key="n" text :repeat="3" />
+    </div>
   </div>
 
   <NModal

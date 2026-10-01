@@ -9,7 +9,8 @@ html,
 body,
 #app {
   width: 100%;
-  min-width: 960px;
+  /* 不设 min-width：桌面窗口视口 = 窗口逻辑尺寸减去系统边框（约 14px），
+     若按 960 下限锁定会把最小窗口右侧内容推出视口外被裁切。 */
   min-height: 100%;
   margin: 0;
 }
