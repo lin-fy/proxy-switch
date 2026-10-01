@@ -21,7 +21,7 @@
 - 只暂存当前任务修改的文件
 - 不修改、不覆盖、不回滚其他 agent 或用户尚未提交的改动
 - 开发期间允许 agent 分支暂时落后于 `dev`；准备合并时必须在自己的 worktree 执行 `git merge dev`，解决冲突并重新验证
-- 任务 agent 验收通过后创建目标为 `dev` 的 GitHub PR；多个 agent 并行时由用户指定 reviewer/merger 审查并合并，只有一个活跃 agent 时允许该 agent 自审并合并自己的 PR，但必须等待 CI 通过。远端推送仍按用户授权执行。
+- 任务 agent 验收通过后创建目标为 `dev` 的 GitHub PR；多个 agent 并行时由用户指定 reviewer/merger 审查并合并，只有一个活跃 agent 时允许该 agent 自审并在分支保护允许时合并自己的 PR，但必须等待 CI 通过。若分支保护要求独立批准，仍需指定 reviewer。远端推送仍按用户授权执行。
 
 ## 提交信息规范
 
