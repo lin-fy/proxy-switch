@@ -3,7 +3,7 @@
 > agent 协作的"单一事实源"。开工读，收工更新。只保留当前状态。
 > 详细规则见 [`agent-guide/workflow.md`](agent-guide/workflow.md)。
 
-最后更新：2026-10-02 · codex（完成 GitHub 发布配置只读审计）
+最后更新：2026-10-02 · codex（已创建 GitHub production Environment）
 
 ## 一句话现状
 
@@ -20,12 +20,13 @@ V1 后端核心 + 桌面壳 + Vue 前端已完成并通过桌面原生验收（M
 ## 当前卡点
 
 - 真实 CPA / OpenAI / 自定义 Provider 凭据（**需用户提供**）
-- GitHub `production` Environment 与 Secrets 尚未配置（**需用户操作**）
+- GitHub `production` Environment 已创建，但签名 Secrets 尚未配置；用户目前没有 Windows Authenticode PFX 证书（**需用户申请/提供证书**）
 - 当前仓库为私有仓库，GitHub API 对 `main` 分支保护和 Rulesets 返回 403，提示需要 GitHub Pro 或将仓库设为公开（**需用户裁决**）
 
 ## 待协调事项
 
 - GitHub Free 私有仓库无法启用分支保护/Rulesets；M6-D 需要用户选择升级方案或接受公开仓库。
+- 正式 `1.0.0` 签名需要受 Windows 信任链认可、包含私钥且可导出为 `.pfx` 的 Authenticode 证书；自签名证书不能作为公开发布替代品。
 
 ### 已裁决（归档）
 

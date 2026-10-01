@@ -30,6 +30,11 @@
 - **关键文件**：`docs/CONTEXT.md`
 - **后续**：用户需升级 GitHub 方案或将仓库设为公开后，才能完成 `main` 分支保护；Environment 和 Secrets 仍需用户配置。
 
+### ops(github): create production Environment
+
+- **影响**：已在 `lin-fy/proxy-switch` 创建 `production` Environment；当前没有保护规则或签名 Secrets。
+- **后续**：需要受信任的 Windows Authenticode PFX 证书和密码，才能配置签名 Secrets 并进行正式发布。
+
 ### fix(ci): support Windows PowerShell 5.1 in verification scripts
 
 - **影响**：CI 验证、发布版本守卫及其测试不再要求 PowerShell 7.3；通过显式检查原生命令退出码，保留 5.1 下的失败检测行为。
