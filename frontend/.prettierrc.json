@@ -1,0 +1,11 @@
+{
+  "arrowParens": "always",
+  "bracketSameLine": false,
+  "endOfLine": "lf",
+  "printWidth": 120,
+  "semi": true,
+  "singleAttributePerLine": false,
+  "singleQuote": true,
+  "trailingComma": "all",
+  "vueIndentScriptAndStyle": false
+}

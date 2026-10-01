@@ -27,7 +27,7 @@ tasks:
       - sh: npm version
         msg: "Looks like npm isn't installed. Npm is part of the Node installer: https://nodejs.org/en/download/"
     cmds:
-      - npm install
+      - npm ci
 
   install:frontend:deps:bun:
     dir: frontend
@@ -198,10 +198,14 @@ tasks:
       - "appicon.png"
       - "appicon.icon"
     generates:
-      - "darwin/icons.icns"
+      - "darwin/icon.icns"
       - "windows/icon.ico"
     cmds:
-      - wails3 generate icons -input appicon.png -macfilename darwin/icons.icns -windowsfilename windows/icon.ico -iconcomposerinput appicon.icon -macassetdir darwin
+      - cmd: powershell -NoProfile -Command "New-Item -ItemType Directory -Force -Path darwin | Out-Null"
+        platforms: [windows]
+      - cmd: mkdir -p darwin
+        platforms: [linux, darwin]
+      - wails3 generate icons -input appicon.png -macfilename darwin/icon.icns -windowsfilename windows/icon.ico{{if eq OS "darwin"}} -iconcomposerinput appicon.icon -macassetdir darwin{{end}}
 
   dev:frontend:
     summary: Runs the frontend in development mode

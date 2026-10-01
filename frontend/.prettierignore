@@ -1,0 +1,7 @@
+node_modules/
+dist/
+bindings/
+wailsjs/
+assets/
+src/assets/
+package-lock.json

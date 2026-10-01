@@ -123,6 +123,26 @@ func (a *App) TestProviderModel(ctx context.Context, providerID, modelID string)
 	return a.tester.TestModel(ctx, item, modelID)
 }
 
+func (a *App) SyncProviderModels(ctx context.Context, providerID string) ([]ModelDTO, error) {
+	if a.tester == nil {
+		return nil, errors.New("Provider 模型同步服务尚未就绪")
+	}
+	item, err := a.providers.Get(ctx, providerID)
+	if err != nil {
+		return nil, err
+	}
+	remote, err := a.tester.ListModels(ctx, item)
+	if err != nil {
+		return nil, err
+	}
+	models := make([]model.Model, 0, len(remote))
+	for _, item := range remote {
+		models = append(models, model.Model{ProviderID: providerID, ID: item.ID, Name: item.Name, Enabled: true})
+	}
+	items, err := a.models.Sync(ctx, providerID, models)
+	return mapModels(items), err
+}
+
 func (a *App) ListModels(ctx context.Context) ([]ModelDTO, error) {
 	items, err := a.models.List(ctx)
 	return mapModels(items), err
@@ -195,15 +215,32 @@ func (a *App) CodexRunning(ctx context.Context) (bool, error) {
 }
 
 func (a *App) StartCodex(ctx context.Context) error {
-	item := route.Route{PlatformID: route.PlatformCodex}
+	items, err := a.routes.List(ctx)
+	if err != nil {
+		return err
+	}
+	var item route.Route
+	for _, candidate := range items {
+		if candidate.Default {
+			item = candidate
+			break
+		}
+	}
+	if item.ID == "" {
+		return errors.New("没有默认路由")
+	}
+	providerItem, err := a.providers.Get(ctx, item.ProviderID)
+	if err != nil {
+		return err
+	}
 	running, err := a.codex.IsRunning(ctx)
 	if err != nil {
 		return err
 	}
 	if running {
-		return a.codex.Restart(ctx, item)
+		return a.codex.Restart(ctx, item, providerItem)
 	}
-	return a.codex.Launch(ctx, item)
+	return a.codex.Launch(ctx, item, providerItem)
 }
 
 func (a *App) AutostartEnabled(context.Context) (bool, error) {

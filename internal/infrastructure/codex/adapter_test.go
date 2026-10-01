@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"testing"
 
@@ -65,12 +66,27 @@ func TestPrepareWritesCatalogAndRestoresBackup(t *testing.T) {
 	if !ok || providers[p.ID] == nil {
 		t.Fatalf("model_providers missing: %#v", config["model_providers"])
 	}
+	providerConfig, ok := providers[p.ID].(map[string]any)
+	if !ok || providerConfig["env_key"] != "CPA_API_KEY" {
+		t.Fatalf("provider env_key = %#v", providerConfig["env_key"])
+	}
+	catalogPath, ok := config["model_catalog_json"].(string)
+	if !ok || catalogPath != filepath.Join(home, "default.models.json") {
+		t.Fatalf("model_catalog_json = %#v", config["model_catalog_json"])
+	}
+	catalogBytes, err := os.ReadFile(catalogPath)
+	if err != nil {
+		t.Fatal(err)
+	}
 	var catalog modelCatalog
-	if err := json.Unmarshal([]byte(config["model_catalog_json"].(string)), &catalog); err != nil {
+	if err := json.Unmarshal(catalogBytes, &catalog); err != nil {
 		t.Fatal(err)
 	}
 	if len(catalog.Models) != 2 || catalog.Models[0].Slug != selected.ID || catalog.Models[1].Slug != other.ID {
 		t.Fatalf("catalog = %#v", catalog.Models)
+	}
+	if catalog.Models[0].Priority != 0 || catalog.Models[0].BaseInstructions == "" || catalog.Models[0].TruncationPolicy.Mode == "" {
+		t.Fatalf("catalog required Codex fields = %#v", catalog.Models[0])
 	}
 
 	if _, err := os.Stat(backupPath(configPath)); err != nil {
@@ -85,6 +101,51 @@ func TestPrepareWritesCatalogAndRestoresBackup(t *testing.T) {
 	}
 	if string(restored) != original {
 		t.Fatalf("restored config = %q", restored)
+	}
+	if _, err := os.Stat(catalogPath); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("catalog after restoring a previously absent file = %v", err)
+	}
+}
+
+func TestPrepareUsesConfiguredModelCatalogPath(t *testing.T) {
+	home := t.TempDir()
+	adapter, err := NewAdapter(home)
+	if err != nil {
+		t.Fatal(err)
+	}
+	p, err := provider.New("custom", "Custom", "https://example.test/v1", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	m, err := model.New(p.ID, "model-a", "Model A")
+	if err != nil {
+		t.Fatal(err)
+	}
+	r, err := route.New("route", "Route", p.ID, m.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	pr, err := profile.New("work", "Work")
+	if err != nil {
+		t.Fatal(err)
+	}
+	pr.ModelCatalogPath = filepath.Join("catalogs", "work.json")
+	if err := adapter.Prepare(context.Background(), r, p, m, []model.Model{m}, pr); err != nil {
+		t.Fatal(err)
+	}
+	want := filepath.Join(home, "catalogs", "work.json")
+	if got := adapter.CatalogPath(pr); got != want {
+		t.Fatalf("catalog path = %q, want %q", got, want)
+	}
+	if _, err := os.Stat(want); err != nil {
+		t.Fatal(err)
+	}
+	var config map[string]any
+	if _, err := toml.DecodeFile(filepath.Join(home, "config.toml"), &config); err != nil {
+		t.Fatal(err)
+	}
+	if got := config["model_catalog_json"]; got != want {
+		t.Fatalf("model_catalog_json = %#v, want %q", got, want)
 	}
 }
 
@@ -114,6 +175,39 @@ func TestExecutableImageNameUsesConfiguredExecutable(t *testing.T) {
 				t.Fatalf("image name = %q, want %q", got, test.want)
 			}
 		})
+	}
+}
+
+func TestRestartResolvesCredentialBeforeStoppingCodex(t *testing.T) {
+	t.Setenv("CODEX_PROVIDER_HUB_MISSING", "")
+	adapter := &Adapter{homeDir: t.TempDir(), executable: "codex"}
+	p, err := provider.New("custom", "Custom", "https://example.test/v1", "CODEX_PROVIDER_HUB_MISSING")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := adapter.Restart(context.Background(), route.Route{PlatformID: route.PlatformCodex}, p); err == nil {
+		t.Fatal("expected credential resolution failure before restart")
+	}
+}
+
+func TestInjectCredentialAddsResolvedSecretOnlyToChildEnvironment(t *testing.T) {
+	t.Setenv("CLI_API_KEY", "secret-value")
+	p, err := provider.New("custom", "Custom", "https://example.test/v1", "env:CLI_API_KEY")
+	if err != nil {
+		t.Fatal(err)
+	}
+	cmd := exec.Command("codex")
+	if err := injectCredential(cmd, p); err != nil {
+		t.Fatal(err)
+	}
+	found := false
+	for _, item := range cmd.Env {
+		if item == "CLI_API_KEY=secret-value" {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatalf("resolved credential missing from child environment")
 	}
 }
 
@@ -256,6 +350,10 @@ func TestRestoreRestoresActiveAndSelectedProfileFiles(t *testing.T) {
 	if err := os.WriteFile(backupPath(profilePath), []byte(profileOriginal), 0o600); err != nil {
 		t.Fatal(err)
 	}
+	catalogPath := filepath.Join(home, "work.models.json")
+	if err := os.WriteFile(missingBackupPath(catalogPath), nil, 0o600); err != nil {
+		t.Fatal(err)
+	}
 	if err := os.WriteFile(activePath, []byte("model = \"active-new\"\n"), 0o600); err != nil {
 		t.Fatal(err)
 	}
@@ -285,5 +383,24 @@ func TestRestoreRestoresActiveAndSelectedProfileFiles(t *testing.T) {
 	}
 	if string(activeRestored) != activeOriginal || string(profileRestored) != profileOriginal {
 		t.Fatalf("restored active/profile = %q/%q", activeRestored, profileRestored)
+	}
+}
+
+func TestRollbackFilesRestoresEarlierFiles(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.toml")
+	if err := os.WriteFile(path, []byte("new"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	originals := map[string][]byte{path: []byte("old")}
+	existed := map[string]bool{path: true}
+	if err := rollbackFiles(originals, existed, []string{path}); err != nil {
+		t.Fatal(err)
+	}
+	contents, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(contents) != "old" {
+		t.Fatalf("rolled back contents = %q", contents)
 	}
 }

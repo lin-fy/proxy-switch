@@ -4,6 +4,8 @@ includes:
   common: ../Taskfile.yml
 
 vars:
+  # A portable NSIS compiler can be selected without changing the system PATH.
+  MAKENSIS: '{{.MAKENSIS | default "makensis"}}'
   # Signing configuration - edit these values for your project
   # SIGN_CERTIFICATE: "path/to/certificate.pfx"
   # SIGN_THUMBPRINT: "certificate-thumbprint"  # Alternative to SIGN_CERTIFICATE
@@ -117,7 +119,18 @@ tasks:
     dir: build/windows/nsis
     deps:
       - task: build
+    cmds:
+      - task: create:nsis:installer:from-build
+        vars:
+          INSTALL_SCOPE: '{{.INSTALL_SCOPE | default "machine"}}'
+
+  create:nsis:installer:from-build:
+    summary: Creates an NSIS installer from the existing executable
+    internal: true
+    dir: build/windows/nsis
     preconditions:
+      - sh: '"{{.MAKENSIS}}" -VERSION'
+        msg: "NSIS is required. Add its directory to the current PATH or pass MAKENSIS=C:/path/to/makensis.exe (portable NSIS is supported)."
       - sh: '[ "{{.INSTALL_SCOPE}}" = "user" ] || [ "{{.INSTALL_SCOPE}}" = "machine" ]'
         msg: "INSTALL_SCOPE must be 'user' or 'machine', got '{{.INSTALL_SCOPE}}'"
     cmds:
@@ -125,9 +138,9 @@ tasks:
       - wails3 generate webview2bootstrapper -dir "{{.ROOT_DIR}}/build/windows/nsis"
       - |
         {{if eq OS "windows"}}
-        makensis {{if eq .INSTALL_SCOPE "user"}}-DWAILS_INSTALL_SCOPE=user -DREQUEST_EXECUTION_LEVEL=user {{end}}-DARG_WAILS_{{.ARG_FLAG}}_BINARY="{{.ROOT_DIR}}\{{.BIN_DIR}}\{{.APP_NAME}}.exe" project.nsi
+        "{{.MAKENSIS}}" {{if eq .INSTALL_SCOPE "user"}}-DWAILS_INSTALL_SCOPE=user -DREQUEST_EXECUTION_LEVEL=user {{end}}-DARG_WAILS_{{.ARG_FLAG}}_BINARY="{{.ROOT_DIR}}\{{.BIN_DIR}}\{{.APP_NAME}}.exe" project.nsi
         {{else}}
-        makensis {{if eq .INSTALL_SCOPE "user"}}-DWAILS_INSTALL_SCOPE=user -DREQUEST_EXECUTION_LEVEL=user {{end}}-DARG_WAILS_{{.ARG_FLAG}}_BINARY="{{.ROOT_DIR}}/{{.BIN_DIR}}/{{.APP_NAME}}.exe" project.nsi
+        "{{.MAKENSIS}}" {{if eq .INSTALL_SCOPE "user"}}-DWAILS_INSTALL_SCOPE=user -DREQUEST_EXECUTION_LEVEL=user {{end}}-DARG_WAILS_{{.ARG_FLAG}}_BINARY="{{.ROOT_DIR}}/{{.BIN_DIR}}/{{.APP_NAME}}.exe" project.nsi
         {{end}}
     vars:
       ARCH: '{{.ARCH | default ARCH}}'
@@ -170,7 +183,8 @@ tasks:
       Signs the .exe with an Authenticode certificate.
       Set SIGN_CERTIFICATE or SIGN_THUMBPRINT to override the certificate
       configured globally via `wails3 setup` (~/.config/wails/defaults.yaml).
-      Password is retrieved from system keychain (run: wails3 setup signing)
+      Set WAILS_WINDOWS_CERT_PASSWORD for CI; otherwise use the
+      system keychain (run: wails3 setup signing).
     deps:
       - task: build
     cmds:
@@ -181,15 +195,20 @@ tasks:
   sign:installer:
     summary: Signs the NSIS installer
     desc: |
-      Creates and signs the NSIS installer.
+      Signs the executable, creates the NSIS installer from that signed executable,
+      and signs the installer.
       Set SIGN_CERTIFICATE or SIGN_THUMBPRINT to override the certificate
       configured globally via `wails3 setup` (~/.config/wails/defaults.yaml).
-      Password is retrieved from system keychain (run: wails3 setup signing)
+      Set WAILS_WINDOWS_CERT_PASSWORD for CI; otherwise use the
+      system keychain (run: wails3 setup signing).
     deps:
-      - task: create:nsis:installer
-        vars:
-          INSTALL_SCOPE: '{{.INSTALL_SCOPE | default "machine"}}'
+      - task: build
     vars:
+      ARCH: '{{.ARCH | default "amd64"}}'
       INSTALL_SCOPE: '{{.INSTALL_SCOPE | default "machine"}}'
     cmds:
-      - wails3 tool sign --input "build/windows/nsis/{{.APP_NAME}}-installer.exe" {{if .SIGN_CERTIFICATE}}--certificate "{{.SIGN_CERTIFICATE}}"{{end}} {{if .SIGN_THUMBPRINT}}--thumbprint "{{.SIGN_THUMBPRINT}}"{{end}} {{if .TIMESTAMP_SERVER}}--timestamp "{{.TIMESTAMP_SERVER}}"{{end}}
+      - wails3 tool sign --input "{{.BIN_DIR}}/{{.APP_NAME}}.exe" {{if .SIGN_CERTIFICATE}}--certificate "{{.SIGN_CERTIFICATE}}"{{end}} {{if .SIGN_THUMBPRINT}}--thumbprint "{{.SIGN_THUMBPRINT}}"{{end}} {{if .TIMESTAMP_SERVER}}--timestamp "{{.TIMESTAMP_SERVER}}"{{end}}
+      - task: create:nsis:installer:from-build
+        vars:
+          INSTALL_SCOPE: '{{.INSTALL_SCOPE}}'
+      - wails3 tool sign --input "{{.BIN_DIR}}/{{.APP_NAME}}-{{.ARCH}}-installer.exe" {{if .SIGN_CERTIFICATE}}--certificate "{{.SIGN_CERTIFICATE}}"{{end}} {{if .SIGN_THUMBPRINT}}--thumbprint "{{.SIGN_THUMBPRINT}}"{{end}} {{if .TIMESTAMP_SERVER}}--timestamp "{{.TIMESTAMP_SERVER}}"{{end}}

@@ -101,6 +101,10 @@ export function StartCodex(): $CancellablePromise<void> {
     return $Call.ByID(56129242);
 }
 
+export function SyncProviderModels(providerID: string): $CancellablePromise<$models.ModelDTO[] | null> {
+    return $Call.ByID(948662285, providerID);
+}
+
 export function TestProvider(id: string): $CancellablePromise<void> {
     return $Call.ByID(1724053524, id);
 }

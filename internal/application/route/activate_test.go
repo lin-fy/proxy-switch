@@ -64,10 +64,12 @@ func (r activationProfiles) Save(context.Context, profile.Profile) error        
 func (r activationProfiles) Delete(context.Context, string) error                 { return nil }
 
 type activationAdapter struct {
-	validated bool
-	prepared  bool
-	launched  bool
-	restarted bool
+	validated         bool
+	prepared          bool
+	launched          bool
+	restarted         bool
+	restartProviderID string
+	restartErr        error
 }
 
 func (a *activationAdapter) Validate(context.Context, route.Route, provider.Provider, model.Model) error {
@@ -81,19 +83,34 @@ func (a *activationAdapter) Prepare(_ context.Context, _ route.Route, _ provider
 	a.prepared = true
 	return nil
 }
-func (a *activationAdapter) Launch(context.Context, route.Route) error {
+func (a *activationAdapter) Launch(context.Context, route.Route, provider.Provider) error {
 	a.launched = true
 	return nil
 }
-func (a *activationAdapter) Restart(context.Context, route.Route) error {
+func (a *activationAdapter) Restart(_ context.Context, _ route.Route, p provider.Provider) error {
 	a.restarted = true
-	return nil
+	a.restartProviderID = p.ID
+	return a.restartErr
 }
 func (a *activationAdapter) IsRunning(context.Context) (bool, error) { return false, nil }
 
 type activationFactory struct{ adapter ports.PlatformAdapter }
 
 func (f activationFactory) Create(string) (ports.PlatformAdapter, error) { return f.adapter, nil }
+
+type activationTester struct {
+	err   error
+	calls int
+}
+
+func (t *activationTester) Test(context.Context, provider.Provider) error { return nil }
+func (t *activationTester) TestModel(context.Context, provider.Provider, string) error {
+	t.calls++
+	return t.err
+}
+func (t *activationTester) ListModels(context.Context, provider.Provider) ([]ports.RemoteModel, error) {
+	return nil, nil
+}
 
 func TestActivatorPreparesAndMarksRouteDefault(t *testing.T) {
 	routes := &activationRoutes{item: route.Route{
@@ -142,5 +159,49 @@ func TestActivatorLaunchesWhenRestartIsEnabled(t *testing.T) {
 	}
 	if !adapter.restarted || adapter.launched {
 		t.Fatalf("restart-enabled route calls = restarted:%v launched:%v", adapter.restarted, adapter.launched)
+	}
+	if adapter.restartProviderID != "provider-a" {
+		t.Fatalf("restart provider = %q", adapter.restartProviderID)
+	}
+}
+
+func TestActivatorDoesNotDefaultWhenRestartFails(t *testing.T) {
+	routes := &activationRoutes{item: route.Route{ID: "route-a", Name: "Route A", PlatformID: route.PlatformCodex, ProviderID: "provider-a", ModelID: "model-a", RestartOnActivate: true}}
+	adapter := &activationAdapter{restartErr: errors.New("restart failed")}
+	activator := NewActivator(
+		routes,
+		activationProviders{item: provider.Provider{ID: "provider-a", Name: "Provider A", BaseURL: "https://example.test", Protocol: provider.ProtocolResponses}},
+		activationModels{selected: model.Model{ProviderID: "provider-a", ID: "model-a"}, items: []model.Model{{ProviderID: "provider-a", ID: "model-a"}, {ProviderID: "provider-a", ID: "model-b"}}},
+		activationProfiles{item: profile.Profile{ID: "profile-a", Name: "Profile A"}},
+		activationFactory{adapter: adapter},
+	)
+	if err := activator.Activate(context.Background(), routes.item.ID, "profile-a"); err == nil {
+		t.Fatal("expected restart failure")
+	}
+	if len(routes.saved) != 0 || routes.item.Default {
+		t.Fatalf("route saved/default after restart failure = %d/%v", len(routes.saved), routes.item.Default)
+	}
+}
+
+func TestActivatorDoesNotPrepareOrDefaultWhenReachabilityFails(t *testing.T) {
+	routes := &activationRoutes{item: route.Route{
+		ID: "route-a", Name: "Route A", PlatformID: route.PlatformCodex,
+		ProviderID: "provider-a", ModelID: "model-a",
+	}}
+	adapter := &activationAdapter{}
+	tester := &activationTester{err: errors.New("unreachable")}
+	activator := NewActivator(
+		routes,
+		activationProviders{item: provider.Provider{ID: "provider-a", Name: "Provider A", BaseURL: "https://example.test", Protocol: provider.ProtocolResponses}},
+		activationModels{selected: model.Model{ProviderID: "provider-a", ID: "model-a"}, items: []model.Model{{ProviderID: "provider-a", ID: "model-a"}, {ProviderID: "provider-a", ID: "model-b"}}},
+		activationProfiles{item: profile.Profile{ID: "profile-a", Name: "Profile A"}},
+		activationFactory{adapter: adapter}, tester,
+	)
+
+	if err := activator.Activate(context.Background(), "route-a", "profile-a"); err == nil {
+		t.Fatal("expected reachability failure")
+	}
+	if tester.calls != 1 || adapter.prepared || len(routes.saved) != 0 || routes.item.Default {
+		t.Fatalf("reachability failure calls = tester:%d prepared:%v saved:%d default:%v", tester.calls, adapter.prepared, len(routes.saved), routes.item.Default)
 	}
 }

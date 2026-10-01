@@ -17,6 +17,7 @@ type Activator struct {
 	models    model.Repository
 	profiles  profile.Repository
 	adapters  ports.PlatformAdapterFactory
+	tester    ports.ProviderTester
 }
 
 func NewActivator(
@@ -25,10 +26,15 @@ func NewActivator(
 	models model.Repository,
 	profiles profile.Repository,
 	adapters ports.PlatformAdapterFactory,
+	testers ...ports.ProviderTester,
 ) *Activator {
+	var tester ports.ProviderTester
+	if len(testers) > 0 {
+		tester = testers[0]
+	}
 	return &Activator{
 		routes: routes, providers: providers, models: models,
-		profiles: profiles, adapters: adapters,
+		profiles: profiles, adapters: adapters, tester: tester,
 	}
 }
 
@@ -60,11 +66,16 @@ func (a *Activator) Activate(ctx context.Context, routeID, profileID string) err
 	if err := adapter.Validate(ctx, r, p, m); err != nil {
 		return fmt.Errorf("validate route: %w", err)
 	}
+	if a.tester != nil {
+		if err := a.tester.TestModel(ctx, p, m.ID); err != nil {
+			return fmt.Errorf("test provider model reachability: %w", err)
+		}
+	}
 	if err := adapter.Prepare(ctx, r, p, m, models, pr); err != nil {
 		return fmt.Errorf("prepare route: %w", err)
 	}
 	if r.RestartOnActivate {
-		if err := adapter.Restart(ctx, r); err != nil {
+		if err := restart(ctx, adapter, r, p); err != nil {
 			return fmt.Errorf("restart platform: %w", err)
 		}
 	}
@@ -73,4 +84,8 @@ func (a *Activator) Activate(ctx context.Context, routeID, profileID string) err
 		return fmt.Errorf("save active route: %w", err)
 	}
 	return nil
+}
+
+func restart(ctx context.Context, adapter ports.PlatformAdapter, r route.Route, p provider.Provider) error {
+	return adapter.Restart(ctx, r, p)
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	domainprovider "codex-provider-hub/internal/domain/provider"
@@ -37,6 +38,38 @@ func TestResponsesTesterChecksModelsEndpoint(t *testing.T) {
 	p.QueryParams = map[string]string{"tenant": "demo"}
 	if err := NewResponsesTester(server.Client()).Test(context.Background(), p); err != nil {
 		t.Fatal(err)
+	}
+}
+
+func TestResponsesTesterListsModelsAndDefaultsNames(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = w.Write([]byte(`{"data":[{"id":" model-a ","name":" Model A "},{"id":"model-b"},{"name":"ignored"}]}`))
+	}))
+	defer server.Close()
+	p, err := domainprovider.New("custom", "Custom", server.URL+"/v1", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	models, err := NewResponsesTester(server.Client()).ListModels(context.Background(), p)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(models) != 2 || models[0].ID != "model-a" || models[0].Name != "Model A" || models[1].Name != "model-b" {
+		t.Fatalf("models = %#v", models)
+	}
+}
+
+func TestResponsesTesterRejectsBadModelsJSON(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = w.Write([]byte(`{"data":`))
+	}))
+	defer server.Close()
+	p, err := domainprovider.New("custom", "Custom", server.URL+"/v1", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := NewResponsesTester(server.Client()).ListModels(context.Background(), p); err == nil || !strings.Contains(err.Error(), "decode provider models") {
+		t.Fatalf("bad JSON error = %v", err)
 	}
 }
 

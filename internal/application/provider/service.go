@@ -2,13 +2,33 @@ package provider
 
 import (
 	"context"
+	"errors"
 
+	"codex-provider-hub/internal/domain/model"
 	"codex-provider-hub/internal/domain/provider"
+	"codex-provider-hub/internal/domain/route"
 )
 
-type Service struct{ repo provider.Repository }
+var ErrReferenced = errors.New("provider is referenced by models or routes")
 
-func NewService(repo provider.Repository) *Service { return &Service{repo: repo} }
+type Service struct {
+	repo   provider.Repository
+	models model.Repository
+	routes route.Repository
+}
+
+func NewService(repo provider.Repository, dependencies ...any) *Service {
+	s := &Service{repo: repo}
+	for _, dependency := range dependencies {
+		switch item := dependency.(type) {
+		case model.Repository:
+			s.models = item
+		case route.Repository:
+			s.routes = item
+		}
+	}
+	return s
+}
 
 func (s *Service) List(ctx context.Context) ([]provider.Provider, error) {
 	return s.repo.List(ctx)
@@ -36,4 +56,26 @@ func (s *Service) Save(ctx context.Context, item provider.Provider) error {
 	return s.repo.Save(ctx, item)
 }
 
-func (s *Service) Delete(ctx context.Context, id string) error { return s.repo.Delete(ctx, id) }
+func (s *Service) Delete(ctx context.Context, id string) error {
+	if s.models != nil {
+		items, err := s.models.ListByProvider(ctx, id)
+		if err != nil {
+			return err
+		}
+		if len(items) > 0 {
+			return ErrReferenced
+		}
+	}
+	if s.routes != nil {
+		items, err := s.routes.List(ctx)
+		if err != nil {
+			return err
+		}
+		for _, item := range items {
+			if item.ProviderID == id {
+				return ErrReferenced
+			}
+		}
+	}
+	return s.repo.Delete(ctx, id)
+}

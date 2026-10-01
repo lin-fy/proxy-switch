@@ -1,4 +1,13 @@
-# Codex Provider Hub：V1 项目指令
+# Codex 工作约定
+
+本文件是 Codex agent 在本仓库的专属约定。首先阅读并遵守 [AGENTS.md](AGENTS.md) 中的所有通用规则；本文件只补充 Codex 特有的项目指令，与 AGENTS.md 冲突时以 AGENTS.md 为准。
+
+## 项目同步说明
+
+本仓库源自 ChatGPT 项目 “cliproxy-switch”，部分文件同步自该项目：
+
+- `sources/` 中的同步文件只读，不得修改、移动或删除。
+- 这些文件可能在下次从 ChatGPT 项目创建任务时被替换。
 
 ## 当前目标
 
@@ -7,6 +16,15 @@
 每轮对话、开发、验证、修复和文档更新都属于同一个 V1 goal，不拆成独立用户任务。
 
 V1 验收完成后关闭当前 goal。V1.1、V2 或其他平台支持必须创建新的独立 goal。
+
+## 文档关系
+
+- `docs/product.md`：产品定位、范围和架构原则。
+- `docs/planning/ROADMAP.md`：V1 的统一目标、里程碑、验收状态和当前下一步；目标模式每轮都必须读取并维护。
+- `docs/architecture/TECH_STACK.md`、`docs/architecture/UI_ARCHITECTURE_SPEC.md`：前端技术和界面实现规范。
+- `docs/ops/BUILD_WINDOWS.md`：Windows 构建、安装和恢复操作说明。
+
+当聊天上下文与仓库文档不一致时，以代码和 `docs/planning/ROADMAP.md` 的最新验证记录为准；发现差异先更新文档。
 
 ## 首轮初始化
 
