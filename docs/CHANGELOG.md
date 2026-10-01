@@ -18,6 +18,12 @@
 - **后续**：M6-C 需要真实 Provider 凭据，M6-D 需要 GitHub Environment、签名 Secrets 和分支保护。
 - **commit**：待提交后补充
 
+### docs(planning): prioritize GitHub release configuration
+
+- **影响**：按用户选择先推进 M6-D GitHub 发布配置；M6-C 真实 Provider 验收延后，M6-E 仍需两者都通过后执行。
+- **关键文件**：`docs/CONTEXT.md`、`docs/planning/ROADMAP.md`
+- **后续**：按 `docs/ops/RELEASE_CHECKLIST.md` 完成仓库设置；当前不创建 Tag、不切换 `1.0.0`。
+
 ### fix(ci): support Windows PowerShell 5.1 in verification scripts
 
 - **影响**：CI 验证、发布版本守卫及其测试不再要求 PowerShell 7.3；通过显式检查原生命令退出码，保留 5.1 下的失败检测行为。

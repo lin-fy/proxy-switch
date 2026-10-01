@@ -133,9 +133,9 @@ M6-A：对齐状态、目标和验收证据
   ↓
 M6-B：本地确定性验证与 Windows 产物检查（已完成）
   ↓
-M6-C：CPA / OpenAI / 自定义 Provider 真实端到端验收
+M6-D：GitHub production Environment、签名 Secrets、main 保护与 Tag 演练（当前先行）
   ↓
-M6-D：GitHub production Environment、签名 Secrets、main 保护与 Tag 演练
+M6-C：CPA / OpenAI / 自定义 Provider 真实端到端验收（按用户安排延后）
   ↓
 M6-E：确认 1.0.0、合并 main、发布签名安装包并关闭 V1 goal
 ```
