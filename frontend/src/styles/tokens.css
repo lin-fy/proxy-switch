@@ -1,6 +1,11 @@
 @import 'tailwindcss/theme.css';
 @import 'tailwindcss/utilities.css';
 
+/*
+ * 设计令牌唯一来源:Naive UI 主题(app/theme.ts)与 Tailwind 映射都从这里读取,
+ * 不允许在别处维护第二套颜色、字体或圆角。
+ * 文字颜色对所有表面(surface-0/1/2/selected)的对比度均 ≥ 4.5:1。
+ */
 :root {
   --surface-0: #0e1519;
   --surface-1: #141e23;
@@ -11,14 +16,19 @@
   --border-strong: #3a5153;
   --text-primary: #e7f0ee;
   --text-secondary: #a4b6b5;
-  --text-muted: #6d8181;
+  --text-muted: #8ca3a1;
   --accent: #62e6c2;
   --accent-strong: #2ebb96;
   --accent-pressed: #189b7a;
   --accent-soft: rgba(98, 230, 194, 0.12);
   --warning: #f0b45c;
+  --warning-strong: #f5c47c;
   --danger: #e77b80;
+  --danger-strong: #d95c66;
+  --danger-soft: rgba(231, 123, 128, 0.1);
   --success: #62e6c2;
+  --font-ui: 'Segoe UI', 'Microsoft YaHei UI', 'Microsoft YaHei', 'PingFang SC', system-ui, sans-serif;
+  --font-mono: Consolas, 'Cascadia Mono', ui-monospace, monospace;
   --radius-sm: 6px;
   --radius-md: 8px;
   --radius-lg: 12px;
@@ -41,4 +51,5 @@
   --color-accent-strong: var(--accent-strong);
   --color-warning: var(--warning);
   --color-danger: var(--danger);
+  --color-success: var(--success);
 }

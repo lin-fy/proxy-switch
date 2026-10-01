@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import {
-  useDialog,
-  useMessage,
   NButton,
   NCard,
+  NDropdown,
   NEmpty,
   NForm,
   NFormItem,
@@ -14,30 +13,68 @@ import {
   NSkeleton,
   NSwitch,
   NTag,
-  NDropdown,
+  NTooltip,
+  useDialog,
+  useMessage,
   type FormInst,
   type FormRules,
 } from 'naive-ui';
-import { MoreHorizontal, Pencil, Plus, PlugZap, Power, Trash2 } from 'lucide-vue-next';
+import { MoreHorizontal, Plus, Power, Rocket } from 'lucide-vue-next';
 import { useWorkspaceStore } from '../stores/workspace';
+import { useFormModal } from '../app/form';
 import type { ModelDTO, ProviderDTO, RouteDTO } from '../services/wails-api';
 
 const workspace = useWorkspaceStore();
 const message = useMessage();
 const dialog = useDialog();
+
 const providerModal = ref(false);
 const modelModal = ref(false);
 const routeModal = ref(false);
 const providerDraft = ref<ProviderDTO | null>(null);
 const modelDraft = ref<ModelDTO | null>(null);
 const routeDraft = ref<RouteDTO | null>(null);
-const providerMenuTarget = ref<ProviderDTO | null>(null);
-const providerFormRef = ref<FormInst | null>(null);
-const modelFormRef = ref<FormInst | null>(null);
-const routeFormRef = ref<FormInst | null>(null);
+
 const providerForm = ref({ id: '', name: '', baseURL: '', authRef: '' });
 const modelForm = ref({ providerID: '', id: '', name: '' });
 const routeForm = ref({ id: '', name: '', providerID: '', modelID: '', restart: false });
+const providerFormRef = ref<FormInst | null>(null);
+const modelFormRef = ref<FormInst | null>(null);
+const routeFormRef = ref<FormInst | null>(null);
+
+const {
+  fieldErrors: providerErrors,
+  setSummaryRef: providerSetSummaryRef,
+  registerField: providerRegisterField,
+  focusField: providerFocusField,
+  submit: providerSubmit,
+  track: providerTrack,
+  guardClose: guardClose,
+} = useFormModal();
+const {
+  fieldErrors: modelErrors,
+  setSummaryRef: modelSetSummaryRef,
+  registerField: modelRegisterField,
+  focusField: modelFocusField,
+  submit: modelSubmit,
+  track: modelTrack,
+} = useFormModal();
+const {
+  fieldErrors: routeErrors,
+  setSummaryRef: routeSetSummaryRef,
+  registerField: routeRegisterField,
+  focusField: routeFocusField,
+  submit: routeSubmit,
+  track: routeTrack,
+} = useFormModal();
+
+const providerTracker = providerTrack(() => providerForm.value);
+const modelTracker = modelTrack(() => modelForm.value);
+const routeTracker = routeTrack(() => routeForm.value);
+const providerDirty = computed(() => providerTracker.dirty());
+const modelDirty = computed(() => modelTracker.dirty());
+const routeDirty = computed(() => routeTracker.dirty());
+
 const routeModelKey = computed({
   get: () => `${routeForm.value.providerID}::${routeForm.value.modelID}`,
   set: (value: string) => {
@@ -47,6 +84,7 @@ const routeModelKey = computed({
   },
 });
 const profileID = computed(() => workspace.selectedProfileID || workspace.profiles[0]?.id || '');
+const selectedProfileName = computed(() => workspace.profiles.find((item) => item.id === profileID.value)?.name ?? '');
 const providerOptions = computed(() => workspace.providers.map((item) => ({ label: item.name, value: item.id })));
 const modelOptions = computed(() =>
   workspace.models
@@ -56,15 +94,11 @@ const modelOptions = computed(() =>
       value: `${item.provider_id}::${item.id}`,
     })),
 );
-const profileOptions = computed(() => workspace.profiles.map((item) => ({ label: item.name, value: item.id })));
-const providerMenuOptions = [
-  { label: '编辑 Provider', key: 'edit' },
-  { label: '删除 Provider', key: 'delete' },
-];
+
 const providerRules: FormRules = {
   id: { required: true, message: '请填写 Provider 标识', trigger: ['blur', 'input'] },
   name: { required: true, message: '请填写 Provider 名称', trigger: ['blur', 'input'] },
-  baseURL: { required: true, message: '请填写 API 地址', trigger: ['blur', 'input'] },
+  baseURL: { required: true, message: '请填写 Responses API 地址', trigger: ['blur', 'input'] },
 };
 const modelRules: FormRules = {
   providerID: { required: true, message: '请选择 Provider', trigger: 'change' },
@@ -73,33 +107,55 @@ const modelRules: FormRules = {
 const routeRules: FormRules = {
   id: { required: true, message: '请填写路由标识', trigger: ['blur', 'input'] },
   name: { required: true, message: '请填写路由名称', trigger: ['blur', 'input'] },
-  modelID: { required: true, message: '请选择模型', trigger: 'change' },
+  modelID: { required: true, message: '请选择已启用的模型', trigger: 'change' },
 };
 
 function providerName(id: string): string {
   return workspace.providers.find((item) => item.id === id)?.name ?? id;
 }
+
 function modelName(providerID: string, modelID: string): string {
   return workspace.models.find((item) => item.provider_id === providerID && item.id === modelID)?.name || modelID;
 }
+
+function enabledModelCount(providerID: string): number {
+  return (workspace.modelsByProvider.get(providerID) ?? []).filter((item) => item.enabled).length;
+}
+
+function providerHasRoute(item: ProviderDTO): boolean {
+  return workspace.routes.some(
+    (route) => route.provider_id === item.id && isModelEnabled(route.provider_id, route.model_id),
+  );
+}
+
+function isModelEnabled(providerID: string, modelID: string): boolean {
+  return workspace.models.some((item) => item.provider_id === providerID && item.id === modelID && item.enabled);
+}
+
 function openProvider(item?: ProviderDTO): void {
   providerDraft.value = item ? { ...item } : null;
   providerForm.value = item
     ? { id: item.id, name: item.name, baseURL: item.base_url, authRef: item.auth_ref ?? '' }
     : { id: '', name: '', baseURL: '', authRef: '' };
+  providerErrors.value = [];
   providerModal.value = true;
+  providerTracker.snapshot();
 }
+
 function openModel(item?: ModelDTO): void {
   modelDraft.value = item ? { ...item } : null;
   modelForm.value = item
     ? { providerID: item.provider_id, id: item.id, name: item.name }
     : { providerID: workspace.providers[0]?.id ?? '', id: '', name: '' };
+  modelErrors.value = [];
   modelModal.value = true;
+  modelTracker.snapshot();
 }
+
 function openRoute(item?: RouteDTO): void {
   routeDraft.value = item ? { ...item } : null;
   const firstProviderID = workspace.providers[0]?.id ?? '';
-  const firstModel = workspace.models.find((model) => model.provider_id === firstProviderID);
+  const firstModel = workspace.models.find((model) => model.provider_id === firstProviderID && model.enabled);
   routeForm.value = item
     ? {
         id: item.id,
@@ -108,301 +164,552 @@ function openRoute(item?: RouteDTO): void {
         modelID: item.model_id,
         restart: item.restart_on_activate,
       }
-    : {
-        id: '',
-        name: '',
-        providerID: firstProviderID,
-        modelID: firstModel?.id ?? '',
-        restart: false,
-      };
+    : { id: '', name: '', providerID: firstProviderID, modelID: firstModel?.id ?? '', restart: false };
+  routeErrors.value = [];
   routeModal.value = true;
+  routeTracker.snapshot();
 }
+
 async function saveProvider(): Promise<void> {
-  const f = providerForm.value;
-  const valid = await providerFormRef.value?.validate().then(() => true).catch(() => false);
-  if (valid === false) return;
-  if (!f.id || !f.name || !f.baseURL) {
-    message.warning('请填写标识、名称和 API 地址');
-    return;
-  }
-  const ok = providerDraft.value
-    ? await workspace.saveProvider({
-        ...providerDraft.value,
-        id: f.id,
-        name: f.name,
-        base_url: f.baseURL,
-        auth_ref: f.authRef,
-      })
-    : await workspace.createProvider(f.id, f.name, f.baseURL, f.authRef);
-  if (ok) providerModal.value = false;
+  await providerSubmit(providerFormRef.value, async () => {
+    const f = providerForm.value;
+    const ok = providerDraft.value
+      ? await workspace.saveProvider({
+          ...providerDraft.value,
+          id: f.id,
+          name: f.name,
+          base_url: f.baseURL,
+          auth_ref: f.authRef,
+        })
+      : await workspace.createProvider(f.id, f.name, f.baseURL, f.authRef);
+    if (ok) providerModal.value = false;
+    else message.error(workspace.message);
+    return ok;
+  });
 }
+
 async function saveModel(): Promise<void> {
-  const f = modelForm.value;
-  const valid = await modelFormRef.value?.validate().then(() => true).catch(() => false);
-  if (valid === false) return;
-  if (!f.providerID || !f.id) {
-    message.warning('请选择 Provider 并填写模型 ID');
-    return;
-  }
-  const ok = modelDraft.value
-    ? await workspace.saveModel({ ...modelDraft.value, provider_id: f.providerID, id: f.id, name: f.name })
-    : await workspace.createModel(f.providerID, f.id, f.name);
-  if (ok) modelModal.value = false;
+  await modelSubmit(modelFormRef.value, async () => {
+    const f = modelForm.value;
+    const ok = modelDraft.value
+      ? await workspace.saveModel({ ...modelDraft.value, provider_id: f.providerID, id: f.id, name: f.name })
+      : await workspace.createModel(f.providerID, f.id, f.name);
+    if (ok) modelModal.value = false;
+    else message.error(workspace.message);
+    return ok;
+  });
 }
+
 async function saveRoute(): Promise<void> {
-  const f = routeForm.value;
-  const valid = await routeFormRef.value?.validate().then(() => true).catch(() => false);
-  if (valid === false) return;
-  if (!f.id || !f.name || !f.providerID || !f.modelID) {
-    message.warning('请填写路由信息');
-    return;
-  }
-  const value: RouteDTO = {
-    ...(routeDraft.value ?? { platform_id: 'codex', default: false }),
-    id: f.id,
-    name: f.name,
-    provider_id: f.providerID,
-    model_id: f.modelID,
-    restart_on_activate: f.restart,
-  };
-  const ok = routeDraft.value
-    ? await workspace.saveRoute(value)
-    : await workspace.createRoute(f.id, f.name, f.providerID, f.modelID);
-  if (ok) routeModal.value = false;
+  await routeSubmit(routeFormRef.value, async () => {
+    const f = routeForm.value;
+    const value: RouteDTO = {
+      ...(routeDraft.value ?? { platform_id: 'codex', default: false }),
+      id: f.id,
+      name: f.name,
+      provider_id: f.providerID,
+      model_id: f.modelID,
+      restart_on_activate: f.restart,
+    };
+    const ok = routeDraft.value
+      ? await workspace.saveRoute(value)
+      : await workspace.createRoute({
+          id: f.id,
+          name: f.name,
+          providerID: f.providerID,
+          modelID: f.modelID,
+          restart: f.restart,
+        });
+    if (ok) routeModal.value = false;
+    else message.error(workspace.message);
+    return ok;
+  });
 }
-function remove(kind: 'provider' | 'model' | 'route', item: ProviderDTO | ModelDTO | RouteDTO): void {
+
+function confirmAction(title: string, content: string, positiveText: string, action: () => Promise<boolean>): void {
   dialog.warning({
-    title: '确认删除',
-    content: `删除后需要重新配置“${item.name || item.id}”，确定继续吗？`,
-    positiveText: '删除',
+    title,
+    content,
+    positiveText,
     negativeText: '取消',
+    positiveButtonProps: { type: 'error', secondary: true },
     onPositiveClick: async () => {
-      if (kind === 'provider') await workspace.deleteProvider((item as ProviderDTO).id);
-      if (kind === 'model') {
-        const m = item as ModelDTO;
-        await workspace.deleteModel(m.provider_id, m.id);
+      const ok = await action();
+      if (!ok) {
+        message.error(workspace.message);
+        return false;
       }
-      if (kind === 'route') await workspace.deleteRoute((item as RouteDTO).id);
+      message.success(workspace.message);
+      return true;
     },
   });
 }
-function openProviderMenu(item: ProviderDTO): void {
-  providerMenuTarget.value = item;
+
+function removeProvider(item: ProviderDTO): void {
+  confirmAction('删除 Provider', `删除“${item.name || item.id}”后需要重新配置,确定继续吗?`, '删除', () =>
+    workspace.deleteProvider(item.id),
+  );
 }
-async function selectProviderMenu(key: string): Promise<void> {
-  const item = providerMenuTarget.value;
-  providerMenuTarget.value = null;
-  if (!item) return;
-  if (key === 'edit') openProvider(item);
-  if (key === 'delete') remove('provider', item);
+
+function removeModel(item: ModelDTO): void {
+  confirmAction('删除 Model', `删除“${item.name || item.id}”后引用它的 Route 会失效,确定继续吗?`, '删除', () =>
+    workspace.deleteModel(item.provider_id, item.id),
+  );
 }
-async function activate(route: RouteDTO): Promise<void> {
-  await workspace.activate(route.id, profileID.value);
-  if (!workspace.error) message.success('路由已激活');
+
+function removeRoute(item: RouteDTO): void {
+  confirmAction('删除 Route', `删除“${item.name || item.id}”后不能再用它激活,确定继续吗?`, '删除', () =>
+    workspace.deleteRoute(item.id),
+  );
 }
-async function testProvider(id: string): Promise<void> {
-  await workspace.testProvider(id);
-  if (!workspace.error) message.success('Provider 连接成功');
+
+async function activateRoute(route: RouteDTO): Promise<void> {
+  const ok = await workspace.activate(route.id, profileID.value);
+  if (ok) message.success(workspace.message);
+  else message.error(workspace.message);
 }
+
+function switchProvider(item: ProviderDTO): void {
+  const route = workspace.routes.find(
+    (candidate) => candidate.provider_id === item.id && isModelEnabled(candidate.provider_id, candidate.model_id),
+  );
+  if (!route) {
+    message.warning('该 Provider 还没有可用路由,请先在 Routes 中创建');
+    return;
+  }
+  void activateRoute(route);
+}
+
+async function testProvider(item: ProviderDTO): Promise<void> {
+  const ok = await workspace.testProvider(item.id);
+  if (ok) message.success(workspace.message);
+  else message.error(workspace.message);
+}
+
 async function testModel(item: ModelDTO): Promise<void> {
-  await workspace.testModel(item.provider_id, item.id);
-  if (!workspace.error) message.success('模型测试成功');
+  const ok = await workspace.testModel(item.provider_id, item.id);
+  if (ok) message.success(workspace.message);
+  else message.error(workspace.message);
+}
+
+async function toggleModel(item: ModelDTO, enabled: boolean): Promise<void> {
+  const ok = await workspace.saveModel({ ...item, enabled }, enabled ? 'Model 已启用' : 'Model 已停用');
+  if (!ok) message.error(workspace.message);
+}
+
+const providerMenuOptions = [
+  { label: '测试连接', key: 'test' },
+  { label: '编辑 Provider', key: 'edit' },
+  { label: '删除 Provider', key: 'delete', props: { class: 'dropdown-danger' } },
+];
+const routeMenuOptions = [
+  { label: '编辑 Route', key: 'edit' },
+  { label: '删除 Route', key: 'delete', props: { class: 'dropdown-danger' } },
+];
+const modelMenuOptions = [
+  { label: '测试模型', key: 'test' },
+  { label: '编辑 Model', key: 'edit' },
+  { label: '删除 Model', key: 'delete', props: { class: 'dropdown-danger' } },
+];
+
+function onProviderMenu(key: string, item: ProviderDTO): void {
+  if (key === 'test') void testProvider(item);
+  if (key === 'edit') openProvider(item);
+  if (key === 'delete') removeProvider(item);
+}
+
+function onRouteMenu(key: string, item: RouteDTO): void {
+  if (key === 'edit') openRoute(item);
+  if (key === 'delete') removeRoute(item);
+}
+
+function onModelMenu(key: string, item: ModelDTO): void {
+  if (key === 'test') void testModel(item);
+  if (key === 'edit') openModel(item);
+  if (key === 'delete') removeModel(item);
 }
 </script>
 
 <template>
   <div class="page-width">
-    <section class="hero-grid">
-      <div>
-        <p class="eyebrow">LOCAL ROUTING</p>
-        <h2>把当前模型配置整理成<br /><span>一个清晰的工作台</span></h2>
-        <p class="hero-copy">Provider 负责连接，Model 负责能力，Route 决定 Codex 现在使用谁。</p>
-      </div>
-      <div class="route-summary">
-        <div class="summary-label">
-          <span class="status-light" :class="{ 'is-busy': workspace.busy }" />当前激活路由
-        </div>
-        <strong>{{ workspace.currentRoute?.name || '还没有激活路由' }}</strong
-        ><span
-          >{{ workspace.currentProvider?.name || '选择一个 Provider' }} <i>/</i>
-          {{ workspace.currentModel?.name || '选择一个 Model' }}</span
-        ><NSelect
-          v-model:value="workspace.selectedProfileID"
-          :options="profileOptions"
-          size="small"
-          placeholder="选择配置档案"
-        />
-      </div>
-    </section>
     <div v-if="workspace.error" class="notice notice-error" role="alert">
-      {{ workspace.message }}
-      <span v-if="workspace.activationStage === 'error' && workspace.activationRecovered === true">已恢复上一次配置。</span>
+      <div>{{ workspace.message }}</div>
+      <p v-if="workspace.activationStage === 'error'" class="notice-hint">
+        无法确认 Codex 配置是否已恢复。如果 Codex 无法使用,请到「配置档案」页恢复最近备份。
+      </p>
     </div>
     <div v-else-if="workspace.phase === 'loading' && !workspace.providers.length" class="loading-grid">
-      <NSkeleton v-for="n in 3" :key="n" text :repeat="4" />
+      <NSkeleton v-for="n in 3" :key="n" text :repeat="3" />
     </div>
-    <section v-else class="resource-grid">
-      <NCard class="resource-card resource-card-wide" :bordered="false">
-        <div class="card-heading">
-          <div>
-            <p class="eyebrow">CONNECTIONS</p>
-            <h3>Providers</h3>
-            <p>管理可连接的 API 服务。</p>
-          </div>
-          <NButton size="small" type="primary" @click="openProvider()"><Plus :size="15" />添加 Provider</NButton>
+    <template v-else>
+      <section class="current-card" :class="{ 'is-empty': !workspace.currentRoute }">
+        <div class="current-icon">
+          {{ workspace.currentProvider?.name.slice(0, 1).toUpperCase() || '·' }}
         </div>
-        <NEmpty v-if="!workspace.providers.length" description="还没有 Provider" />
-        <div v-else class="resource-list">
-          <div
-            v-for="item in workspace.providers"
-            :key="item.id"
-            class="resource-row provider-row"
-            :class="{ 'is-active': workspace.currentProvider?.id === item.id }"
+        <div class="current-main">
+          <div class="current-title">
+            <strong>{{ workspace.currentRoute?.name || '还没有激活路由' }}</strong>
+            <NTag v-if="workspace.currentRoute" size="small" type="success" :bordered="false">已激活</NTag>
+          </div>
+          <span v-if="workspace.currentRoute" class="current-sub mono">
+            {{ workspace.currentModel?.name || workspace.currentRoute.model_id }}
+            <i>·</i>{{ workspace.currentProvider?.name }} <i>·</i>Profile {{ selectedProfileName || '未选择' }}
+          </span>
+          <span v-else class="current-sub">在下方 Routes 中激活一个路由,Codex 会使用它作为当前配置</span>
+        </div>
+        <div class="current-action">
+          <NButton
+            secondary
+            size="small"
+            type="primary"
+            :loading="workspace.phase === 'saving'"
+            @click="workspace.startCodex"
           >
-            <div class="resource-icon">{{ item.name.slice(0, 1).toUpperCase() }}</div>
-            <div class="resource-main">
-              <strong>{{ item.name }}</strong
-              ><span>{{ item.base_url }}</span>
+            <Rocket :size="14" />{{ workspace.codexRunning ? '重启 Codex' : '启动 Codex' }}
+          </NButton>
+        </div>
+      </section>
+
+      <section class="resource-grid">
+        <NCard class="resource-card resource-card-wide" :bordered="false">
+          <div class="card-heading">
+            <div>
+              <p class="eyebrow">Providers</p>
+              <h3>连接服务</h3>
+              <p>管理可连接的 Responses API 服务。</p>
             </div>
-            <NTag size="small" :bordered="false">{{ item.protocol }}</NTag
-            ><NButton quaternary size="small" aria-label="测试 Provider" @click="testProvider(item.id)"
-              ><PlugZap :size="15" /></NButton
-            ><NButton quaternary size="small" aria-label="编辑 Provider" @click="openProvider(item)"
-              ><Pencil :size="15"
-            /></NButton>
-            ><NDropdown
-              trigger="click"
-              :options="providerMenuOptions"
-              @select="
-                (key) => {
-                  openProviderMenu(item);
-                  void selectProviderMenu(key);
-                }
-              "
-              ><NButton quaternary size="small" aria-label="Provider 更多操作"><MoreHorizontal :size="15" /></NButton>
-              ></NDropdown
+            <NButton size="small" type="primary" @click="openProvider()"><Plus :size="14" />添加 Provider</NButton>
+          </div>
+          <NEmpty v-if="!workspace.providers.length" description="还没有 Provider" size="small">
+            <template #extra>
+              <NButton size="small" type="primary" @click="openProvider()">添加第一个 Provider</NButton>
+            </template>
+          </NEmpty>
+          <div v-else class="resource-list">
+            <div
+              v-for="item in workspace.providers"
+              :key="item.id"
+              class="resource-row provider-row"
+              :class="{ 'is-active': workspace.currentProvider?.id === item.id }"
+            >
+              <div class="resource-icon">{{ item.name.slice(0, 1).toUpperCase() }}</div>
+              <div class="resource-main">
+                <strong
+                  >{{ item.name }}<span class="text-muted"> · {{ item.id }}</span></strong
+                >
+                <span class="mono">{{ item.base_url }} · {{ enabledModelCount(item.id) }} 个启用模型</span>
+              </div>
+              <div class="resource-side">
+                <NTag v-if="workspace.currentProvider?.id === item.id" size="small" type="success" :bordered="false"
+                  >当前使用</NTag
+                >
+                <NTooltip v-else>
+                  <template #trigger>
+                    <span class="tooltip-target">
+                      <NButton
+                        size="small"
+                        secondary
+                        type="primary"
+                        :disabled="!enabledModelCount(item.id) || !providerHasRoute(item)"
+                        @click="switchProvider(item)"
+                        >切换</NButton
+                      >
+                    </span>
+                  </template>
+                  {{
+                    !enabledModelCount(item.id)
+                      ? '先启用模型后才能切换'
+                      : !providerHasRoute(item)
+                        ? '该 Provider 还没有可用 Route'
+                        : `激活 ${providerName(item.id)} 的第一条可用路由`
+                  }}
+                </NTooltip>
+                <NDropdown
+                  trigger="click"
+                  :options="providerMenuOptions"
+                  @select="(key: string) => onProviderMenu(key, item)"
+                >
+                  <NButton quaternary size="small" aria-label="Provider 更多操作"
+                    ><MoreHorizontal :size="15"
+                  /></NButton>
+                </NDropdown>
+              </div>
+            </div>
+          </div>
+        </NCard>
+
+        <NCard class="resource-card" :bordered="false">
+          <div class="card-heading">
+            <div>
+              <p class="eyebrow">Models</p>
+              <h3>模型</h3>
+              <p>启用后可被 Route 选择。</p>
+            </div>
+            <NButton size="small" secondary :disabled="!workspace.providers.length" @click="openModel()"
+              ><Plus :size="14" />添加</NButton
             >
           </div>
-        </div>
-      </NCard>
-      <NCard class="resource-card" :bordered="false">
-        <div class="card-heading">
-          <div>
-            <p class="eyebrow">AVAILABLE MODELS</p>
-            <h3>Models</h3>
-            <p>启用后可被 Route 选择。</p>
-          </div>
-          <NButton quaternary size="small" @click="openModel()"><Plus :size="15" /></NButton>
-        </div>
-        <NEmpty v-if="!workspace.models.length" description="还没有 Model" />
-        <div v-else class="resource-list">
-          <div
-            v-for="item in workspace.models"
-            :key="`${item.provider_id}:${item.id}`"
-            class="resource-row compact-row"
-          >
-            <div class="resource-main">
-              <strong>{{ item.name || item.id }}</strong
-              ><span>{{ providerName(item.provider_id) }} · {{ item.id }}</span>
+          <NEmpty v-if="!workspace.models.length" description="还没有 Model" size="small">
+            <template #extra>
+              <NButton size="small" type="primary" :disabled="!workspace.providers.length" @click="openModel()"
+                >添加模型</NButton
+              >
+            </template>
+          </NEmpty>
+          <div v-else class="resource-list">
+            <div
+              v-for="item in workspace.models"
+              :key="`${item.provider_id}:${item.id}`"
+              class="resource-row compact-row"
+            >
+              <div class="resource-main">
+                <strong>{{ item.name || item.id }}</strong>
+                <span class="mono">{{ providerName(item.provider_id) }} · {{ item.id }}</span>
+              </div>
+              <div class="resource-side">
+                <NSwitch
+                  :value="item.enabled"
+                  size="small"
+                  :aria-label="`启用模型 ${item.name || item.id}`"
+                  @update:value="(enabled: boolean) => toggleModel(item, enabled)"
+                />
+                <NDropdown
+                  trigger="click"
+                  :options="modelMenuOptions"
+                  @select="(key: string) => onModelMenu(key, item)"
+                >
+                  <NButton quaternary size="small" aria-label="Model 更多操作"><MoreHorizontal :size="15" /></NButton>
+                </NDropdown>
+              </div>
             </div>
-            <NSwitch
-              :value="item.enabled"
+          </div>
+        </NCard>
+
+        <NCard class="resource-card" :bordered="false">
+          <div class="card-heading">
+            <div>
+              <p class="eyebrow">Routes</p>
+              <h3>路由目标</h3>
+              <p>把 Provider 与 Model 组合成可激活的目标。</p>
+            </div>
+            <NButton
               size="small"
-              @update:value="
-                (enabled) => workspace.saveModel({ ...item, enabled }, enabled ? 'Model 已启用' : 'Model 已停用')
-              "
-            /><NButton quaternary size="small" @click="testModel(item)"><PlugZap :size="15" /></NButton
-            ><NButton quaternary size="small" @click="openModel(item)"><Pencil :size="15" /></NButton>
+              type="primary"
+              :disabled="!workspace.providers.length || !workspace.models.some((model) => model.enabled)"
+              @click="openRoute()"
+              ><Plus :size="14" />添加 Route</NButton
+            >
           </div>
-        </div>
-      </NCard>
-      <NCard class="resource-card resource-card-wide" :bordered="false">
-        <div class="card-heading">
-          <div>
-            <p class="eyebrow">CODEX TARGETS</p>
-            <h3>Routes</h3>
-            <p>将 Provider 与 Model 组合成可激活的目标。</p>
-          </div>
-          <NButton size="small" type="primary" @click="openRoute()"><Plus :size="15" />添加 Route</NButton>
-        </div>
-        <NEmpty v-if="!workspace.routes.length" description="还没有 Route" />
-        <div v-else class="resource-list">
-          <div v-for="item in workspace.routes" :key="item.id" class="resource-row route-row">
-            <div class="route-indicator" :class="{ 'is-active': item.default }"><Power :size="15" /></div>
-            <div class="resource-main">
-              <strong>{{ item.name }}</strong
-              ><span>{{ providerName(item.provider_id) }} / {{ modelName(item.provider_id, item.model_id) }}</span>
+          <NEmpty v-if="!workspace.routes.length" description="还没有 Route" size="small">
+            <template #extra>
+              <NButton
+                size="small"
+                type="primary"
+                :disabled="!workspace.providers.length || !workspace.models.some((model) => model.enabled)"
+                @click="openRoute()"
+                >添加第一个 Route</NButton
+              >
+            </template>
+          </NEmpty>
+          <div v-else class="resource-list">
+            <div v-for="item in workspace.routes" :key="item.id" class="resource-row route-row">
+              <div class="route-indicator" :class="{ 'is-active': item.default }"><Power :size="15" /></div>
+              <div class="resource-main">
+                <strong>{{ item.name }}</strong>
+                <span class="mono"
+                  >{{ providerName(item.provider_id) }} / {{ modelName(item.provider_id, item.model_id)
+                  }}<template v-if="item.restart_on_activate"> · 激活时重启 Codex</template></span
+                >
+              </div>
+              <div class="resource-side">
+                <NTag v-if="item.default" size="small" type="success" :bordered="false">当前</NTag>
+                <NButton
+                  v-else
+                  size="small"
+                  secondary
+                  type="primary"
+                  :loading="workspace.activatingRouteID === item.id"
+                  :disabled="workspace.phase === 'activating' || !profileID"
+                  @click="activateRoute(item)"
+                  >激活</NButton
+                >
+                <NDropdown
+                  trigger="click"
+                  :options="routeMenuOptions"
+                  @select="(key: string) => onRouteMenu(key, item)"
+                >
+                  <NButton quaternary size="small" aria-label="Route 更多操作"><MoreHorizontal :size="15" /></NButton>
+                </NDropdown>
+              </div>
             </div>
-            <NTag v-if="item.default" type="success" size="small" :bordered="false">当前</NTag
-            ><NButton size="small" secondary :loading="workspace.phase === 'activating'" @click="activate(item)"
-              >激活</NButton
-            ><NButton quaternary size="small" @click="openRoute(item)"><Pencil :size="15" /></NButton
-            ><NButton quaternary size="small" type="error" @click="remove('route', item)"
-              ><Trash2 :size="15"
-            /></NButton>
           </div>
-        </div>
-      </NCard>
-    </section>
-    <p class="page-footnote">配置写入前会自动保留备份。所有请求都在本机 Wails 进程中完成。</p>
+        </NCard>
+      </section>
+      <p class="page-footnote">配置写入前会自动保留备份。所有请求都在本机 Wails 进程中完成,凭据只以引用形式使用。</p>
+    </template>
   </div>
 
   <NModal
-    v-model:show="providerModal"
+    :show="providerModal"
     preset="card"
     :title="providerDraft ? '编辑 Provider' : '添加 Provider'"
     class="edit-modal"
+    :mask-closable="false"
+    @update:show="(show: boolean) => guardClose(providerDirty, (next: boolean) => (providerModal = next), show)"
   >
-    <NForm ref="providerFormRef" :model="providerForm" :rules="providerRules" label-placement="top" @submit.prevent="saveProvider"
-      ><NFormItem label="标识"
-        ><NInput v-model:value="providerForm.id" :disabled="!!providerDraft" placeholder="例如 openai" /></NFormItem
-      ><NFormItem label="显示名称"><NInput v-model:value="providerForm.name" placeholder="例如 OpenAI" /></NFormItem
-      ><NFormItem label="Responses API 地址"
-        ><NInput v-model:value="providerForm.baseURL" placeholder="https://api.example.com/v1" /></NFormItem
-      ><NFormItem label="凭据引用"
-        ><NInput v-model:value="providerForm.authRef" placeholder="环境变量名或 credential:target" /></NFormItem
-    ></NForm>
-    <template #footer
-      ><div class="modal-footer">
-        <NButton @click="providerModal = false">取消</NButton
-        ><NButton type="primary" @click="saveProvider">保存 Provider</NButton>
-      </div></template
+    <NForm
+      ref="providerFormRef"
+      :model="providerForm"
+      :rules="providerRules"
+      label-placement="top"
+      @submit.prevent="saveProvider"
     >
+      <div
+        v-if="providerErrors.length"
+        :ref="providerSetSummaryRef"
+        class="form-error-summary"
+        tabindex="-1"
+        role="alert"
+      >
+        <ul>
+          <li v-for="item in providerErrors" :key="`${item.field}:${item.message}`">
+            <button type="button" @click="providerFocusField(item.field)">{{ item.message }}</button>
+          </li>
+        </ul>
+      </div>
+      <NFormItem label="标识" path="id">
+        <NInput
+          :ref="(el: unknown) => providerRegisterField('id', el)"
+          v-model:value="providerForm.id"
+          :disabled="!!providerDraft"
+          placeholder="例如 openai"
+        />
+      </NFormItem>
+      <NFormItem label="显示名称" path="name">
+        <NInput
+          :ref="(el: unknown) => providerRegisterField('name', el)"
+          v-model:value="providerForm.name"
+          placeholder="例如 OpenAI"
+        />
+      </NFormItem>
+      <NFormItem label="Responses API 地址" path="baseURL">
+        <NInput
+          :ref="(el: unknown) => providerRegisterField('baseURL', el)"
+          v-model:value="providerForm.baseURL"
+          placeholder="https://api.example.com/v1"
+        />
+      </NFormItem>
+      <NFormItem label="凭据引用" path="authRef">
+        <NInput v-model:value="providerForm.authRef" placeholder="环境变量名或 credential:target" />
+      </NFormItem>
+    </NForm>
+    <template #footer>
+      <div class="modal-footer">
+        <NButton :disabled="workspace.phase === 'saving'" @click="providerModal = false">取消</NButton>
+        <NButton type="primary" :loading="workspace.phase === 'saving'" @click="saveProvider">{{
+          providerDraft ? '保存' : '添加'
+        }}</NButton>
+      </div>
+    </template>
   </NModal>
-  <NModal v-model:show="modelModal" preset="card" :title="modelDraft ? '编辑 Model' : '添加 Model'" class="edit-modal">
-    <NForm ref="modelFormRef" :model="modelForm" :rules="modelRules" label-placement="top" @submit.prevent="saveModel"
-      ><NFormItem label="Provider"
-        ><NSelect
+
+  <NModal
+    :show="modelModal"
+    preset="card"
+    :title="modelDraft ? '编辑 Model' : '添加 Model'"
+    class="edit-modal"
+    :mask-closable="false"
+    @update:show="(show: boolean) => guardClose(modelDirty, (next: boolean) => (modelModal = next), show)"
+  >
+    <NForm ref="modelFormRef" :model="modelForm" :rules="modelRules" label-placement="top" @submit.prevent="saveModel">
+      <div v-if="modelErrors.length" :ref="modelSetSummaryRef" class="form-error-summary" tabindex="-1" role="alert">
+        <ul>
+          <li v-for="item in modelErrors" :key="`${item.field}:${item.message}`">
+            <button type="button" @click="modelFocusField(item.field)">{{ item.message }}</button>
+          </li>
+        </ul>
+      </div>
+      <NFormItem label="Provider" path="providerID">
+        <NSelect
+          :ref="(el: unknown) => modelRegisterField('providerID', el)"
           v-model:value="modelForm.providerID"
           :options="providerOptions"
-          placeholder="选择 Provider" /></NFormItem
-      ><NFormItem label="模型 ID"
-        ><NInput v-model:value="modelForm.id" :disabled="!!modelDraft" placeholder="例如 gpt-5.6-sol" /></NFormItem
-      ><NFormItem label="显示名称"><NInput v-model:value="modelForm.name" placeholder="可选" /></NFormItem
-    ></NForm>
-    <template #footer
-      ><div class="modal-footer">
-        <NButton @click="modelModal = false">取消</NButton
-        ><NButton type="primary" @click="saveModel">保存 Model</NButton>
-      </div></template
-    >
+          placeholder="选择 Provider"
+        />
+      </NFormItem>
+      <NFormItem label="模型 ID" path="id">
+        <NInput
+          :ref="(el: unknown) => modelRegisterField('id', el)"
+          v-model:value="modelForm.id"
+          :disabled="!!modelDraft"
+          placeholder="例如 gpt-5.6-sol"
+        />
+      </NFormItem>
+      <NFormItem label="显示名称" path="name">
+        <NInput v-model:value="modelForm.name" placeholder="可选" />
+      </NFormItem>
+    </NForm>
+    <template #footer>
+      <div class="modal-footer">
+        <NButton :disabled="workspace.phase === 'saving'" @click="modelModal = false">取消</NButton>
+        <NButton type="primary" :loading="workspace.phase === 'saving'" @click="saveModel">{{
+          modelDraft ? '保存' : '添加'
+        }}</NButton>
+      </div>
+    </template>
   </NModal>
-  <NModal v-model:show="routeModal" preset="card" :title="routeDraft ? '编辑 Route' : '添加 Route'" class="edit-modal">
-    <NForm ref="routeFormRef" :model="routeForm" :rules="routeRules" label-placement="top" @submit.prevent="saveRoute"
-      ><NFormItem label="路由标识"
-        ><NInput v-model:value="routeForm.id" :disabled="!!routeDraft" placeholder="例如 work" /></NFormItem
-      ><NFormItem label="路由名称"><NInput v-model:value="routeForm.name" placeholder="例如 工作模型" /></NFormItem
-      ><NFormItem label="模型"
-        ><NSelect v-model:value="routeModelKey" :options="modelOptions" placeholder="选择已启用的 Model" /></NFormItem
-      ><NFormItem label="激活行为"
-        ><NSwitch v-model:value="routeForm.restart" /> <span class="switch-copy">激活时尝试启动 Codex</span></NFormItem
-      ></NForm
-    >
-    <template #footer
-      ><div class="modal-footer">
-        <NButton @click="routeModal = false">取消</NButton
-        ><NButton type="primary" @click="saveRoute">保存 Route</NButton>
-      </div></template
-    >
+
+  <NModal
+    :show="routeModal"
+    preset="card"
+    :title="routeDraft ? '编辑 Route' : '添加 Route'"
+    class="edit-modal"
+    :mask-closable="false"
+    @update:show="(show: boolean) => guardClose(routeDirty, (next: boolean) => (routeModal = next), show)"
+  >
+    <NForm ref="routeFormRef" :model="routeForm" :rules="routeRules" label-placement="top" @submit.prevent="saveRoute">
+      <div v-if="routeErrors.length" :ref="routeSetSummaryRef" class="form-error-summary" tabindex="-1" role="alert">
+        <ul>
+          <li v-for="item in routeErrors" :key="`${item.field}:${item.message}`">
+            <button type="button" @click="routeFocusField(item.field)">{{ item.message }}</button>
+          </li>
+        </ul>
+      </div>
+      <NFormItem label="路由标识" path="id">
+        <NInput
+          :ref="(el: unknown) => routeRegisterField('id', el)"
+          v-model:value="routeForm.id"
+          :disabled="!!routeDraft"
+          placeholder="例如 work-sol"
+        />
+      </NFormItem>
+      <NFormItem label="路由名称" path="name">
+        <NInput
+          :ref="(el: unknown) => routeRegisterField('name', el)"
+          v-model:value="routeForm.name"
+          placeholder="例如 工作主力"
+        />
+      </NFormItem>
+      <NFormItem label="Provider 与模型" path="modelID">
+        <NSelect
+          :ref="(el: unknown) => routeRegisterField('modelID', el)"
+          v-model:value="routeModelKey"
+          :options="modelOptions"
+          placeholder="选择已启用的 Model"
+        />
+      </NFormItem>
+      <NFormItem label="激活行为" path="restart">
+        <NSwitch v-model:value="routeForm.restart" aria-label="激活时尝试启动 Codex" />
+        <span class="switch-copy">激活时尝试启动 Codex</span>
+      </NFormItem>
+    </NForm>
+    <template #footer>
+      <div class="modal-footer">
+        <NButton :disabled="workspace.phase === 'saving'" @click="routeModal = false">取消</NButton>
+        <NButton type="primary" :loading="workspace.phase === 'saving'" @click="saveRoute">{{
+          routeDraft ? '保存' : '添加'
+        }}</NButton>
+      </div>
+    </template>
   </NModal>
 </template>

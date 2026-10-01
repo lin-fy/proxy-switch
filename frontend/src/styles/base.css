@@ -1,17 +1,7 @@
-@font-face {
-  font-family: 'IBM Plex Sans';
-  font-style: normal;
-  font-weight: 400 700;
-  src: local('Segoe UI');
-}
-
-@font-face {
-  font-family: 'JetBrains Mono';
-  font-style: normal;
-  font-weight: 400 700;
-  src: local('Consolas');
-}
-
+/*
+ * 项目 reset 与全局基础:字体、focus、滚动条、reduced-motion。
+ * 只使用 tokens.css 的令牌,不声明颜色或字体字面量。
+ */
 * {
   box-sizing: border-box;
 }
@@ -32,7 +22,7 @@ body {
   overflow: hidden;
   background: var(--surface-0);
   color: var(--text-primary);
-  font-family: 'IBM Plex Sans', 'Segoe UI', sans-serif;
+  font-family: var(--font-ui);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
 }
