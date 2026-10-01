@@ -201,6 +201,10 @@ tasks:
       - "darwin/icon.icns"
       - "windows/icon.ico"
     cmds:
+      - cmd: powershell -NoProfile -Command "New-Item -ItemType Directory -Force -Path darwin | Out-Null"
+        platforms: [windows]
+      - cmd: mkdir -p darwin
+        platforms: [linux, darwin]
       - wails3 generate icons -input appicon.png -macfilename darwin/icon.icns -windowsfilename windows/icon.ico{{if eq OS "darwin"}} -iconcomposerinput appicon.icon -macassetdir darwin{{end}}
 
   dev:frontend:
