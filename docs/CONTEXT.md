@@ -17,7 +17,7 @@ V1 后端核心 + 桌面壳 + Vue 前端已完成并通过桌面原生验收（M
 
 ## 当前卡点
 
-- GitHub PR #1 的 Windows CI 格式检查失败：已复现 Git 检出转 CRLF 与 Prettier LF 要求冲突，正在补充 `.gitattributes` 并重新验证
+- GitHub PR #1 的 Windows CI 首轮格式检查已修复；第二轮发现 Wails 图标任务在 Windows 仍传入 macOS `darwin/icons.icns` 路径，已改为按平台生成并等待重跑
 - 真实 CPA / OpenAI / 自定义 Provider 凭据（**需用户提供**）
 - GitHub 仓库 Secrets 配置（**需用户操作**）
 

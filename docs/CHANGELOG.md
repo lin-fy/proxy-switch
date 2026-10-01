@@ -109,3 +109,10 @@
 - **关键文件**：`.gitattributes`
 - **后续**：等待 PR 的完整 Windows CI 通过再合并
 - **commit**：待下次文档提交回填
+
+### fix(build): generate platform-specific icons
+
+- **影响**：Windows CI 不再尝试打开 macOS 专用的 `darwin/icons.icns` 路径；macOS 仍保留 ICNS 和 Assets.car 生成参数。
+- **关键文件**：`build/Taskfile.yml`
+- **后续**：等待 PR 的完整 Windows CI 通过再合并
+- **commit**：待下次文档提交回填
