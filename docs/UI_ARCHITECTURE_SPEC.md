@@ -94,12 +94,12 @@ frontend/src/
 ├── styles/
 │   ├── tokens.css                 # 语义颜色、尺寸、动效令牌
 │   ├── base.css                   # reset、字体、focus、滚动条
-│   └── desktop.css                # 壳层布局和桌面专用规则
+│   └── desktop.css                # 桌面专用视觉规则；壳层布局交给 Tailwind
 ├── main.ts                        # createApp、Pinia、Router、全局样式
 └── vite-env.d.ts
 ```
 
-组件边界按“业务功能”划分，不按视觉块堆一层层 `Card`。一个组件只有在拥有自己的状态、提交动作或可复用的交互时才单独拆分。基础控件由 Naive UI 提供，项目只封装业务语义和主题配置。
+此目录树表达职责，不要求移动当前可用的 App、router、DesktopShell 或 store 文件，也不要求创建全部占位目录。组件边界按“业务功能”划分，不按视觉块堆一层层 `Card`。一个组件只有在拥有自己的状态、提交动作或可复用的交互时才单独拆分。基础控件由 Naive UI 提供，项目只封装业务语义和主题配置。
 
 ## 4. 组件树
 
@@ -137,10 +137,10 @@ App
 
 ### 绑定原则
 
-`services/wails-api.ts` 是生成绑定和 Vue 的唯一边界。页面和组件不得直接导入自动生成的 `app.ts`，这样生成绑定路径变化时只需改一处。
+`services/wails-api.ts` 是生成绑定的唯一运行时入口。页面和组件只调用 Pinia 动作，不直接调用适配层或导入生成绑定；DTO 使用适配层的类型导出。生成绑定路径变化时只需改一处。
 
 ```ts
-import * as generated from '../bindings/codex-provider-hub/internal/interfaces/wails/app'
+import * as generated from '../../bindings/codex-provider-hub/internal/interfaces/wails/app'
 
 export const wailsApi = {
   listProviders: () => generated.ListProviders(),
@@ -177,16 +177,11 @@ export const wailsApi = {
 - 并行拉取四种资源；
 - 建立 `providerId → models` 的索引；
 - 计算当前默认 Route、当前 Provider、当前 Model；
-- 保持 `loading / refreshing / activating / error` 等状态；
+- 保持 `loading / saving / testing / activating / error`、激活阶段和恢复状态；
 - 在保存、删除、激活后刷新受影响的数据；
 - 把后端错误转换成页面可展示的阶段和恢复建议。
 
-`shell.store.ts` 负责：
-
-- 当前一级页面；
-- 当前 Profile 选择；
-- 顶部短消息和 `role=alert` 错误消息；
-- 弹窗打开状态和正在编辑的对象 ID。
+workspace store 同时保存当前 Profile 选择和可供界面展示的操作消息。当前一级页面由 Router 管理；弹窗开关、编辑草稿和焦点由所属页面/组件管理。store 不直接操作 DOM 或调用 Naive UI 消息 API。
 
 组件只能调用 store 的动作，例如 `workspace.activateRoute(routeId)`，不在模板中拼接 `Promise.all` 或捕获原始错误。只有当独立状态和复用行为确实出现时，才再拆分 shell/settings store 或额外 service。
 
@@ -198,7 +193,7 @@ export const wailsApi = {
 - Provider / Profile 表单使用 `NForm`、`NFormItem` 和规则校验；错误摘要仍由页面提供，不能只依赖字段下方的红字。
 - `useMessage()`、`useDialog()`、`useNotification()` 只能在对应 Provider 后代组件的 `setup()` 中调用；Pinia 和 service 不直接显示 UI 消息。
 - 不使用 Naive 的全屏后台布局组件来生成页面壳层；壳层、导航、Provider 列表和状态摘要按 [`UI_PROTOTYPE.md`](UI_PROTOTYPE.md) 自有布局实现。
-- 组件库只负责控件行为和基础外观，桌面视觉令牌集中在 `styles/tokens.css` 和 `NConfigProvider.theme-overrides`。
+- 组件库只负责控件行为和基础外观。颜色的唯一来源是 `styles/tokens.css`；`themeOverrides` 读取令牌计算值，具体方法见实施计划，不维护另一套颜色。
 
 完整的组件库比较、版本依据和未实测项见 [`UI_LIBRARY_COMPARISON.md`](UI_LIBRARY_COMPARISON.md)。
 
@@ -221,7 +216,7 @@ export const wailsApi = {
 
 ### 布局规则
 
-- 壳层使用 `display: grid`：`216px minmax(0, 1fr)`。
+- 壳层通过 Tailwind Grid/Flex 类组织固定左导航、顶部工具栏、主区和底部状态区；列宽为 `216px minmax(0, 1fr)`。
 - 主内容区使用 `min-width: 0; min-height: 0; overflow: auto`，防止列表把窗口撑出边界。
 - 列表使用行布局和分隔线，不嵌套多层卡片。
 - 主要按钮使用实心强调色；次要动作使用低对比度边界；危险动作使用语义红色。

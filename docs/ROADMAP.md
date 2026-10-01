@@ -6,6 +6,8 @@
 
 本文档是目标模式的执行依据和项目状态真源。它回答四个问题：最终要交付什么、分几段完成、每段如何验收、现在马上做什么。
 
+当前前端任务仅交付设计规范与实施计划，文档基线已整理完成；以下 V1 实施与发布事项是后续工程范围。该前端任务不安装依赖、不修改源码、Go API 或生成绑定，具体边界与验收门槛见 [`FRONTEND_IMPLEMENTATION_PLAN.md`](FRONTEND_IMPLEMENTATION_PLAN.md)。
+
 产品范围和架构原则见 [`PRODUCT_PLAN.md`](../PRODUCT_PLAN.md)，执行约束见 [`PROJECT_INSTRUCTIONS.md`](../PROJECT_INSTRUCTIONS.md)。如果实现过程发现方案需要变化，先更新本文档和相关方案文档，再继续编码。
 
 ## 1. 目标 Goal
@@ -55,7 +57,7 @@ Proxy Switch
 | Provider 连通性 | [x] | 支持 `/models` 和最小 `/responses` 请求，凭据只使用引用。 |
 | Wails 桌面壳 | [x] | Wails 3、窗口关闭隐藏、托盘显示/隐藏/退出已接入。 |
 | 开机启动 | [x] | Windows `HKCU\\...\\Run` 开关已接入。 |
-| 当前工作区构建 | [!] | Go 测试和 vet 仍被 `PlatformAdapter.Launch/Restart` 签名与调用方不一致阻塞；`frontend` 的 `vue-tsc --noEmit` 与 `npm run build` 已通过（最近构建约 636 kB raw / 192 kB gzip）；Wails Windows 构建尚未复验。 |
+| 当前工作区构建 | [-] | 前端类型检查、生产构建和 lint 已通过（最近 JS 约 636 kB raw / 192 kB gzip）。当前 PATH 未找到 Go/Wails，Go 测试、vet 和 Wails Windows 构建未复验；早期签名错误只作为历史记录，不能据此判定当前工作树仍构建失败。 |
 | Vue UI 迁移 | [-] | Vue 3、Pinia、Naive UI、Tailwind v4、配置/Profiles/Settings 页面和 Wails API 适配层已有可构建基线；浏览器窗口和导航冒烟检查已完成，Wails、DPI、焦点、IME、对比度和完整流程验收仍待完成。 |
 | Windows 安装包 | [-] | 用户级 ZIP 安装/卸载已验证；NSIS 和 MSIX 仍待工具链补齐。 |
 | 真实端到端验收 | [ ] | 仍需可用的 CPA、OpenAI 和自定义 Provider 以及 Codex Desktop 实际请求记录。 |
@@ -75,7 +77,7 @@ Proxy Switch
 
 ### M1 — 核心后端与桌面壳
 
-状态：`[!]`（实现已在工作区，当前集成验证被构建回归阻塞）
+状态：`[-]`（实现已在工作区，当前集成验证待复验）
 
 - [x] 本地 JSON 状态存储和四类 Repository。
 - [x] Wails 服务绑定、DTO 和前端生成绑定。
@@ -147,9 +149,9 @@ Proxy Switch
 ### 当前执行顺序
 
 ```text
-修复 Vue 构建
+完成前端设计规范与实施计划（本阶段）
   ↓
-完成 Profiles / Settings 页面
+按实施计划收敛现有前端基线（后续阶段）
   ↓
 跑 Go + 前端 + Wails 验证
   ↓
@@ -181,14 +183,14 @@ Proxy Switch
 
 只保留进入实现阶段后马上要做的三项：
 
-1. 同步 `PlatformAdapter.Launch/Restart` 的调用方和实现，让 `go test ./...` 与 `go vet ./...` 通过。
-2. 重新运行 Wails Windows 构建，并按 960 × 640、1120 × 760、125% / 150% DPI 验证壳层、浮层和主区滚动。
-3. 完成表单焦点、键盘/IME、对比度、reduced-motion 和 Provider → Codex 的真实流程验收，再处理 NSIS/MSIX 安装包。
+1. 按前端实施计划核对依赖、主题、表单、错误转换和激活状态，处理已记录的基线缺口；保持现有 Go API 和 DTO 不变。
+2. 定位既有 Go/Wails 工具链并复验 Go 测试、vet 和 Windows 构建；如有后端问题，记录为独立工程任务，不混入前端范围。
+3. 按 960 × 640、1120 × 760、125% / 150% DPI 完成壳层、浮层、焦点、键盘/IME、对比度、reduced-motion 和真实后端流程验收，再处理安装包。
 
 ## 6. 技术决策记录
 
 - 使用 Wails 3，不迁移到 Tauri、Electron 或远程网页。
-- 使用 Vue 3 + TypeScript + Naive UI + Pinia；生成的 Wails 绑定不得手改。
+- 使用 Vue 3 + TypeScript + Pinia；Tailwind CSS v4 管布局与令牌，Naive UI 管控件；生成的 Wails 绑定不得手改。
 - Provider 是数据，不为 CPA、OpenAI 等供应商分别创建工厂。
 - V1 只有 Codex 平台适配器，其他平台留到新的 goal。
 - Codex Desktop 若不支持 `--profile`，继续使用备份后切换活动配置文件的兼容方案。
