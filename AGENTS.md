@@ -9,7 +9,7 @@
 
 1. **开工前必读**：[`docs/CONTEXT.md`](docs/CONTEXT.md) + [`docs/TASKS.md`](docs/TASKS.md)，然后 `git status` + `git log --oneline -10`。
 2. **不越权**：不动其他 agent 标记 `[- by xxx]` 的任务；不修改、不覆盖、不回滚他人未提交的改动；TASKS.md "已完成"区只能本人写入，发现归属有误记入 CONTEXT.md "待协调事项"，不改原条目。
-3. **提交前更新文档**：任务 agent 在自己的分支完成代码和验证后，更新 TASKS.md → 追加 CHANGELOG.md →（如涉决策）追加 DECISIONS.md → 更新 CONTEXT.md，再创建 GitHub PR。由用户指定的 reviewer/merger 审查并合并 PR。提交信息必须遵循 [Conventional Commits](https://www.conventionalcommits.org/)。
+3. **提交前更新文档**：任务 agent 在自己的分支完成代码和验证后，更新 TASKS.md → 追加 CHANGELOG.md →（如涉决策）追加 DECISIONS.md → 更新 CONTEXT.md，再创建 GitHub PR。多个 agent 并行时由用户指定 reviewer/merger；只有一个活跃 agent 时，该 agent 可自审并合并 PR，但仍必须通过 CI。提交信息必须遵循 [Conventional Commits](https://www.conventionalcommits.org/)。
 4. **Git 禁区**：禁止 `git add .` / `git add -A` / `git reset --hard` / `git clean -fd` / force push / 未经用户允许 commit。允许 `git reset --soft` 撤销本地未推送提交。
 5. **安全**：密钥、Token、密码不写入代码、配置、日志、文档或提交；凭据用引用机制（环境变量 / Windows Credential Manager）。
 
@@ -22,8 +22,8 @@
 ### 核心原则
 
 - **代码改动**：在 agent 自己的工作树，提交到 agent 自己的分支
-- **文档更新**（TASKS/CONTEXT/CHANGELOG/DECISIONS）：任务相关更新在 agent 分支完成并随 PR 审查；用户指定的 reviewer/merger 负责合并 PR 到 `dev`
-- **合并**：任务 agent 只负责自己的分支、同步、冲突处理、验证和创建 PR；未获指定的 agent 不得直接合并 PR 或在主工作树合并分支
+- **文档更新**（TASKS/CONTEXT/CHANGELOG/DECISIONS）：任务相关更新在 agent 分支完成并随 PR 审查
+- **合并**：多个 agent 并行时由用户指定 reviewer/merger；只有一个活跃 agent 时，该 agent 可自审并合并自己的 PR。任何情况下都必须通过 PR，禁止直接在主工作树合并分支
 
 ### 工作树结构
 
@@ -102,15 +102,15 @@ git add <当前任务涉及的具体文件>
 git commit -m "docs(collab): record <agent名> <任务简称> completion"
 ```
 
-任务 agent 在 PR 描述中报告分支、提交、验证命令和结果；公共文档随 PR 一起审查。用户可以人工指定 reviewer 和 merger；未指定前不合并。
+任务 agent 在 PR 描述中报告分支、提交、验证命令和结果；公共文档随 PR 一起审查。多个 agent 并行时用户人工指定 reviewer 和 merger；只有一个活跃 agent 时，任务 agent 可自审并合并，但必须等待 CI 通过。
 
 #### 5. 创建 PR
 
 任务 agent 确认自己的分支已经合并最新 `dev` 并完成验证，然后创建目标为 `dev` 的 GitHub PR。PR 描述必须包含改动范围、验证结果和未完成事项。
 
-#### 6. root/Codex 审查并合并 PR
+#### 6. 审查并合并 PR
 
-用户指定的 reviewer 检查 PR 差异、验证记录和目标分支最新状态；指定的 merger 在审查通过后于 GitHub 合并 PR。未通过或有冲突时退回 agent 分支处理，不能直接覆盖或绕过审查。
+多个 agent 并行时，用户指定的 reviewer 检查 PR 差异、验证记录和目标分支最新状态，指定的 merger 在审查通过后于 GitHub 合并 PR。只有一个活跃 agent 时，该 agent 可以执行同样的自审流程并合并自己的 PR。未通过或有冲突时退回 agent 分支处理，不能直接覆盖或绕过审查。
 
 合并后确认 `dev` 状态和 CI 结果，再向用户报告合并提交。远端推送和发布仍按用户授权执行。
 
@@ -154,7 +154,7 @@ git merge dev
 # 解决冲突后重新运行验收
 
 # zcode 更新 TASKS/CHANGELOG/CONTEXT 并创建 GitHub PR（目标 dev）
-# 用户指定 reviewer 审查，指定 merger 确认 CI 后在 GitHub 合并
+# 多 agent 时由用户指定 reviewer/merger；单 agent 时 zcode 自审并等待 CI 后合并
 
 # zcode 清理自己的已合并、干净工作树（可选）
 git worktree remove ../proxy-switch-zcode

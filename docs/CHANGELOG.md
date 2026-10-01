@@ -98,5 +98,5 @@
 
 - **影响**：并行分支交付、公共文档审查和 `dev` 集成职责
 - **关键文件**：`AGENTS.md`、`docs/agent-guide/git-rules.md`、`docs/agent-guide/workflow.md`、`docs/CONTEXT.md`、`docs/TASKS.md`、`docs/DECISIONS.md`
-- **后续**：用户人工指定 reviewer/merger；后续可配置分支保护和 Merge Queue
+- **后续**：多个 agent 并行时由用户人工指定 reviewer/merger；单 agent 可自审并合并，但必须等待 CI；后续可配置分支保护和 Merge Queue
 - **commit**：待下次文档提交回填

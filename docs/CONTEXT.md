@@ -30,7 +30,7 @@ V1 后端核心 + 桌面壳 + Vue 前端已完成并通过桌面原生验收（M
 
 ## 长期注意事项
 
-- 当前已切换 GitHub PR 流程：任务 agent 在自己的分支同步 `dev`、解决冲突、验证并创建 PR；用户人工指定 reviewer/merger，未指定前不合并。不得覆盖他人未提交改动。
+- 当前已切换 GitHub PR 流程：任务 agent 在自己的分支同步 `dev`、解决冲突、验证并创建 PR；多个 agent 并行时由用户指定 reviewer/merger，只有一个活跃 agent 时允许自审并合并，但必须等待 CI 通过。不得覆盖他人未提交改动。
 - `sources/` 下文件只读
 - 不得提交密钥、临时文件、构建产物、CodeGraph 缓存
 - 瞬时工作区状态直接 `git status`，不在本文档维护
