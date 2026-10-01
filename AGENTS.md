@@ -24,6 +24,7 @@
 | 代码风格 / 测试 / 架构约束 | [`docs/agent-guide/code-rules.md`](docs/agent-guide/code-rules.md) |
 | V1 范围与产品边界 | [`docs/agent-guide/scope.md`](docs/agent-guide/scope.md) |
 | 何时停下请求用户介入 | [`docs/agent-guide/escalation.md`](docs/agent-guide/escalation.md) |
+| **模糊需求澄清流程** | [`docs/agent-guide/requirement-clarification.md`](docs/agent-guide/requirement-clarification.md) |
 | 项目里程碑与验收状态 | [`docs/planning/ROADMAP.md`](docs/planning/ROADMAP.md) |
 | 文档索引与字符规范 | [`docs/README.md`](docs/README.md) |
 
