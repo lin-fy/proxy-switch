@@ -137,12 +137,14 @@ Store 并行刷新四种资源，计算明确的已激活路由，管理 loading
 | 类型与生产构建 | 单独运行 `vue-tsc --noEmit`、`npm run build`，保存退出码和产物 | 2026-10-01 通过；4428 modules，JS 636.18 kB raw / 192.47 kB gzip，仍有单 chunk 超过 500 kB 的 Vite 提示 |
 | Wails Windows 构建 | 沿用项目 Windows task、生成 exe 并启动 WebView | 未验收；此前工具不在 PATH，须查实际安装路径 |
 | 本地资源 | 检查生产 HTML/CSS/JS 加载入口，离线运行并检查资源请求；SVG namespace 和文档链接不等于远程加载 | 仅历史 HTML/CSS检查，完整运行验证待做 |
+| 令牌与字体单一来源 | 检查 `themeOverrides` 是否从 `tokens.css` 的计算值生成，且字体确实为系统字体或随包资源；不得维护第二套硬编码颜色 | 当前基线的 `src/app/theme.ts` 仍有硬编码颜色，并声明 IBM Plex Sans / JetBrains Mono；待实施阶段收敛并记录字体资源 |
 | 960 × 640 / 1120 × 760 | 两尺寸下空态、长列表、弹窗、菜单、通知截图；检查壳层高度和滚动区域 | 960 空/错误态历史检查；长列表和推荐窗口未完整验收 |
 | Windows 125% / 150% | 原生 Windows/WebView 在两缩放下检查焦点、文字、浮层边界 | 未验收；浏览器 viewport 不能冒充 DPI 测试 |
 | 固定导航/主区滚动 | 长列表滚动，比较工具栏、导航、状态区位置和主区 scrollTop | 待做，空页面不足以证明 |
 | 浮层 | 两尺寸打开最长表单、底部菜单和通知，检查边界与可滚动内容 | 未完整验收 |
 | Modal 焦点 | 记录打开时 activeElement、Tab/Shift+Tab 圈定、Esc、关闭后焦点 | 未完整验收 |
 | 校验与保留输入 | 空值、空白、无效 URL、后端失败；错误摘要聚焦且输入不丢失 | 待做，已有规则声明不足以证明 |
+| NForm 字段语义 | 逐项核对每个 `NFormItem` 的 `path`、label/id、错误摘要和失败后焦点；保存字段输入 | 当前基线已声明 rules，但 Profile 表单仍需补齐显式 `path` 并完成焦点验证 |
 | 键盘与 IME | 键盘导航、Enter 提交、Escape 取消、中文候选确认不提交 | 未完整验收 |
 | 对比度 | 计算文字对所有实际背景比率，含 muted、selected、占位符、控件 | 未验收，目标 ≥4.5:1 |
 | reduced-motion | 启用系统减少动效，检查实际过渡/动画不位移 | 声明存在；运行行为待验证 |

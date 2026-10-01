@@ -115,7 +115,7 @@ Proxy Switch
 - [x] Profiles 页面：档案切换、创建、删除和恢复备份的前端基线已接入。
 - [x] Settings 页面：Codex 状态、启动、自动启动和恢复入口的前端基线已接入。
 - [x] 加载、保存、测试、激活、错误和恢复状态的统一反馈已接入。
-- [ ] 完成 Wails Windows 构建、窗口尺寸、DPI、浮层、焦点、键盘/IME、对比度和真实后端流程验收。
+- [ ] 完成令牌/字体单一来源、NForm 字段 path、Wails Windows 构建、窗口尺寸、DPI、浮层、焦点、键盘/IME、对比度和真实后端流程验收。
 
 出口标准：在 960 × 640 窗口中，Provider、Model、Route、Profile 和 Settings 全流程可操作，前端构建通过。
 
