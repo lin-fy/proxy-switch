@@ -4,7 +4,7 @@
 >
 > 目标：供应商只配置一次，通过路由生成目标平台配置并启动对应平台。
 >
-> 执行状态：见 [`docs/ROADMAP.md`](docs/ROADMAP.md)。
+> 执行状态：见 [`planning/ROADMAP.md`](planning/ROADMAP.md)。
 
 ## 1. 产品定位
 
@@ -267,7 +267,7 @@ CPA-Manager-Plus 负责管理和观测；实际请求转发由 CPA / CLIProxyAPI
 8. 验证 Codex 内置模型下拉列表显示同步后的全部模型。
 9. 验证托盘常驻和开机启动；自动更新在 V1.1 单独验证。
 
-核心配置验证通过后，项目已进入 Vue 界面迁移、桌面能力补齐和真实端到端验收阶段。当前执行顺序和阻塞项以 [`docs/ROADMAP.md`](docs/ROADMAP.md) 为准。
+核心配置验证通过后，项目已进入 Vue 界面迁移、桌面能力补齐和真实端到端验收阶段。当前执行顺序和阻塞项以 [`planning/ROADMAP.md`](planning/ROADMAP.md) 为准。
 
 ## 10. 待确认事项
 

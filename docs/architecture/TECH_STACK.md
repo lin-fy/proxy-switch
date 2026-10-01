@@ -76,7 +76,7 @@ CC Switch 使用 Tauri，但它的视觉形态来自 React 组件架构、页面
 
 ### 暂不增加
 
-- Reka UI / shadcn-vue：它们适合自建组件系统；当前项目已有完整控件需求，暂不承担额外的基础组件维护成本。比较依据见 [`UI_LIBRARY_COMPARISON.md`](UI_LIBRARY_COMPARISON.md)。
+- Reka UI / shadcn-vue：它们适合自建组件系统；当前项目已有完整控件需求，暂不承担额外的基础组件维护成本。比较依据见 [`../design/UI_LIBRARY_COMPARISON.md`](../design/UI_LIBRARY_COMPARISON.md)。
 - Nuxt：应用没有 SSR、SEO 或远程页面需求。
 - VueUse：首版的窗口和异步能力用 Vue / Wails 原生 API 即可。
 - TanStack Query：资源数量少，Pinia store 足以管理刷新、缓存和错误状态。
@@ -186,7 +186,7 @@ Go Application Service
 - `EmptyState`、`ListSkeleton`、`ErrorState`；
 - `ProviderIcon`：首字母或后续接入的可信品牌资源。
 
-这些结构使用项目语义令牌，不直接暴露一堆颜色和间距 props。Tailwind v4 使用 `@tailwindcss/vite`；不创建旧版 Tailwind 或 PostCSS 配置。完整边界、实施次序与验收记录见 [`FRONTEND_IMPLEMENTATION_PLAN.md`](FRONTEND_IMPLEMENTATION_PLAN.md)。
+这些结构使用项目语义令牌，不直接暴露一堆颜色和间距 props。Tailwind v4 使用 `@tailwindcss/vite`；不创建旧版 Tailwind 或 PostCSS 配置。完整边界、实施次序与验收记录见 [`../planning/FRONTEND_IMPLEMENTATION_PLAN.md`](../planning/FRONTEND_IMPLEMENTATION_PLAN.md)。
 
 ## 8. 技术验收标准
 

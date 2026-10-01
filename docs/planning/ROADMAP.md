@@ -8,7 +8,7 @@
 
 当前前端任务仅交付设计规范与实施计划，文档基线已整理完成；以下 V1 实施与发布事项是后续工程范围。该前端任务不安装依赖、不修改源码、Go API 或生成绑定，具体边界与验收门槛见 [`FRONTEND_IMPLEMENTATION_PLAN.md`](FRONTEND_IMPLEMENTATION_PLAN.md)。
 
-产品范围和架构原则见 [`PRODUCT_PLAN.md`](../PRODUCT_PLAN.md)，执行约束见 [`PROJECT_INSTRUCTIONS.md`](../PROJECT_INSTRUCTIONS.md)。如果实现过程发现方案需要变化，先更新本文档和相关方案文档，再继续编码。
+产品范围和架构原则见 [`../product.md`](../product.md)，执行约束见 [`../../CODEX.md`](../../CODEX.md)。如果实现过程发现方案需要变化，先更新本文档和相关方案文档，再继续编码。
 
 ## 1. 目标 Goal
 
@@ -57,8 +57,8 @@ Proxy Switch
 | Provider 连通性 | [x] | 支持 `/models` 和最小 `/responses` 请求，凭据只使用引用。 |
 | Wails 桌面壳 | [x] | Wails 3、窗口关闭隐藏、托盘显示/隐藏/退出已接入。 |
 | 开机启动 | [x] | Windows `HKCU\\...\\Run` 开关已接入。 |
-| 当前工作区构建 | [-] | 前端类型检查、生产构建和 lint 已通过（最近 JS 约 636 kB raw / 192 kB gzip）。当前 PATH 未找到 Go/Wails，Go 测试、vet 和 Wails Windows 构建未复验；早期签名错误只作为历史记录，不能据此判定当前工作树仍构建失败。 |
-| Vue UI 迁移 | [-] | Vue 3、Pinia、Naive UI、Tailwind v4、配置/Profiles/Settings 页面和 Wails API 适配层已有可构建基线；浏览器窗口和导航冒烟检查已完成，Wails、DPI、焦点、IME、对比度和完整流程验收仍待完成。 |
+| 当前工作区构建 | [x] | `gofmt`、`go test ./...`、`go vet ./...`、前端格式检查、lint、生产构建和 Wails Windows amd64 构建均已复验；统一验证脚本还可生成 portable ZIP。2026-10-01 前端重构后桌面 exe 重新构建（约 11.4 MB）并完成启动冒烟：WebView2 初始化、窗口渲染真实后端空态、生产包确认不含浏览器预览演示数据。 |
+| Vue UI 迁移 | [-] | Vue 3、Pinia、Naive UI、Tailwind v4、配置/Profiles/Settings 页面和 Wails API 适配层已有可构建基线；浏览器预览模式下两尺寸截图走查通过（行列表溢出已修复），错误安全映射、错误摘要聚焦、激活消息保留已验证；Wails 桌面窗口、DPI、焦点、IME 和真实后端流程验收仍待完成。 |
 | Windows 安装包 | [-] | 用户级 ZIP 安装/卸载已验证；NSIS 和 MSIX 仍待工具链补齐。 |
 | 真实端到端验收 | [ ] | 仍需可用的 CPA、OpenAI 和自定义 Provider 以及 Codex Desktop 实际请求记录。 |
 
@@ -110,16 +110,18 @@ Proxy Switch
 
 ### M4 — Vue 桌面界面
 
-状态：`[-]`（前端基线已实现，桌面验收待完成）
+状态：`[-]`（前端基线已实现，浏览器走查通过；桌面原生验收待完成）
 
 - [x] Vue 入口、Pinia workspace store、Wails API 适配层和 Naive UI 主题。
 - [x] 配置页的 Provider / Model / Route 列表、编辑和激活流程已接入。
 - [x] Profiles 页面：档案切换、创建、删除和恢复备份的前端基线已接入。
 - [x] Settings 页面：Codex 状态、启动、自动启动和恢复入口的前端基线已接入。
 - [x] 加载、保存、测试、激活、错误和恢复状态的统一反馈已接入。
-- [ ] 收敛令牌/字体单一来源，补齐 NForm 字段 path 和错误摘要焦点。
-- [ ] 创建 Route 时保留 `restart_on_activate`，并让激活 `recovered` 只来自明确后端证据。
-- [ ] 将原始后端错误转换为安全提示，再完成 Wails Windows 构建、窗口尺寸、DPI、浮层、键盘/IME、对比度和真实后端流程验收。
+- [x] 收敛令牌/字体单一来源（`theme.ts` 从 `tokens.css` 计算值生成主题，系统字体栈），补齐 NForm 字段 path 和错误摘要焦点。
+- [x] 创建 Route 时保留 `restart_on_activate`，并让激活 `recovered` 只来自明确后端证据（失败时保持 unknown 并提供恢复入口）。
+- [x] 将原始后端错误转换为安全提示（分类映射，浏览器 401 用例验证无原始异常泄漏）。
+- [x] 修正文字对比度（muted 调整为 `#8ca3a1`，所有表面 ≥ 4.5:1，计算证据）并按 960×640 / 1120×760 截图走查修复行列表溢出。
+- [ ] 完成窗口尺寸、DPI、浮层、键盘/IME 和真实后端流程验收（Wails Windows 构建与启动冒烟已复验，见「当前状态」）。
 
 出口标准：在 960 × 640 窗口中，Provider、Model、Route、Profile 和 Settings 全流程可操作，前端构建通过。
 
@@ -130,7 +132,7 @@ Proxy Switch
 - [x] Windows amd64 可执行文件构建和启动冒烟验证。
 - [x] 无管理员权限的用户级 ZIP 安装和卸载验证。
 - [ ] 补齐 NSIS 或 MSIX 安装包，并验证安装、启动、升级/回滚和卸载。
-- [ ] 发布 `BUILD_WINDOWS.md` 的最终步骤和故障恢复说明。
+- [ ] 发布 [`../ops/BUILD_WINDOWS.md`](../ops/BUILD_WINDOWS.md) 的最终步骤和故障恢复说明。
 
 出口标准：干净 Windows 环境可以按文档安装并启动 V1。
 
@@ -143,6 +145,14 @@ Proxy Switch
 - [ ] 完成 OpenAI、CPA、自定义 Provider 和两个 Codex Profile 的验收记录。
 - [ ] 清理文档中的临时状态，更新版本号、README 和发布说明。
 - [ ] 将验收后的 `dev` 合并到 `main`，关闭 V1 goal。
+
+### CI/CD 实施状态
+
+- [x] `.github/workflows/ci.yml`：Windows runner、Go/前端检查、Wails 构建和 7 天构建产物。
+- [x] `.github/workflows/release.yml`：Tag 校验、版本元数据校验、NSIS/portable 构建、签名、SHA256 和 GitHub Release。
+- [x] `.agents/skills/review-pr`：项目级 Codex Review Skill 和检查清单。
+- [ ] 在 GitHub 配置 `production` Environment、签名证书 Secrets 和 `main` 分支保护。
+- [ ] 在 GitHub Actions 上完成一次真实 Tag 发布演练。
 
 ## 4. 计划 Plan
 
@@ -183,9 +193,9 @@ Proxy Switch
 
 只保留进入实现阶段后马上要做的三项：
 
-1. 按前端实施计划核对依赖、主题、表单、错误转换和激活状态，处理已记录的基线缺口；保持现有 Go API 和 DTO 不变。
-2. 定位既有 Go/Wails 工具链并复验 Go 测试、vet 和 Windows 构建；如有后端问题，记录为独立工程任务，不混入前端范围。
-3. 按 960 × 640、1120 × 760、125% / 150% DPI 完成壳层、浮层、焦点、键盘/IME、对比度、reduced-motion 和真实后端流程验收，再处理安装包。
+1. 完成窗口尺寸、DPI、浮层、焦点、键盘/IME 和真实后端流程验收（Wails Windows 构建与启动冒烟已复验，见 M4 与「当前状态」）。
+2. 在 GitHub 配置 `production` Environment、签名 Secrets 和 `main` 分支保护，完成一次 Tag 发布演练。
+3. 补齐 NSIS 或 MSIX 安装包并验证安装、启动、升级/回滚和卸载。
 
 ## 6. 技术决策记录
 

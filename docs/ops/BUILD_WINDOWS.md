@@ -14,9 +14,11 @@ wails3 build
 
 ```text
 C:\Users\yfeeling\go\bin
-C:\Users\yfeeling\AppData\Local\codex-go\runtime\go\bin
+C:\Users\yfeeling\AppData\Local\go-sdk\go\bin
 C:\Program Files\nodejs
 ```
+
+2026-10-01 起本机 Go 工具链为用户级安装：`C:\Users\yfeeling\AppData\Local\go-sdk\go`（go1.25.14.windows-amd64.zip 解压，无需管理员权限）；旧 `codex-go` 运行时目录已不存在。
 
 ## 安装包
 
@@ -65,10 +67,14 @@ powershell -ExecutionPolicy Bypass -File build/windows/portable/package.ps1
 应用层测试覆盖以下关键顺序：
 
 1. 读取路由关联的 Provider、Model、全部 Provider 模型和 Codex Profile。
-2. 创建对应平台适配器并执行校验和配置准备。
-3. 只有路由勾选“激活时重启”时才重启 Codex；已有进程会先按配置的可执行文件名停止，再启动新进程。
-4. 配置准备成功后才把路由保存为默认路由。
+2. 创建对应平台适配器，先用同一套 Provider 凭据执行选中模型的 Responses 可达性检查，再执行校验和配置准备。
+3. 只有路由勾选“激活时重启”时才重启 Codex；已有进程会先按配置的可执行文件名停止，再启动新进程，并把 Provider 传入启动环境。
+4. 配置准备和按需重启都成功后才把路由保存为默认路由；可达性失败不会写入配置。
 
 这组测试位于 `internal/application/route/activate_test.go`，用于防止界面层调整时破坏路由激活边界。
 
 Codex 适配器测试还覆盖：无备份时返回明确错误、活动配置与选中 Profile 配置同时恢复，以及多文件写入失败后的活动配置回滚。
+
+Provider 模型同步通过 `/models` 增量 Upsert；本地已有 Model 的启用状态保留，远端消失的 Model 不自动删除，新 Model 默认启用。Codex 目录写入独立的 `<profile-id>.models.json`，`model_catalog_json` 只保存该文件路径；目录、活动配置和 Profile 配置使用同一轮备份和事务式恢复。
+
+V1 验收加固还覆盖激活前可达性检查、Provider 凭据的子进程注入、引用删除保护和默认 Route 删除恢复。当前机器能运行 Codex CLI，但 Provider Hub 状态中没有 CPA 配置，因此 CPA 双模型和真实 Codex 重启链路仍需在目标环境手工复验。

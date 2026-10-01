@@ -1,10 +1,10 @@
 # Codex Provider Hub：UI 页面框架与实现规范
 
 > 状态：设计规范；现有实现为部分基线，尚未完成验收
-> 配套原型：[`UI_PROTOTYPE.md`](UI_PROTOTYPE.md)
+> 配套原型：[`../design/UI_PROTOTYPE.md`](../design/UI_PROTOTYPE.md)
 > 目标：在不改变 Go 业务接口的前提下，把当前单文件 DOM 页面重构为可维护的 Vue 3 桌面工具界面。
 
-本阶段只更新设计与实施计划，不安装依赖、不修改前端源码、Go API 或生成绑定。后续实施与验收以 [`FRONTEND_IMPLEMENTATION_PLAN.md`](FRONTEND_IMPLEMENTATION_PLAN.md) 为准；已有代码和历史构建结果不代表完整验收通过。
+本阶段只更新设计与实施计划，不安装依赖、不修改前端源码、Go API 或生成绑定。后续实施与验收以 [`../planning/FRONTEND_IMPLEMENTATION_PLAN.md`](../planning/FRONTEND_IMPLEMENTATION_PLAN.md) 为准；已有代码和历史构建结果不代表完整验收通过。
 
 ## 1. 约束与目标
 
@@ -192,10 +192,10 @@ workspace store 同时保存当前 Profile 选择和可供界面展示的操作�
 - `NModal` / `NDrawer` 用于编辑上下文，默认启用自动聚焦和焦点圈定；Provider 编辑弹窗设置 `mask-closable=false`，关闭前检查脏表单。
 - Provider / Profile 表单使用 `NForm`、`NFormItem` 和规则校验；错误摘要仍由页面提供，不能只依赖字段下方的红字。
 - `useMessage()`、`useDialog()`、`useNotification()` 只能在对应 Provider 后代组件的 `setup()` 中调用；Pinia 和 service 不直接显示 UI 消息。
-- 不使用 Naive 的全屏后台布局组件来生成页面壳层；壳层、导航、Provider 列表和状态摘要按 [`UI_PROTOTYPE.md`](UI_PROTOTYPE.md) 自有布局实现。
+- 不使用 Naive 的全屏后台布局组件来生成页面壳层；壳层、导航、Provider 列表和状态摘要按 [`../design/UI_PROTOTYPE.md`](../design/UI_PROTOTYPE.md) 自有布局实现。
 - 组件库只负责控件行为和基础外观。颜色的唯一来源是 `styles/tokens.css`；`themeOverrides` 读取令牌计算值，具体方法见实施计划，不维护另一套颜色。
 
-完整的组件库比较、版本依据和未实测项见 [`UI_LIBRARY_COMPARISON.md`](UI_LIBRARY_COMPARISON.md)。
+完整的组件库比较、版本依据和未实测项见 [`../design/UI_LIBRARY_COMPARISON.md`](../design/UI_LIBRARY_COMPARISON.md)。
 
 ## 7. 表单与弹窗规范
 

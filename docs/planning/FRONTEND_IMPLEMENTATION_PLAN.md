@@ -8,7 +8,7 @@
 
 工作树已有 Vue 前端和其他未提交改动。本计划保留这些事实，不回滚现有工作，也不把已有部分实现视为完成验收。后续开始实施时先核对工作树，沿用可复用部分；不要重复安装、搭建或提交其他工作的文件。
 
-配套文档：[`TECH_STACK.md`](TECH_STACK.md)、[`UI_ARCHITECTURE_SPEC.md`](UI_ARCHITECTURE_SPEC.md)、[`UI_PROTOTYPE.md`](UI_PROTOTYPE.md)。本计划中的混合样式边界取代旧文档里“只用原生 CSS、不引入 Tailwind”的结论。
+配套文档：[`../architecture/TECH_STACK.md`](../architecture/TECH_STACK.md)、[`../architecture/UI_ARCHITECTURE_SPEC.md`](../architecture/UI_ARCHITECTURE_SPEC.md)、[`../design/UI_PROTOTYPE.md`](../design/UI_PROTOTYPE.md)。本计划中的混合样式边界取代旧文档里“只用原生 CSS、不引入 Tailwind”的结论。
 
 原型用于页面层级和布局参考。若旧原型文字与本计划冲突，以本计划为准：校验失败先聚焦错误摘要，再由摘要定位字段；没有现有 API 支撑的设置不虚构交互。
 
@@ -136,22 +136,22 @@ Store 并行刷新四种资源，计算明确的已激活路由，管理 loading
 
 | 项目 | 证明方法 | 当前证据状态 |
 | --- | --- | --- |
-| 类型与生产构建 | 单独运行 `vue-tsc --noEmit`、`npm run build`，保存退出码和产物 | 2026-10-01 通过；4428 modules，JS 636.18 kB raw / 192.47 kB gzip，仍有单 chunk 超过 500 kB 的 Vite 提示 |
-| Wails Windows 构建 | 沿用项目 Windows task、生成 exe 并启动 WebView | 未验收；此前工具不在 PATH，须查实际安装路径 |
-| 本地资源 | 检查生产 HTML/CSS/JS 加载入口，离线运行并检查资源请求；SVG namespace 和文档链接不等于远程加载 | 2026-10-01 静态检查仅发现随包字体和用户输入的 URL 占位符；离线运行与 WebView 请求记录仍待做 |
-| 令牌与字体单一来源 | 检查 `themeOverrides` 是否从 `tokens.css` 的计算值生成，且字体确实为系统字体或随包资源；不得维护第二套硬编码颜色 | 当前基线的 `src/app/theme.ts` 仍有硬编码颜色，并声明 IBM Plex Sans / JetBrains Mono；待实施阶段收敛并记录字体资源 |
-| 960 × 640 / 1120 × 760 | 两尺寸下空态、长列表、弹窗、菜单、通知截图；检查壳层高度和滚动区域 | 960 空/错误态历史检查；长列表和推荐窗口未完整验收 |
+| 类型与生产构建 | 单独运行 `vue-tsc --noEmit`、`npm run build`，保存退出码和产物 | 2026-10-01 通过；4431 modules，主 chunk 637.88 kB raw / 193.66 kB gzip，Profiles/Settings 已拆为懒加载 chunk（6.37 / 5.33 kB），仍有单 chunk 超过 500 kB 的 Vite 提示 |
+| Wails Windows 构建 | 沿用项目 Windows task、生成 exe 并启动 WebView | 2026-10-01 复验：go1.25.14（用户级安装于 AppData\Local\go-sdk）+ wails3 v3.0.0-beta.26 生成 `bin/codex-provider-hub.exe`（约 11.4 MB，windowsgui），启动冒烟通过：WebView2 初始化成功、窗口渲染真实后端空态；NSIS/MSIX 安装包仍待工具链补齐 |
+| 本地资源 | 检查生产 HTML/CSS/JS 加载入口，离线运行并检查资源请求；SVG namespace 和文档链接不等于远程加载 | 2026-10-01 静态检查仅发现随包字体和用户输入的 URL 占位符；浏览器预览演示数据（demo-data.ts）确认已被生产构建完整剔除（仅存占位文案），离线运行与 WebView 请求记录仍待做 |
+| 令牌与字体单一来源 | 检查 `themeOverrides` 是否从 `tokens.css` 的计算值生成，且字体确实为系统字体或随包资源；不得维护第二套硬编码颜色 | 2026-10-01 已收敛：`theme.ts` 在 App setup 阶段读取 `tokens.css` 计算值生成 themeOverrides，无第二套硬编码颜色；字体改为真实系统字体栈（`--font-ui` = Segoe UI / 中文系统字体，`--font-mono` = Consolas），伪造的 IBM Plex / JetBrains Mono @font-face 已删除 |
+| 960 × 640 / 1120 × 760 | 两尺寸下空态、长列表、弹窗、菜单、通知截图；检查壳层高度和滚动区域 | 2026-10-01 浏览器预览模式下 960×640 与 1120×760 截图走查通过，发现并修复行列表 grid 轨道 max-content 溢出；原生窗口验收仍待做 |
 | Windows 125% / 150% | 原生 Windows/WebView 在两缩放下检查焦点、文字、浮层边界 | 未验收；浏览器 viewport 不能冒充 DPI 测试 |
-| 固定导航/主区滚动 | 长列表滚动，比较工具栏、导航、状态区位置和主区 scrollTop | 待做，空页面不足以证明 |
+| 固定导航/主区滚动 | 长列表滚动，比较工具栏、导航、状态区位置和主区 scrollTop | 2026-10-01 浏览器走查：导航、工具栏、底部状态区固定，仅主内容区滚动（截图证据）；原生窗口核对待做 |
 | 浮层 | 两尺寸打开最长表单、底部菜单和通知，检查边界与可滚动内容 | 未完整验收 |
 | Modal 焦点 | 记录打开时 activeElement、Tab/Shift+Tab 圈定、Esc、关闭后焦点 | 未完整验收 |
 | 校验与保留输入 | 空值、空白、无效 URL、后端失败；错误摘要聚焦且输入不丢失 | 待做，已有规则声明不足以证明 |
-| NForm 字段语义 | 逐项核对每个 `NFormItem` 的 `path`、label/id、错误摘要和失败后焦点；保存字段输入 | 当前基线已声明 rules，但 Profile 表单仍需补齐显式 `path` 并完成焦点验证 |
-| Route 创建语义 | 新建 Route 后核对 `restart_on_activate` 与用户输入一致，且不新增后端 API | 当前基线调用 `CreateRoute` 时未传递该字段；需使用现有 DTO/保存方法补齐并验证 |
-| 激活恢复状态 | 仅使用后端明确证据设置 `recovered`；错误文案不能作为状态协议 | 当前基线从错误文本中查找“恢复/restore”来推断状态；待移除并保留 unknown |
-| 错误信息边界 | 将后端异常转换为安全、可操作的中文提示，不把原始异常直接放入界面 | 当前基线 `describeError` 直接返回原始 `Error.message`；待建立安全映射 |
+| NForm 字段语义 | 逐项核对每个 `NFormItem` 的 `path`、label/id、错误摘要和失败后焦点；保存字段输入 | 2026-10-01 全部 NFormItem 已补显式 `path`；提交失败时表单顶部显示错误摘要（真实字段文案）、自动聚焦且点击条目可跳转对应字段（浏览器验证）；完整逐项核对仍待真实后端 |
+| Route 创建语义 | 新建 Route 后核对 `restart_on_activate` 与用户输入一致，且不新增后端 API | 2026-10-01 已补齐：CreateRoute 后按用户勾选通过现有 SaveRoute 保存 `restart_on_activate`，未新增后端 API；真实后端一致性核对待做 |
+| 激活恢复状态 | 仅使用后端明确证据设置 `recovered`；错误文案不能作为状态协议 | 2026-10-01 已移除错误文本解析：激活失败时 `recovered` 恒为 unknown，界面提示到「配置档案」页恢复备份；真实后端证据待接入 |
+| 错误信息边界 | 将后端异常转换为安全、可操作的中文提示，不把原始异常直接放入界面 | 2026-10-01 `describeError` 已建立分类安全映射（网络/凭据/404/限流/档案/配置写入）；浏览器 401 用例验证 toast 与页脚仅显示安全提示，原始异常未泄漏 |
 | 键盘与 IME | 键盘导航、Enter 提交、Escape 取消、中文候选确认不提交 | 未完整验收 |
-| 对比度 | 计算文字对所有实际背景比率，含 muted、selected、占位符、控件 | 未验收，目标 ≥4.5:1 |
+| 对比度 | 计算文字对所有实际背景比率，含 muted、selected、占位符、控件 | 2026-10-01 计算通过：muted 调整为 `#8ca3a1`，对 surface-0/1/2/selected 分别为 6.90/6.35/5.75/4.70:1，secondary ≥ 5.94:1，primary ≥ 10.8:1；界面截图复核 |
 | reduced-motion | 启用系统减少动效，检查实际过渡/动画不位移 | 声明存在；运行行为待验证 |
 | Go API / binding 不变 | 实施差异与开始基线逐文件核对，不把他人改动算入本阶段 | 本阶段不修改；工作树已有其他改动 |
 
