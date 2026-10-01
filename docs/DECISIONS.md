@@ -81,3 +81,13 @@
 - 决策：`frontend/src/services/wails-api.ts` 仅在「开发构建（`import.meta.env.DEV`）且检测不到 Wails runtime（`window._wails.environment`）」时启用内存演示数据（`services/demo-data.ts`），界面在侧栏与底部状态栏显示「预览数据」标记。生产构建经产物检查确认演示数据被完整剔除。
 - 理由：不修改 Go API 与绑定，让 `npm run dev` 成为界面开发的快速预览环境；最终交付形态保持为 Wails 桌面工具。
 - 后果：浏览器 `npm run dev` 中看到的是演示数据而非真实配置；任何真实行为验证必须在 `wails3 build` 产出的桌面 exe 中进行。
+
+## ADR-0008：并行分支在合并前同步最新 dev
+
+- 日期：2026-10-01
+- 决策人：用户 + codex
+- 状态：accepted
+- 背景：多个 agent 并行开发时，各自 worktree 会自然落后于 `dev`；强制实时同步会打断开发，直接合并又可能把旧代码带入主分支。
+- 决策：开发期间允许 agent 分支暂时落后；准备合并时，agent 必须在自己的 worktree 执行 `git merge dev`，在该分支解决冲突并重新运行任务验证，验证通过后再合并到 `dev`。
+- 理由：把版本冲突处理放在隔离工作树中，避免主工作树出现半解决状态；保留已有提交，不要求 force push 或改写分支历史。
+- 后果：合并前需要额外一次同步和验证；被忽略的依赖、缓存和构建产物仍需通过独立初始化流程生成，Git 合并不会自动补齐。

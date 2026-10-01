@@ -23,7 +23,7 @@
 
 - **代码改动**：在 agent 自己的工作树，提交到 agent 自己的分支
 - **文档更新**（TASKS/CONTEXT/CHANGELOG/DECISIONS）：**只在主工作树**，提交到 dev 分支
-- **合并**：由用户在主工作树执行 `git merge`
+- **合并**：任务验收通过后，由负责该任务的 agent 在主工作树自行合并到 `dev`，无需用户执行或再次确认
 
 ### 工作树结构
 
@@ -73,6 +73,23 @@ git commit -m "feat(<scope>): <改动说明>"
 # 可以多次提交
 ```
 
+开发期间允许 agent 分支暂时落后于 `dev`。其他 agent 合并代码不会自动改动当前工作树。
+
+#### 3.5 合并前同步版本（在自己的工作树）
+
+准备合并时，先在 agent 自己的工作树同步主分支：
+
+```bash
+cd ../proxy-switch-<agent名>
+git status --short
+# 确认当前修改已保存并且工作区干净
+git merge dev
+# 如有冲突，只在当前 agent 分支解决
+# 解决后重新运行本任务的测试和构建
+```
+
+同步后的分支必须重新验证通过，才能进入主工作树合并。不得用重置、删除文件或覆盖他人修改的方式解决版本落后问题。
+
 #### 4. 完成后更新文档（回到主工作树）
 
 ```bash
@@ -84,19 +101,23 @@ git add docs/TASKS.md docs/CHANGELOG.md docs/CONTEXT.md
 git commit -m "docs(collab): record <agent名> <任务简称> completion"
 ```
 
-#### 5. 请求合并
+#### 5. 合并前检查
 
-告诉用户："我在 `<分支名>` 完成了 `<任务>`，请合并。"
+agent 确认自己的分支已经合并最新 `dev` 并完成验证；随后确认主工作树处于 `dev`、工作区干净，并检查待合并差异和任务验收结果。不得覆盖他人未提交的改动。
 
-#### 6. 用户合并（在主工作树）
+#### 6. agent 自行合并（在主工作树）
 
 ```bash
 cd H:/code/proxy-switch
-git merge <agent名>/<任务简称>
-git push origin dev
+git merge --no-ff <agent名>/<任务简称> -m "<type>(<scope>): merge <任务简称>"
+git status --short
 ```
 
-#### 7. 清理工作树（可选，由用户执行）
+合并后检查结果，并向用户报告合并提交和验证情况。推送远端仍按用户授权执行。出现涉及他人工作或需求取舍的冲突时，按冲突处理规则协调，不覆盖或回滚他人改动。
+
+#### 7. 清理工作树（可选，由所属 agent 执行）
+
+仅清理自己的、工作区干净且分支已合并的工作树；不得强制删除。
 
 ```bash
 git worktree remove ../proxy-switch-<agent名>
@@ -129,6 +150,10 @@ cd ../proxy-switch-zcode
 git add frontend/src/pages/ConfigPage.vue
 git commit -m "fix(ui): correct DPI scaling on 960x640 window"
 
+# zcode 合并前同步主分支并重新验证
+git merge dev
+# 解决冲突后重新运行验收
+
 # zcode 完成后回到主工作树更新文档
 cd H:/code/proxy-switch
 # 编辑 TASKS.md: [x by zcode 2026-10-02]
@@ -136,13 +161,13 @@ cd H:/code/proxy-switch
 git add docs/TASKS.md docs/CHANGELOG.md
 git commit -m "docs(collab): record zcode m4-dpi-fix completion"
 
-# zcode 告诉用户："我在 zcode/m4-dpi-fix 完成了 M4 DPI 验收，请合并"
+# zcode 检查主工作树状态和任务验收结果后自行合并
+git status --short
+git merge --no-ff zcode/m4-dpi-fix -m "fix(ui): merge M4 DPI acceptance"
+git status --short
+# 向用户报告合并结果；推送远端按用户授权执行
 
-# 用户合并
-git merge zcode/m4-dpi-fix
-git push origin dev
-
-# 用户清理（可选）
+# zcode 清理自己的已合并、干净工作树（可选）
 git worktree remove ../proxy-switch-zcode
 git branch -d zcode/m4-dpi-fix
 ```

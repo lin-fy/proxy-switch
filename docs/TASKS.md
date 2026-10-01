@@ -36,6 +36,8 @@
 
 ## 已完成
 
+- [x by codex 2026-10-01] 明确并行分支版本同步规则：开发期间允许落后，合并前在 agent worktree 合并最新 `dev` 并重新验证
+- [x by codex 2026-10-01] 按用户指示调整并行流程：任务验收通过后由 agent 自行合并到 dev
 - [x by codex 2026-10-01] 文档结构整理：建立多 agent 协作机制（AGENTS.md + 各 agent 入口 + docs/CONTEXT/TASKS/CHANGELOG/DECISIONS）
 - [x by zcode 2026-10-01] 前端基线缺口修复与视觉重做（令牌单一来源、错误安全映射、表单 path/错误摘要、懒加载、960/1120 走查）
 - [x by zcode 2026-10-01] 桌面构建复验与用户级 Go 1.25 工具链安装（wails3 build + 启动冒烟 + 生产包演示数据剔除检查）
