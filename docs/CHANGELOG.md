@@ -10,6 +10,16 @@
 
 ## 2026-10-02 · codex
 
+### ops(github): make repository public and enable release protections
+
+- **影响**：按用户明确授权将 `lin-fy/proxy-switch` 从私有改为公开，解决原分支保护和 Environment 审批的方案限制。
+- **验证**：GitHub API 确认 `visibility=public`；`main` 要求 PR、`verify` 通过、最新分支和对话解决，规则对管理员生效，禁止强推/删除；单人仓库强制批准人数为 0。`production` 已添加 `lin-fy` 为审批人，允许本人批准；两个 Secret 名称仍存在，未读取其值。
+- **关键文件**：`docs/TASKS.md`、`docs/planning/ROADMAP.md`、`docs/DECISIONS.md`、`docs/CONTEXT.md`
+- **后续**：当前 Secrets 为自签名测试凭据，签名和 Tag 演练仍待验证；未创建 Tag 或 Release。
+- **commit**：待下次文档提交回填
+
+## 2026-10-02 · codex
+
 ### docs(planning): align V1.0 goal tree and M6 acceptance gates
 
 - **影响**：修正 ROADMAP 中已完成的 Provider/Route/自动重启状态，新增 M6-A 到 M6-E 的执行顺序与验收证据矩阵，并同步产品状态与 CI/CD 的 `v1.0.0` 发布目标。

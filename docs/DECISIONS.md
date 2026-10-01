@@ -121,3 +121,13 @@
 - 决策：`scripts/ci/verify.ps1` 作为唯一验证实现，`Taskfile.yml` 提供前端、后端和完整 CI 入口；GitHub Actions 只执行这些确定性检查。AI Review 或失败诊断只能作为独立的可选分析层。
 - 理由：任何 agent 都能调用相同命令，CI 结果可复现，模型或中转服务不可用时仍能完成构建、测试和发布。
 - 后果：需要 AI 分析时必须另行配置凭据、权限和失败触发策略；AI 不直接拥有生产发布权限。
+
+## ADR-0012：公开仓库并启用 main 与 production 保护
+
+- 日期：2026-10-02
+- 决策人：用户 + codex
+- 状态：accepted
+- 背景：私有仓库的当前 GitHub 方案拒绝分支保护和 Environment 发布审批；用户明确要求将仓库设为公开。
+- 决策：将 `lin-fy/proxy-switch` 改为公开。`main` 必须通过 PR 和最新分支上的 `verify` 检查，解决对话后才能合并，禁止强推/删除，管理员同样受约束；单人仓库强制批准人数为 0。`production` 由 `lin-fy` 审批，允许本人批准。
+- 理由：使用当前方案可用的 GitHub 保护能力，保留单人 PR 和发布审批流程。
+- 后果：源码和已推送历史对外公开，Environment Secrets 仍受 GitHub 保护；本次设置不证明签名凭据有效或 V1 已验收，正式发布仍需相应验证。

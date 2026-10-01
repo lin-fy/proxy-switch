@@ -121,7 +121,7 @@ Proxy Switch
 - [x] `.github/workflows/ci.yml`：Windows runner、Go/前端检查、Wails 构建和 7 天构建产物。
 - [x] `.github/workflows/release.yml`：Tag 校验、版本元数据校验、NSIS/portable 构建、签名、SHA256 和 GitHub Release。
 - [x] `.agents/skills/review-pr`：项目级 Codex Review Skill 和检查清单。
-- [ ] 在 GitHub 配置 `production` Environment、签名证书 Secrets 和 `main` 分支保护。
+- [x] 在 GitHub 配置 `production` Environment、两个测试签名 Secrets 和 `main` 分支保护（2026-10-02：用户授权将仓库公开；`main` 要求 PR、`verify` 通过、分支最新和对话解决，禁止强推与删除；`production` 审批人为 `lin-fy`）。Secret 名称已验证，PFX 密码与证书信任尚待实际签名验证。
 - [ ] 在 GitHub Actions 上完成一次真实 Tag 发布演练。
 
 ## 4. 计划 Plan
@@ -133,11 +133,11 @@ M6-A：对齐状态、目标和验收证据
   ↓
 M6-B：本地确定性验证与 Windows 产物检查（已完成）
   ↓
-M6-D：GitHub production Environment、签名 Secrets、main 保护与 Tag 演练（当前先行）
+M6-D 配置：GitHub production Environment、测试签名 Secrets、main 保护与审批（已完成）
   ↓
 M6-C：CPA / OpenAI / 自定义 Provider 真实端到端验收（按用户安排延后）
   ↓
-M6-E：确认 1.0.0、合并 main、发布签名安装包并关闭 V1 goal
+M6-D 演练 / M6-E：确认签名凭据、统一版本、合并 main、Tag 演练与正式发布
 ```
 
 ### M6 验收证据与门槛
@@ -147,7 +147,7 @@ M6-E：确认 1.0.0、合并 main、发布签名安装包并关闭 V1 goal
 | M6-A | 文档状态与代码、已合并验收结果一致 | [x] | 本文件、`docs/CONTEXT.md`、`docs/TASKS.md` |
 | M6-B | Go/前端/Wails/portable ZIP 验证通过，且本地找不到 Wails 时给出明确预检 | [x] | `scripts/ci/verify.ps1`、`docs/ops/CI_CD.md`、`docs/ops/BUILD_WINDOWS.md` |
 | M6-C | 三类 Provider 各完成真实请求；CPA 验证两个模型；两个 Profile 可切换、激活、恢复 | [ ] | 需要用户提供 Provider 凭据与 Codex Desktop 环境 |
-| M6-D | GitHub Environment、签名 Secrets、`main` 分支保护和一次 Tag 发布演练完成 | [ ] | 需要仓库管理员操作，流程见 `docs/ops/RELEASE_CHECKLIST.md` |
+| M6-D | GitHub Environment、签名 Secrets、`main` 分支保护和一次 Tag 发布演练完成 | [-] | 仓库已公开，保护与审批已生效；测试 Secrets 已配置，签名与 Tag 演练尚未验证；流程见 `docs/ops/RELEASE_CHECKLIST.md` |
 | M6-E | 版本资源、Tag、Release 产物和安装验证全部一致 | [ ] | 依赖 M6-C、M6-D；目标 Tag 为 `v1.0.0` |
 
 ### 执行原则
@@ -171,7 +171,7 @@ M6-E：确认 1.0.0、合并 main、发布签名安装包并关闭 V1 goal
 
 只保留进入实现阶段后马上要做的两项：
 
-1. 在 GitHub 配置 `production` Environment、签名 Secrets 和 `main` 分支保护，完成一次 Tag 发布演练（**需要用户操作**）。
+1. GitHub 配置已完成；下一步确认实际签名能力并准备 Tag 发布演练（当前证书为自签名测试证书，现有工作流要求签名状态为 `Valid` 且带时间戳）。
 2. 完成 CPA、OpenAI、自定义 Provider 的真实端到端验收（**需要用户提供凭据**）。
 
 ## 6. 技术决策记录
