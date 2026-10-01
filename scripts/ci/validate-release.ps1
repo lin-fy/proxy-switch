@@ -1,4 +1,4 @@
-#Requires -Version 7.3
+#Requires -Version 5.1
 param(
     [Parameter(Mandatory)]
     [string]$Tag,
@@ -6,7 +6,15 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$PSNativeCommandUseErrorActionPreference = $true
+
+function Invoke-Native([string]$Name, [scriptblock]$Command) {
+    $output = & $Command
+    $exitCode = $LASTEXITCODE
+    if ($exitCode -ne 0) {
+        throw "$Name failed with exit code $exitCode"
+    }
+    return $output
+}
 
 if ($Tag -notmatch '^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$') {
     throw 'Release tag must match vX.Y.Z without prerelease suffixes'
@@ -16,12 +24,12 @@ foreach ($part in $version.Split('.')) {
     if ([decimal]$part -gt 65535) { throw 'Windows version components must be at most 65535' }
 }
 
-$tagExists = @(git tag --list $Tag)
+$tagExists = @(Invoke-Native 'git tag --list' { git tag --list $Tag })
 if ($tagExists.Count -eq 0) { throw "Release tag does not exist: $Tag" }
-$tagCommit = git rev-parse --verify "refs/tags/$Tag^{commit}"
-$headCommit = git rev-parse HEAD
+$tagCommit = [string](Invoke-Native 'git rev-parse tag' { git rev-parse --verify "refs/tags/$Tag^{commit}" })
+$headCommit = [string](Invoke-Native 'git rev-parse HEAD' { git rev-parse HEAD })
 if ($tagCommit -ne $headCommit) { throw 'Checkout does not match the release tag' }
-git merge-base --is-ancestor $tagCommit $MainRef
+$ancestorCheck = & git merge-base --is-ancestor $tagCommit $MainRef
 if ($LASTEXITCODE -ne 0) { throw "Release tag is not on $MainRef" }
 
 $config = Get-Content build/config.yml -Raw
