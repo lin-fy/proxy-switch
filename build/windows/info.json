@@ -4,7 +4,7 @@
 	},
 	"info": {
 		"0000": {
-			"ProductVersion": "1.0.0",
+			"ProductVersion": "0.1.0",
 			"CompanyName": "Codex Provider Hub",
 			"FileDescription": "Local provider routing for Codex Desktop",
 			"LegalCopyright": "(c) 2026 Codex Provider Hub",
