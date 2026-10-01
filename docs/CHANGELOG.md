@@ -36,4 +36,4 @@
 
 - **影响**：工作区 88 个路径分 6 组提交完毕。其中 `feat(backend)`（2d2f821）与 `build(ci)`（417d4d6）两组是**整理 codex 之前未提交的工作**（后端 Provider 模型同步/引用完整性/凭据引用助手 + GitHub Actions/打包脚本），zcode 仅做分组、命名与提交，未改动代码内容；`chore(frontend)`（2046906）为前端 lint/format 工具链配置
 - **关键文件**：见 `git log` 对应提交
-- **commit**：<提交后补充 hash>
+- **commit**：f8a718e
