@@ -24,6 +24,12 @@
 - **关键文件**：`docs/CONTEXT.md`、`docs/planning/ROADMAP.md`
 - **后续**：按 `docs/ops/RELEASE_CHECKLIST.md` 完成仓库设置；当前不创建 Tag、不切换 `1.0.0`。
 
+### docs(ops): record GitHub branch protection plan limitation
+
+- **影响**：只读审计确认仓库为私有仓库，当前 GitHub 方案对分支保护和 Rulesets 返回 403；`production` Environment 尚未创建，远端没有 Tag。
+- **关键文件**：`docs/CONTEXT.md`
+- **后续**：用户需升级 GitHub 方案或将仓库设为公开后，才能完成 `main` 分支保护；Environment 和 Secrets 仍需用户配置。
+
 ### fix(ci): support Windows PowerShell 5.1 in verification scripts
 
 - **影响**：CI 验证、发布版本守卫及其测试不再要求 PowerShell 7.3；通过显式检查原生命令退出码，保留 5.1 下的失败检测行为。
