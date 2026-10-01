@@ -135,3 +135,12 @@
 - **关键文件**：`build/Taskfile.yml`
 - **后续**：等待 PR 的完整 Windows CI 通过再合并
 - **commit**：待下次文档提交回填
+
+## 2026-10-01 · zcode
+
+### perf(ui): split vendor chunks and name the profile selects
+
+- **影响**：vite `manualChunks` 把依赖拆为 naive-ui（437.74 kB）/ framework（129.50 kB）/ vendor（28.93 kB）/ icons（5.90 kB），业务代码 index 从 638.10 kB 降至 36.97 kB，单 chunk 全部低于 500 kB 警告线；桌面端经 go:embed 打包总字节不变，收益是业务改动不再翻新库代码 hash。顶栏与设置页的配置档案 NSelect 在无档案时禁用（naive-ui 非过滤选择器空值时内部焦点 div 无可访问名称、attrs 无法透传到内部元素属上游限制），消除无名 tab stop；运行时审计三个页面可聚焦控件 0 个无名称
+- **关键文件**：`frontend/vite.config.ts`、`frontend/src/components/DesktopShell.vue`、`frontend/src/pages/SettingsPage.vue`
+- **后续**：模态/对话框右上角 X 关闭按钮（NCard/NDialog 内部）无可访问名称为上游限制，可考虑向 naive-ui 反馈；`wails/custom.js` 404 为运行时探测可选文件的上游行为，与本次分包无关
+- **commit**：`65762fb`（PR #4）

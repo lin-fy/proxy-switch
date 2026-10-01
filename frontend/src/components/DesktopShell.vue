@@ -78,6 +78,7 @@ const statusText = computed(() => {
             :options="profileOptions"
             size="small"
             placeholder="当前档案"
+            :disabled="!workspace.profiles.length"
             aria-label="当前 Codex 配置档案"
           />
           <NTag size="small" :bordered="false" :type="workspace.codexRunning ? 'success' : 'default'">{{
