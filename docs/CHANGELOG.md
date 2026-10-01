@@ -71,4 +71,13 @@
 
 - **影响**：按用户指示，已验收的并行任务由所属 agent 在主工作树自行合并到 `dev`，无需用户执行或再次确认；同步流程和示例，保留他人改动保护及远端推送授权要求。
 - **关键文件**：`AGENTS.md`、`docs/agent-guide/git-rules.md`、`docs/TASKS.md`、`docs/CONTEXT.md`
+- **commit**：381c19e
+
+## 2026-10-01 · codex
+
+### docs(agents): define pre-merge branch synchronization
+
+- **影响**：并行 worktree 的版本同步和合并前验收流程
+- **关键文件**：`AGENTS.md`、`docs/agent-guide/workflow.md`、`docs/agent-guide/git-rules.md`、`docs/CONTEXT.md`、`docs/TASKS.md`、`docs/DECISIONS.md`
+- **后续**：补充新 worktree 的依赖和构建输入初始化入口
 - **commit**：待下次文档提交回填

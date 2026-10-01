@@ -73,6 +73,23 @@ git commit -m "feat(<scope>): <改动说明>"
 # 可以多次提交
 ```
 
+开发期间允许 agent 分支暂时落后于 `dev`。其他 agent 合并代码不会自动改动当前工作树。
+
+#### 3.5 合并前同步版本（在自己的工作树）
+
+准备合并时，先在 agent 自己的工作树同步主分支：
+
+```bash
+cd ../proxy-switch-<agent名>
+git status --short
+# 确认当前修改已保存并且工作区干净
+git merge dev
+# 如有冲突，只在当前 agent 分支解决
+# 解决后重新运行本任务的测试和构建
+```
+
+同步后的分支必须重新验证通过，才能进入主工作树合并。不得用重置、删除文件或覆盖他人修改的方式解决版本落后问题。
+
 #### 4. 完成后更新文档（回到主工作树）
 
 ```bash
@@ -86,7 +103,7 @@ git commit -m "docs(collab): record <agent名> <任务简称> completion"
 
 #### 5. 合并前检查
 
-agent 确认主工作树处于 `dev`、工作区干净，并检查待合并差异和任务验收结果。不得覆盖他人未提交的改动。
+agent 确认自己的分支已经合并最新 `dev` 并完成验证；随后确认主工作树处于 `dev`、工作区干净，并检查待合并差异和任务验收结果。不得覆盖他人未提交的改动。
 
 #### 6. agent 自行合并（在主工作树）
 
@@ -132,6 +149,10 @@ cd ../proxy-switch-zcode
 # ... 改代码 ...
 git add frontend/src/pages/ConfigPage.vue
 git commit -m "fix(ui): correct DPI scaling on 960x640 window"
+
+# zcode 合并前同步主分支并重新验证
+git merge dev
+# 解决冲突后重新运行验收
 
 # zcode 完成后回到主工作树更新文档
 cd H:/code/proxy-switch
