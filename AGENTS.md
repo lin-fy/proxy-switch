@@ -13,6 +13,20 @@
 4. **Git 禁区**：禁止 `git add .` / `git add -A` / `git reset --hard` / `git clean -fd` / force push / 未经用户允许 commit。允许 `git reset --soft` 撤销本地未推送提交。
 5. **安全**：密钥、Token、密码不写入代码、配置、日志、文档或提交；凭据用引用机制（环境变量 / Windows Credential Manager）。
 
+## 模型无关验证协议
+
+项目验证不依赖 Codex、Pi、Claude Code 或任何特定模型。完成改动后按范围运行统一入口：
+
+```powershell
+task check:frontend   # 前端格式、lint、类型检查和生产构建
+task check:backend    # Go 格式、模块、vet 和测试
+task ci               # 全部检查 + Windows Wails 构建与 portable ZIP
+```
+
+GitHub Actions 复用 `scripts/ci/verify.ps1`；CI 本身不调用 LLM。失败诊断或 AI Review 属于独立的可选工作流，不能替代这些硬检查。
+
+如果本机没有安装 Go Task，可直接调用同一实现：`pwsh -NoProfile -File ./scripts/ci/verify.ps1 -Scope frontend`、`-Scope backend` 或 `-BuildWindows`。
+
 ---
 
 ## 并行开发流程（多 agent 同时干活）

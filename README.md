@@ -27,6 +27,14 @@ npm run dev
 task build
 ```
 
+完成代码修改后可用同一套模型无关验证入口：
+
+```powershell
+task check:frontend
+task check:backend
+task ci
+```
+
 完整构建与安装说明见 [`docs/ops/BUILD_WINDOWS.md`](docs/ops/BUILD_WINDOWS.md)。
 
 ## 文档

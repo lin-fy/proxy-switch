@@ -15,6 +15,21 @@ includes:
   windows: ./build/windows/Taskfile.yml
 
 tasks:
+  ci:
+    summary: Runs the complete model-independent CI verification
+    cmds:
+      - pwsh -NoProfile -File ./scripts/ci/verify.ps1 -BuildWindows
+
+  check:frontend:
+    summary: Runs frontend formatting, lint, type-check, and production build checks
+    cmds:
+      - pwsh -NoProfile -File ./scripts/ci/verify.ps1 -Scope frontend
+
+  check:backend:
+    summary: Runs Go formatting, module, vet, and test checks
+    cmds:
+      - pwsh -NoProfile -File ./scripts/ci/verify.ps1 -Scope backend
+
   build:
     summary: Builds the application
     cmds:

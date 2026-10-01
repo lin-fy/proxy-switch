@@ -22,6 +22,24 @@ wails3 build
 
 The Windows executable and portable ZIP are retained as workflow artifacts for seven days.
 
+## Agent-independent local verification
+
+All coding agents use the same PowerShell verifier; the selected model does not change the checks. From the repository root:
+
+Use PowerShell 7.3+, Go 1.25 and Node.js 22, then install the locked frontend dependencies with `npm ci` in `frontend/`. A fresh checkout needs `task check:frontend` before `task check:backend`, because the Go entry point embeds `frontend/dist`. The complete `task ci` already runs them in this order and additionally requires Wails `v3.0.0-beta.26`.
+
+```text
+task check:frontend   # format, lint, type-check, production frontend build
+task check:backend    # gofmt, go mod tidy check, vet, tests
+task ci               # both scopes plus Wails Windows build and portable ZIP
+```
+
+`Taskfile.yml` and GitHub Actions both delegate to `scripts/ci/verify.ps1`. CI never calls an LLM. If an AI reviewer or failure diagnostician is added later, it may analyze the logs after these checks fail, but it must not approve or publish artifacts by itself.
+
+When Go Task is not installed, invoke the same implementation directly, for example `pwsh -NoProfile -File ./scripts/ci/verify.ps1 -Scope backend`.
+
+For Windows builds, the verifier also searches `GOPATH\bin` for an installed Wails CLI. It adjusts only the verification process's PATH; user and system PATH settings are unchanged.
+
 ## Release
 
 Create a version commit on `dev`, merge it into `main`, and create a tag matching the version in `build/config.yml`:
