@@ -39,6 +39,8 @@
 
 ## 已完成
 
+- [x by codex 2026-10-02] 补齐 Provider/Model 删除引用保护、`store.go` 并发写入与损坏 JSON 安全失败的针对性测试；PR #9 同步 dev 后完整 Windows 验证通过；去锁变异测试检验并发回归用例有效，本机无 C 编译器，未运行 race detector
+
 - [x by codex 2026-10-02] 新增 Wails v3 beta 前端开发规则并统一到 `v3.0.0-beta.27`：前端改动前核对最新具体版本，统一 Go 模块、CLI、runtime、CI 和文档，重新生成绑定并通过 `task ci`
 
 - [x by codex 2026-10-02] 按用户授权合并 PR #11 到 `dev`：统一 UI 版本来源并修复 Windows 依赖安装路径；合并提交 `0b33c73`，合并后 Windows CI 通过（运行 `36967821792`）

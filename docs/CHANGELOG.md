@@ -8,6 +8,15 @@
 
 ---
 
+## 2026-10-02 · codex
+
+### test(config): synchronize PR #9 with dev and revalidate
+
+- **影响**：在独立工作树同步 PR #9 与 `dev`，解决协作文档冲突并保留双方记录；生产代码不变，Provider/Model 删除引用保护、并发写入和损坏状态测试均保留。
+- **验证**：`review-checks.ps1 -BuildWindows` 通过，含前端格式/lint/类型检查/生产构建、Go 格式/模块/vet/测试、Wails beta.27 Windows 构建与 portable ZIP；自审无阻塞发现。原去锁变异测试证明回归用例能检出相应缺陷，未运行 race detector。
+- **后续**：推送现有 PR 分支后，等待最新 head 的 GitHub `verify` 通过，再合并到 `dev`；按用户安排保留 `main` 和 Tag。
+- **commit**：同步提交见 Git 历史。
+
 ## 2026-10-02 · zcode
 
 ### feat(ui): exe 版本元数据修复 + NDialog 关闭按钮可访问性兜底
@@ -16,6 +25,16 @@
 - **关键文件**：`build/windows/info.json`、`scripts/ci/validate-release.ps1`、`frontend/src/services/a11y.ts`（新）、`frontend/src/main.ts`
 - **后续**：等上游回应 wails#6210 / naive-ui#8231；观察器在上游修复后自动失效（先查 aria-label 再补）
 - **commit**：待 PR 合并后回填
+
+## 2026-10-02 · codex
+
+### test(config): cover reference guards, concurrent writes and corrupt state
+
+- **影响**：补齐三类高风险后端路径的针对性测试，不修改生产代码。① Provider/Model 删除引用保护：分别覆盖被 Model、被 Route、同名模型属其他 Provider、无引用可删除；② `store.go` 并发：32 个并发 Save 无丢失更新并从磁盘重读验证，并发 Save/List 混合访问保持数据一致；③ 损坏 JSON：读写均返回 `decode state` 错误且原文件不被静默覆盖，另覆盖缺失状态文件目录可写。
+- **关键文件**：`internal/application/provider/service_test.go`（新）、`internal/application/model/service_test.go`、`internal/infrastructure/config/store_test.go`
+- **验证**：变异测试确认并发用例有效（临时禁用 `Store` 锁后两个并发用例失败，已还原）；本机无 C 编译器，`go test -race` 不可用，并发安全性由去锁变异测试而非 race detector 证明。
+- **后续**：无。
+- **commit**：`08ffe9c`
 
 ## 2026-10-02 · codex
 
