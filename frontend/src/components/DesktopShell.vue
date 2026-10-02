@@ -7,6 +7,7 @@ import { useWorkspaceStore } from '../stores/workspace';
 import { isPreviewMode } from '../services/wails-api';
 
 const workspace = useWorkspaceStore();
+const appVersion = __APP_VERSION__;
 const route = useRoute();
 const activeLabel = computed(
   () => ({ config: '当前配置', profiles: '配置档案', settings: '设置' })[String(route.name)] ?? '当前配置',
@@ -63,7 +64,9 @@ const statusText = computed(() => {
           ><small>{{ isPreviewMode ? '演示数据,不写入真实配置' : 'Wails · Windows' }}</small>
         </div>
       </div>
-      <div class="rail-version"><CircleHelp :size="14" /> <span>Codex Provider Hub · 1.0</span></div>
+      <div class="rail-version">
+        <CircleHelp :size="14" /> <span>Codex Provider Hub · {{ appVersion }}</span>
+      </div>
     </aside>
     <section class="desktop-content min-w-0">
       <header class="desktop-topbar">
