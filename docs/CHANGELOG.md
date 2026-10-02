@@ -118,6 +118,15 @@
 
 ## 2026-10-01 · zcode
 
+### feat(ui): 版本展示同源 + build(deps): 构建依赖安装修复
+
+- **影响**：UI 尾栏版本从 build/config.yml 注入（vite define `__APP_VERSION__`），消除 1.0/0.1.0/0.0.0 三处不一致，运行时实测显示 `Codex Provider Hub · 0.1.0`；`install:frontend:deps` 由 `npm ci` 改为 `npm install --no-audit --no-fund`，不再整体删除 node_modules（EBUSY 隐患消除，CI 仍用 npm ci 保证可复现）
+- **关键文件**：`frontend/vite.config.ts`、`frontend/src/vite-env.d.ts`、`frontend/src/components/DesktopShell.vue`、`build/Taskfile.yml`
+- **后续**：无
+- **commit**：待 PR 合并后回填
+
+## 2026-10-01 · zcode
+
 ### feat(ui): align desktop UI with prototype and harden form flows
 
 - **影响**：frontend/src 全部页面与壳层重做；Naive UI 主题改为从 tokens.css 计算值生成（单一令牌来源）；错误安全映射、激活 recovered=unknown、表单 path/错误摘要/脏关闭守卫、Profiles/Settings 懒加载、muted 对比度 ≥4.5:1；生产构建已确认剔除浏览器预览演示数据
