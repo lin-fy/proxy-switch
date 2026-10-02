@@ -12,7 +12,9 @@
 | `WAILS_WINDOWS_CERT_PASSWORD` | Environments → production → Secrets | 证书私钥密码 |
 | `main` 分支保护 | Settings → Branches | 发布 tag 必须位于 `main`（`validate-release.ps1` 校验 `--is-ancestor $tagCommit origin/main`） |
 
-缺少任一 Secret 时，流水线会在签名阶段明确失败，不会产出未签名产物。
+未配置 `WINDOWS_CERTIFICATE_BASE64` 时，流水线会自动走**无签名模式**：跳过签名与
+Authenticode 验证，直接产出 NSIS 安装包、portable ZIP 与 SHA256 校验值（发布说明需
+标注"未签名"）。配置了证书则强制签名并验证（无有效带时间戳签名会失败）。
 
 ## 2. 版本一致性（发布前自检）
 
