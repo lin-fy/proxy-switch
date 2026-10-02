@@ -19,6 +19,16 @@
 
 ## 2026-10-02 · zcode
 
+### refactor: Go module 与内部标识改名 proxy-switch，重发 v0.1.0
+
+- **影响**：承接品牌改名，按用户决定（无历史用户）补齐此前保留的内部标识——Go module `codex-provider-hub` → `proxy-switch`（go.mod + 21 个 Go import）；前端绑定目录随 module 重生成 `frontend/bindings/codex-provider-hub/` → `frontend/bindings/proxy-switch/`（wails-api/demo-data 引用同步）；运行时状态目录 `%APPDATA%\CodexProviderHub` → `%APPDATA%\ProxySwitch`；Codex 适配器备份/临时文件 `.codex-provider-hub.bak`/`.codex-provider-hub-*.tmp` → `.proxy-switch.*`；MSIX app id/可执行名/包名、架构示例与构建文档同步。`docs/CHANGELOG.md` 历史条目保持不变
+- **重发**：删除旧 Release/tag，v0.1.0 以新代码重新发布——产物 `ProxySwitch-0.1.0-Setup.exe`、`ProxySwitch-0.1.0-portable.zip`、`SHA256SUMS.txt`，下载 SHA256 重算一致、属性页 Name=Proxy Switch
+- **关键文件**：`go.mod`、全部 `internal/**/*.go`、`main.go`、`frontend/bindings/`（目录改名）、`frontend/src/services/*`、`build/windows/{msix,nsis}/*`、`docs/*`
+- **后续**：无——仓库内 `codex-provider-hub` 字样已清零（仅 CHANGELOG 历史与 go.sum 依赖哈希）
+- **commit**：待合并后回填
+
+## 2026-10-02 · zcode
+
 ### refactor(brand): 产品重命名为 Proxy Switch，并重发 v0.1.0
 
 - **影响**：产品原本叫 `Codex Provider Hub`（钉死单一平台），而定位是平台无关（V1 仅实现 Codex 适配器，预留 Claude Code / Gemini CLI / OpenCode）。统一为 **Proxy Switch**（与仓库名同源、去平台绑定）。改名覆盖：安装目录/快捷方式/卸载项、exe 文件名（`proxy-switch.exe`）与版本属性、窗口标题与托盘、页面 title 与界面尾栏、发布产物名（`ProxySwitch-<ver>-*`）、CI 制品名、产品标识 `com.proxyswitch.desktop`，以及 README/product/ROADMAP/ops 等文档。按用户决定**保持不动**：Go module 路径 `codex-provider-hub/internal/...`（含生成的 `frontend/bindings/codex-provider-hub/`）、`docs/CHANGELOG.md` 历史条目、运行时状态目录 `%APPDATA%\CodexProviderHub`（避免老用户状态丢失）
