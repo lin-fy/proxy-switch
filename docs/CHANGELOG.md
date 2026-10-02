@@ -19,6 +19,16 @@
 
 ## 2026-10-02 · zcode
 
+### refactor(brand): 产品重命名为 Proxy Switch，并重发 v0.1.0
+
+- **影响**：产品原本叫 `Codex Provider Hub`（钉死单一平台），而定位是平台无关（V1 仅实现 Codex 适配器，预留 Claude Code / Gemini CLI / OpenCode）。统一为 **Proxy Switch**（与仓库名同源、去平台绑定）。改名覆盖：安装目录/快捷方式/卸载项、exe 文件名（`proxy-switch.exe`）与版本属性、窗口标题与托盘、页面 title 与界面尾栏、发布产物名（`ProxySwitch-<ver>-*`）、CI 制品名、产品标识 `com.proxyswitch.desktop`，以及 README/product/ROADMAP/ops 等文档。按用户决定**保持不动**：Go module 路径 `codex-provider-hub/internal/...`（含生成的 `frontend/bindings/codex-provider-hub/`）、`docs/CHANGELOG.md` 历史条目、运行时状态目录 `%APPDATA%\CodexProviderHub`（避免老用户状态丢失）
+- **重发**：删除旧 Release/tag，用新名重新发布 `v0.1.0`——产物 `ProxySwitch-0.1.0-Setup.exe`、`ProxySwitch-0.1.0-portable.zip`、`SHA256SUMS.txt`，下载后 SHA256 重算一致、安装包属性页 Name=Proxy Switch、Release 标题 "Proxy Switch 0.1.0"
+- **关键文件**：`build/config.yml`、`Taskfile.yml`、`build/windows/{info.json,nsis/wails_tools.nsh,wails.exe.manifest,msix/*,portable/*}`、`main.go`、`frontend/{index.html,src/components/DesktopShell.vue,src/pages/SettingsPage.vue}`、`.github/workflows/{ci,release}.yml`、`docs/*`
+- **后续**：Go module 路径与状态目录如需一并更名，属独立清洗任务（需处理绑定重生成与用户数据迁移），本 PR 不做
+- **commit**：待合并后回填
+
+## 2026-10-02 · zcode
+
 ### chore(release): 完成首次 Tag 发布演练，v0.1.0 已发布
 
 - **影响**：完成 V1 首个正式 tag 发布。dev 合入 main 后打 `v0.1.0`，Release 流水线跑通全链路：tag 与六处版本元数据校验 → Windows 构建 → NSIS 打包 → conditional 签名 → portable ZIP → SHA256 → 自动创建 GitHub Release。产物：`CodexProviderHub-0.1.0-Setup.exe`、`CodexProviderHub-0.1.0-portable.zip`、`SHA256SUMS.txt`，下载后 SHA256 重算与校验值一致，安装包与便携 exe 属性页版本均为 0.1.0（验证 0409 修复在正式产物生效）
