@@ -3,7 +3,7 @@
 > agent 协作的"单一事实源"。开工读，收工更新。只保留当前状态。
 > 详细规则见 [`agent-guide/workflow.md`](agent-guide/workflow.md)。
 
-最后更新：2026-10-02 · codex（仓库已公开，main 保护与 production 审批已生效）
+最后更新：2026-10-02 · codex（PR #10 已合并 dev，合并后 Windows CI 通过）
 
 ## 一句话现状
 
@@ -15,7 +15,7 @@ V1 后端核心 + 桌面壳 + Vue 前端已完成并通过桌面原生验收（M
 2. 提供 CPA、OpenAI、自定义 Provider 凭据和 Codex Desktop 环境，完成真实端到端验收（**按用户安排稍后进行**）
 3. M6-C/D 通过后统一切换 `1.0.0`、合并 `main` 并发布正式安装包
 
-统一验证入口已补齐：`task check:frontend`、`task check:backend`、`task ci`；GitHub Actions 与本地入口均复用 `scripts/ci/verify.ps1`，兼容 Windows PowerShell 5.1，并在 Windows 构建时自动搜索 `GOPATH\bin` 的 Wails CLI。2026-10-02 本地完整验证通过并生成 portable ZIP。
+统一验证入口已补齐：`task check:frontend`、`task check:backend`、`task ci`；GitHub Actions 与本地入口均复用 `scripts/ci/verify.ps1`，兼容 Windows PowerShell 5.1，并在 Windows 构建时自动搜索 `GOPATH\bin` 的 Wails CLI。2026-10-02 本地完整验证通过并生成 portable ZIP。PR #10 已合并到 `dev`（`38354c8`），包含文档 PR 的 `verify` 触发修复；合并后 Windows CI 通过（运行 `36964118419`）。
 
 ## 当前卡点
 

@@ -39,6 +39,8 @@
 
 ## 已完成
 
+- [x by codex 2026-10-02] 按用户授权合并 PR #10 到 `dev`：V1 目标/发布门槛文档与文档 PR 的 `verify` 触发修复；合并提交 `38354c8`，合并后 Windows CI 通过（运行 `36964118419`）
+
 - [x by codex 2026-10-01] 后端强制「Route 只能引用已启用 Model」：`route.Service` 创建/保存与 `Activator` 激活时校验 `Enabled`，阻止停用模型仍被激活；补 `ErrModelDisabled` 与前端安全错误映射
 
 - [x by zcode 2026-10-01] 前端产物分包与可访问性标签：manualChunks 拆分（业务 index 638→37 kB，单 chunk 回到警告线内）、配置档案选择器空态无名 tab stop 修复；CI 通过后 PR #4 合并

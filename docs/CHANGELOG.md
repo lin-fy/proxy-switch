@@ -10,12 +10,22 @@
 
 ## 2026-10-02 · codex
 
+### docs(collab): record PR #10 merge evidence
+
+- **影响**：按用户明确授权将 PR #10 合并到 `dev`，合并提交为 `38354c8`；本地 `dev` 已安全快进同步，无未提交改动。`main`、Tag 和 Release 均未更新。
+- **验证**：PR 检查通过；合并内容与通过验证的 PR head `1b9d2f0` 一致；合并后的 Windows `verify` CI 通过，运行 `36964118419`，含前端、Go、Wails Windows 构建与产物上传。
+- **关键文件**：`docs/TASKS.md`、`docs/CONTEXT.md`、`docs/planning/ROADMAP.md`
+- **后续**：M6-C 真实 Provider 验收与正式 Authenticode 签名、Tag 演练仍待完成。
+- **commit**：待下次文档提交回填
+
+## 2026-10-02 · codex
+
 ### fix(ci): run required verification for documentation pull requests
 
 - **影响**：移除 PR 事件上的文档路径忽略，使分支保护要求的 `verify` 检查覆盖文档-only PR；保留 `dev` 推送事件的路径忽略以避免无意义构建。
 - **关键文件**：`.github/workflows/ci.yml`
 - **后续**：PR #10 推送后核对 `verify` 检查状态。
-- **commit**：待提交后补充
+- **commit**：`1b9d2f0`
 
 ## 2026-10-02 · codex
 
