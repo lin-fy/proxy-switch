@@ -8,7 +8,7 @@
 
 ## 进行中
 
-- <暂无>
+- [- by zcode 2026-10-01] 版本展示同源与构建卫生：UI 尾栏版本改为从 build/config.yml 注入（消除 1.0/0.1.0/0.0.0 三处不一致），install:frontend:deps 的 npm ci 每次构建重装且易 EBUSY 问题修复
 
 ## 待认领（按优先级排序）
 
