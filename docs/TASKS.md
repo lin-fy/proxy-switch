@@ -26,8 +26,9 @@
 
 ### M6 — V1 验收
 
+- [x by codex 2026-10-02] M6 目标树、验收证据矩阵与 1.0 发布前验证预检
 - [- by zcode 2026-10-01] M6 发布准备：README 刷新、发布说明草稿与发布演练清单（版本统一与 Tag 演练按用户决定滞后，待新任务/目标后启动）
-- [ ] 在 GitHub 配置 `production` Environment、签名 Secrets、`main` 分支保护（**需要用户操作**）
+- [x by codex 2026-10-02] 按用户授权将仓库公开；配置 `production` Environment、两个测试签名 Secrets、发布审批人和 `main` 分支保护（凭据可用性与签名信任尚待演练验证）
 - [ ] 完成一次 Tag 发布演练
 - [ ] 用真实 CPA、OpenAI、自定义 Provider 完成端到端验收（**需要用户提供凭据**）
 

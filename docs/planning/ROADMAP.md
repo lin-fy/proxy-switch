@@ -1,12 +1,12 @@
 # Codex Provider Hub：V1 目标、里程碑与执行状态
 
 > 项目目录：`H:\code\proxy-switch`  
-> 当前版本目标：Windows V1  
-> 最后更新：2026-10-01
+> 当前版本目标：Windows V1.0.0
+> 最后更新：2026-10-02
 
 本文档是目标模式的执行依据和项目状态真源。它回答四个问题：最终要交付什么、分几段完成、每段如何验收、现在马上做什么。
 
-当前前端任务仅交付设计规范与实施计划，文档基线已整理完成；以下 V1 实施与发布事项是后续工程范围。该前端任务不安装依赖、不修改源码、Go API 或生成绑定，具体边界与验收门槛见 [`FRONTEND_IMPLEMENTATION_PLAN.md`](FRONTEND_IMPLEMENTATION_PLAN.md)。
+M4 桌面界面和 M5 Windows 安装包已完成；当前仅剩 M6 的真实 Provider/Codex 验收、GitHub 发布配置和正式 Tag 发布。具体边界与验收门槛见本文件第 1、3、4 节。
 
 产品范围和架构原则见 [`../product.md`](../product.md)，执行约束见 [`../../CODEX.md`](../../CODEX.md)。如果实现过程发现方案需要变化，先更新本文档和相关方案文档，再继续编码。
 
@@ -20,13 +20,13 @@ V1 首先服务 CPA-Manager-Plus / CLIProxyAPI，也支持 OpenAI 和其他兼�
 
 - [x] Windows 程序可以安装、启动、隐藏到托盘并退出。
 - [x] Provider、Model、Route、Profile 的后端模型和持久化已实现。
-- [ ] Provider 可以通过界面新增、编辑、删除和测试连接。
-- [ ] Route 可以选择 Provider/Model、激活并设置默认路由。
+- [x] Provider 可以通过界面新增、编辑、删除和测试连接。
+- [x] Route 可以选择 Provider/Model、激活并设置默认路由。
 - [x] Codex `config.toml` 读取、局部写入、备份和失败恢复已实现。
 - [x] 多个 Codex Profile 和模型目录同步已实现。
 - [x] 环境变量和 Windows Credential Manager 凭据引用已实现，普通状态文件不保存 API Key。
 - [x] Responses API `/models` 和最小 `/responses` 测试已实现。
-- [ ] 自动重启默认关闭，用户勾选后激活路由可以重启 Codex。
+- [x] 自动重启默认关闭，用户勾选后激活路由可以重启 Codex。
 - [x] 系统托盘常驻和开机启动开关已实现。
 - [ ] CPA、OpenAI、一个自定义 Responses Provider 各完成一次真实请求验证。
 - [x] Windows 安装包、恢复说明和发布文档完成。
@@ -110,7 +110,7 @@ Proxy Switch
 
 状态：`[ ]`
 
-- [ ] 运行 Go 测试、`go vet`、前端类型检查和生产构建。
+- [x] 运行 Go 测试、`go vet`、前端类型检查和生产构建（2026-10-02：`task ci`/`scripts/ci/verify.ps1 -BuildWindows` 通过；验证器会自动搜索 `GOPATH\bin` 中的 Wails CLI，并生成 portable ZIP）。
 - [ ] 完成 CPA → Proxy Switch → Codex Desktop → 模型请求的真实链路。
 - [ ] 完成 OpenAI、CPA、自定义 Provider 和两个 Codex Profile 的验收记录。
 - [x] 清理文档中的临时状态，刷新 README 和发布说明（2026-10-01：README 状态与环境要求刷新；新增 docs/ops/RELEASE_CHECKLIST.md 发布演练清单——含发布时需统一的 6 处版本位置——与 docs/ops/RELEASE_NOTES.md 发布说明草稿；版本号统一与 Tag 演练按用户决定滞后）。
@@ -121,7 +121,7 @@ Proxy Switch
 - [x] `.github/workflows/ci.yml`：Windows runner、Go/前端检查、Wails 构建和 7 天构建产物。
 - [x] `.github/workflows/release.yml`：Tag 校验、版本元数据校验、NSIS/portable 构建、签名、SHA256 和 GitHub Release。
 - [x] `.agents/skills/review-pr`：项目级 Codex Review Skill 和检查清单。
-- [ ] 在 GitHub 配置 `production` Environment、签名证书 Secrets 和 `main` 分支保护。
+- [x] 在 GitHub 配置 `production` Environment、两个测试签名 Secrets 和 `main` 分支保护（2026-10-02：用户授权将仓库公开；`main` 要求 PR、`verify` 通过、分支最新和对话解决，禁止强推与删除；`production` 审批人为 `lin-fy`）。Secret 名称已验证，PFX 密码与证书信任尚待实际签名验证。
 - [ ] 在 GitHub Actions 上完成一次真实 Tag 发布演练。
 
 ## 4. 计划 Plan
@@ -129,18 +129,26 @@ Proxy Switch
 ### 当前执行顺序
 
 ```text
-完成前端设计规范与实施计划（本阶段）
+M6-A：对齐状态、目标和验收证据
   ↓
-按实施计划收敛现有前端基线（后续阶段）
+M6-B：本地确定性验证与 Windows 产物检查（已完成）
   ↓
-跑 Go + 前端 + Wails 验证
+M6-D 配置：GitHub production Environment、测试签名 Secrets、main 保护与审批（已完成）
   ↓
-验收安装包
+M6-C：CPA / OpenAI / 自定义 Provider 真实端到端验收（按用户安排延后）
   ↓
-真实 Provider / Codex 端到端验收
-  ↓
-更新文档并发布 V1
+M6-D 演练 / M6-E：确认签名凭据、统一版本、合并 main、Tag 演练与正式发布
 ```
+
+### M6 验收证据与门槛
+
+| 阶段 | 必须证明 | 当前状态 | 证据或依赖 |
+| --- | --- | --- | --- |
+| M6-A | 文档状态与代码、已合并验收结果一致 | [x] | 本文件、`docs/CONTEXT.md`、`docs/TASKS.md` |
+| M6-B | Go/前端/Wails/portable ZIP 验证通过，且本地找不到 Wails 时给出明确预检 | [x] | `scripts/ci/verify.ps1`、`docs/ops/CI_CD.md`、`docs/ops/BUILD_WINDOWS.md` |
+| M6-C | 三类 Provider 各完成真实请求；CPA 验证两个模型；两个 Profile 可切换、激活、恢复 | [ ] | 需要用户提供 Provider 凭据与 Codex Desktop 环境 |
+| M6-D | GitHub Environment、签名 Secrets、`main` 分支保护和一次 Tag 发布演练完成 | [-] | 仓库已公开，保护与审批已生效；测试 Secrets 已配置，签名与 Tag 演练尚未验证；流程见 `docs/ops/RELEASE_CHECKLIST.md` |
+| M6-E | 版本资源、Tag、Release 产物和安装验证全部一致 | [ ] | 依赖 M6-C、M6-D；目标 Tag 为 `v1.0.0` |
 
 ### 执行原则
 
@@ -163,7 +171,7 @@ Proxy Switch
 
 只保留进入实现阶段后马上要做的两项：
 
-1. 在 GitHub 配置 `production` Environment、签名 Secrets 和 `main` 分支保护，完成一次 Tag 发布演练（**需要用户操作**）。
+1. GitHub 配置已完成；下一步确认实际签名能力并准备 Tag 发布演练（当前证书为自签名测试证书，现有工作流要求签名状态为 `Valid` 且带时间戳）。
 2. 完成 CPA、OpenAI、自定义 Provider 的真实端到端验收（**需要用户提供凭据**）。
 
 ## 6. 技术决策记录

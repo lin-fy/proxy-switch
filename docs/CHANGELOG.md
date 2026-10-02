@@ -10,6 +10,50 @@
 
 ## 2026-10-02 · codex
 
+### fix(ci): run required verification for documentation pull requests
+
+- **影响**：移除 PR 事件上的文档路径忽略，使分支保护要求的 `verify` 检查覆盖文档-only PR；保留 `dev` 推送事件的路径忽略以避免无意义构建。
+- **关键文件**：`.github/workflows/ci.yml`
+- **后续**：PR #10 推送后核对 `verify` 检查状态。
+- **commit**：待提交后补充
+
+## 2026-10-02 · codex
+
+### ops(github): make repository public and enable release protections
+
+- **影响**：按用户明确授权将 `lin-fy/proxy-switch` 从私有改为公开，解决原分支保护和 Environment 审批的方案限制。
+- **验证**：GitHub API 确认 `visibility=public`；`main` 要求 PR、`verify` 通过、最新分支和对话解决，规则对管理员生效，禁止强推/删除；单人仓库强制批准人数为 0。`production` 已添加 `lin-fy` 为审批人，允许本人批准；两个 Secret 名称仍存在，未读取其值。
+- **关键文件**：`docs/TASKS.md`、`docs/planning/ROADMAP.md`、`docs/DECISIONS.md`、`docs/CONTEXT.md`
+- **后续**：当前 Secrets 为自签名测试凭据，签名和 Tag 演练仍待验证；未创建 Tag 或 Release。
+- **commit**：待下次文档提交回填
+
+## 2026-10-02 · codex
+
+### docs(planning): align V1.0 goal tree and M6 acceptance gates
+
+- **影响**：修正 ROADMAP 中已完成的 Provider/Route/自动重启状态，新增 M6-A 到 M6-E 的执行顺序与验收证据矩阵，并同步产品状态与 CI/CD 的 `v1.0.0` 发布目标。
+- **关键文件**：`docs/planning/ROADMAP.md`、`docs/product.md`、`docs/ops/CI_CD.md`、`docs/CONTEXT.md`、`docs/TASKS.md`
+- **验证**：`scripts/ci/verify.ps1 -BuildWindows` 通过；生成 Windows amd64 portable ZIP；工作区无生成文件改动。
+- **后续**：M6-C 需要真实 Provider 凭据，M6-D 需要 GitHub Environment、签名 Secrets 和分支保护。
+- **commit**：待提交后补充
+
+### docs(planning): prioritize GitHub release configuration
+
+- **影响**：按用户选择先推进 M6-D GitHub 发布配置；M6-C 真实 Provider 验收延后，M6-E 仍需两者都通过后执行。
+- **关键文件**：`docs/CONTEXT.md`、`docs/planning/ROADMAP.md`
+- **后续**：按 `docs/ops/RELEASE_CHECKLIST.md` 完成仓库设置；当前不创建 Tag、不切换 `1.0.0`。
+
+### docs(ops): record GitHub branch protection plan limitation
+
+- **影响**：只读审计确认仓库为私有仓库，当前 GitHub 方案对分支保护和 Rulesets 返回 403；`production` Environment 尚未创建，远端没有 Tag。
+- **关键文件**：`docs/CONTEXT.md`
+- **后续**：用户需升级 GitHub 方案或将仓库设为公开后，才能完成 `main` 分支保护；Environment 和 Secrets 仍需用户配置。
+
+### ops(github): create production Environment
+
+- **影响**：已在 `lin-fy/proxy-switch` 创建 `production` Environment，并配置 `WINDOWS_CERTIFICATE_BASE64` 与 `WAILS_WINDOWS_CERT_PASSWORD` 自签名测试凭据；当前没有保护规则。
+- **后续**：正式发布仍需替换为受信任的 Windows Authenticode PFX 证书，并解决私有仓库的分支保护方案限制。
+
 ### fix(ci): support Windows PowerShell 5.1 in verification scripts
 
 - **影响**：CI 验证、发布版本守卫及其测试不再要求 PowerShell 7.3；通过显式检查原生命令退出码，保留 5.1 下的失败检测行为。

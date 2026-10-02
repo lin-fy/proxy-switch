@@ -42,11 +42,13 @@ For Windows builds, the verifier also searches `GOPATH\bin` for an installed Wai
 
 ## Release
 
-Create a version commit on `dev`, merge it into `main`, and create a tag matching the version in `build/config.yml`:
+After M6-C and M6-D pass, create the release version commit on `dev`, merge it into `main`, and create a tag matching the version in `build/config.yml`. The planned V1 release is:
 
 ```text
-v0.1.0
+v1.0.0
 ```
+
+The current development baseline remains `0.1.0` until the release gates pass; do not create the `v1.0.0` tag early.
 
 `.github/workflows/release.yml` rejects tags that are not based on `main` or do not match `build/config.yml`. It builds the user-scope NSIS installer and portable ZIP, signs the executable and installer, generates `SHA256SUMS.txt`, and creates a GitHub Release.
 
