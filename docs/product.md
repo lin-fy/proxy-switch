@@ -1,6 +1,6 @@
 # Codex Provider Hub：需求与架构草案
 
-> 状态：V1 核心后端链路和 Windows 桌面壳已完成；Vue 界面迁移、安装包补齐和真实端到端验收进行中
+> 状态：V1 核心后端、Vue 桌面界面和 Windows 安装包已完成；真实 Provider/Codex 端到端验收与正式发布仍待完成
 >
 > 目标：供应商只配置一次，通过路由生成目标平台配置并启动对应平台。
 >
@@ -312,7 +312,7 @@ profile-name.models.json
 ### V1 开发验证记录
 
 - Go 1.27.1 便携工具链已就绪。
-- Wails CLI `wails3` v3.0.0-beta.26 已安装。
+- Wails CLI `wails3` v3.0.0-beta.27 已安装。
 - DDD 领域层和应用端口已通过 `go test ./...`。
 - Wails v3 vanilla-ts 壳已成功构建 Windows amd64 可执行文件，前端绑定使用 `@wailsio/runtime`。
 - 已实现 Codex 配置写入、写入前备份/失败恢复、模型目录同步和基础 Provider/Route 管理界面。

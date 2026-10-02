@@ -11,7 +11,7 @@ V1 功能开发与验收基本完成：后端核心、桌面壳、Vue 前端已�
 ## 快速开始
 
 ```bash
-# 开发环境要求：Go 1.25+, Node.js 22+, Wails 3 (v3.0.0-beta.26), Task (go-task)
+# 开发环境要求：Go 1.25+, Node.js 22+, Wails 3 (v3.0.0-beta.27), Task (go-task)
 
 # 后端测试
 go test ./...

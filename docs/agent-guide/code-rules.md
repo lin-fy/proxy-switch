@@ -5,7 +5,8 @@
 ## 技术栈约定
 
 - 遵循 [`../architecture/TECH_STACK.md`](../architecture/TECH_STACK.md) 和 [`../architecture/UI_ARCHITECTURE_SPEC.md`](../architecture/UI_ARCHITECTURE_SPEC.md)
-- Wails 3（锁定 `v3.0.0-beta.26`）+ Go + Vue 3 + TypeScript + Pinia + Naive UI + Tailwind v4
+- Wails 3 beta + Go + Vue 3 + TypeScript + Pinia + Naive UI + Tailwind v4
+- Wails beta 规则：前端开发前核对上游最新 beta；Go 模块、`wails3` CLI、`@wailsio/runtime`、CI 和文档必须锁定同一个具体版本，不得混用旧版本或提交浮动的 `latest`。升级后先重新生成 Wails 绑定，再运行 `task check:frontend` 和 `task ci`。
 - 不引入新的 UI 组件库、状态管理库或 CSS 框架
 
 ## DDD 分层

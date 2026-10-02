@@ -8,7 +8,7 @@
 
 ## 进行中
 
-- <暂无>
+- [x by zcode 2026-10-02] 版本展示同源与构建卫生（PR #11 合并：尾栏注入 0.1.0、install-or-skip）；追加强制收尾：exe 版本元数据修复（info.json 0409 + validator）、NDialog 关闭按钮 aria 兜底观察器、上游反馈 wails#6210 / naive-ui#8231
 
 ## 待认领（按优先级排序）
 
@@ -26,8 +26,9 @@
 
 ### M6 — V1 验收
 
+- [x by codex 2026-10-02] M6 目标树、验收证据矩阵与 1.0 发布前验证预检
 - [- by zcode 2026-10-01] M6 发布准备：README 刷新、发布说明草稿与发布演练清单（版本统一与 Tag 演练按用户决定滞后，待新任务/目标后启动）
-- [ ] 在 GitHub 配置 `production` Environment、签名 Secrets、`main` 分支保护（**需要用户操作**）
+- [x by codex 2026-10-02] 按用户授权将仓库公开；配置 `production` Environment、两个测试签名 Secrets、发布审批人和 `main` 分支保护（凭据可用性与签名信任尚待演练验证）
 - [ ] 完成一次 Tag 发布演练
 - [ ] 用真实 CPA、OpenAI、自定义 Provider 完成端到端验收（**需要用户提供凭据**）
 
@@ -38,7 +39,13 @@
 
 ## 已完成
 
-- [x by codex 2026-10-02] 补齐 Provider/Model 删除引用保护、`store.go` 并发写入与损坏 JSON 安全失败的针对性测试；本机无 C 编译器，并发安全性用去锁变异测试证明（去锁后两个并发用例失败）
+- [x by codex 2026-10-02] 补齐 Provider/Model 删除引用保护、`store.go` 并发写入与损坏 JSON 安全失败的针对性测试；PR #9 同步 dev 后完整 Windows 验证通过；去锁变异测试检验并发回归用例有效，本机无 C 编译器，未运行 race detector
+
+- [x by codex 2026-10-02] 新增 Wails v3 beta 前端开发规则并统一到 `v3.0.0-beta.27`：前端改动前核对最新具体版本，统一 Go 模块、CLI、runtime、CI 和文档，重新生成绑定并通过 `task ci`
+
+- [x by codex 2026-10-02] 按用户授权合并 PR #11 到 `dev`：统一 UI 版本来源并修复 Windows 依赖安装路径；合并提交 `0b33c73`，合并后 Windows CI 通过（运行 `36967821792`）
+
+- [x by codex 2026-10-02] 按用户授权合并 PR #10 到 `dev`：V1 目标/发布门槛文档与文档 PR 的 `verify` 触发修复；合并提交 `38354c8`，合并后 Windows CI 通过（运行 `36964118419`）
 
 - [x by codex 2026-10-01] 后端强制「Route 只能引用已启用 Model」：`route.Service` 创建/保存与 `Activator` 激活时校验 `Enabled`，阻止停用模型仍被激活；补 `ErrModelDisabled` 与前端安全错误映射
 

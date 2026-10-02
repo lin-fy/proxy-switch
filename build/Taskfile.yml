@@ -27,7 +27,16 @@ tasks:
       - sh: npm version
         msg: "Looks like npm isn't installed. Npm is part of the Node installer: https://nodejs.org/en/download/"
     cmds:
-      - npm ci
+      # npm ci 会整体删除重装 node_modules，Windows 上易被文件锁打断（EBUSY），
+      # 且 CI 中 npm install 可能重写 lockfile 触发 verify.ps1 的生成物守卫。
+      # 因此：首次（无 node_modules）用 npm ci；已安装时用 npm install --no-save，
+      # 依赖满足时是秒级 no-op，不删除、不写 lockfile。
+      - |
+        if [ ! -d node_modules ]; then
+          npm ci --no-audit --no-fund
+        else
+          npm install --no-audit --no-fund --no-save
+        fi
 
   install:frontend:deps:bun:
     dir: frontend

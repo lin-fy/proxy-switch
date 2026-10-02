@@ -39,7 +39,7 @@ if ($config -notmatch '(?m)^  version:\s*"([^"]+)"') {
 if ($Matches[1] -ne $version) { throw 'Tag does not match build/config.yml info.version' }
 
 $info = Get-Content build/windows/info.json -Raw | ConvertFrom-Json
-if ($info.fixed.file_version -ne $version -or $info.info.'0000'.ProductVersion -ne $version) {
+if ($info.fixed.file_version -ne $version -or $info.info.'0409'.ProductVersion -ne $version) {
     throw 'Update build/windows/info.json to match the release version'
 }
 $nsis = Get-Content build/windows/nsis/wails_tools.nsh -Raw

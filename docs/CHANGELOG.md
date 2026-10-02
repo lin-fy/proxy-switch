@@ -10,6 +10,24 @@
 
 ## 2026-10-02 · codex
 
+### test(config): synchronize PR #9 with dev and revalidate
+
+- **影响**：在独立工作树同步 PR #9 与 `dev`，解决协作文档冲突并保留双方记录；生产代码不变，Provider/Model 删除引用保护、并发写入和损坏状态测试均保留。
+- **验证**：`review-checks.ps1 -BuildWindows` 通过，含前端格式/lint/类型检查/生产构建、Go 格式/模块/vet/测试、Wails beta.27 Windows 构建与 portable ZIP；自审无阻塞发现。原去锁变异测试证明回归用例能检出相应缺陷，未运行 race detector。
+- **后续**：推送现有 PR 分支后，等待最新 head 的 GitHub `verify` 通过，再合并到 `dev`；按用户安排保留 `main` 和 Tag。
+- **commit**：同步提交见 Git 历史。
+
+## 2026-10-02 · zcode
+
+### feat(ui): exe 版本元数据修复 + NDialog 关闭按钮可访问性兜底
+
+- **影响**：① 定位并修复 exe「属性 → 详细信息」版本显示为空：根因是 info.json 语言键 `"0000"`（LCID 0）生成的版本资源 Windows 无法解析，改为 `"0409"`（en-US）并补 `fixed.product_version` 与字符串表 `FileVersion`，实测属性页正确显示 File/Product 0.1.0 与产品名；`validate-release.ps1` 同步改读 `0409` 键。② 新增 `src/services/a11y.ts`：MutationObserver 为 naive-ui `NDialog` 关闭按钮（`.n-dialog__close`，无 props 可设、与 NModal 自带 `aria-label="close"` 不一致）补 `aria-label="关闭"`，节点自身与后代两种 DOM 结构均验证生效。③ 说明：Wails beta.27 升级已由 codex 以 40f0456 落地，本 PR 不重复；上游反馈已提交 wails#6210（版本元数据，问题 1）与 naive-ui#8231（NDialog aria，问题 2）
+- **关键文件**：`build/windows/info.json`、`scripts/ci/validate-release.ps1`、`frontend/src/services/a11y.ts`（新）、`frontend/src/main.ts`
+- **后续**：等上游回应 wails#6210 / naive-ui#8231；观察器在上游修复后自动失效（先查 aria-label 再补）
+- **commit**：待 PR 合并后回填
+
+## 2026-10-02 · codex
+
 ### test(config): cover reference guards, concurrent writes and corrupt state
 
 - **影响**：补齐三类高风险后端路径的针对性测试，不修改生产代码。① Provider/Model 删除引用保护：分别覆盖被 Model、被 Route、同名模型属其他 Provider、无引用可删除；② `store.go` 并发：32 个并发 Save 无丢失更新并从磁盘重读验证，并发 Save/List 混合访问保持数据一致；③ 损坏 JSON：读写均返回 `decode state` 错误且原文件不被静默覆盖，另覆盖缺失状态文件目录可写。
@@ -19,6 +37,80 @@
 - **commit**：`08ffe9c`
 
 ## 2026-10-02 · codex
+
+### docs(rule): require latest concrete Wails beta for frontend work
+
+- **影响**：新增 Wails v3 beta 前端开发规则，并将当前基线统一到 `v3.0.0-beta.27`：开始前先核对上游最新 beta，统一 Go 模块、`wails3` CLI、`@wailsio/runtime`、CI 和文档版本；发现更新时先重新生成绑定并通过 `task ci`。禁止混用旧版或提交浮动的 `latest`。
+- **验证**：已通过 GitHub 上游 release/tag 核对到最新 beta `v3.0.0-beta.27`；Go 模块、CLI、runtime、CI 和构建文档已统一到该版本，前端绑定未发生生成差异。
+- **关键文件**：`AGENTS.md`、`CODEX.md`、`go.mod`、`frontend/package.json`、`.github/workflows/ci.yml`、`docs/agent-guide/code-rules.md`、`docs/ops/CI_CD.md`、`docs/ops/BUILD_WINDOWS.md`、`docs/DECISIONS.md`
+- **后续**：后续前端开发仍须先核对上游最新 beta；若再有更新，先完成版本对齐、重新生成绑定并运行完整 Windows CI。
+- **commit**：待本次 PR 合并后回填
+
+## 2026-10-02 · codex
+
+### docs(collab): record PR #11 merge evidence
+
+- **影响**：按用户明确授权将 PR #11 合并到 `dev`，合并提交为 `0b33c73`；版本展示改为读取 `build/config.yml`，Windows 重复构建在已有依赖时不再整体删除重装 `node_modules`。`main`、Tag 和 Release 均未更新。
+- **验证**：PR #11 审查无阻塞发现；本地前端格式检查、lint、类型检查、生产构建、Go 测试、Wails Windows 构建和 portable ZIP 均通过；合并后的 Windows `verify` CI 通过，运行 `36967821792`。
+- **关键文件**：`frontend/vite.config.ts`、`frontend/src/components/DesktopShell.vue`、`build/Taskfile.yml`、`docs/TASKS.md`、`docs/CONTEXT.md`、`docs/planning/ROADMAP.md`
+- **后续**：PR #9 仍需同步最新 `dev` 并解决冲突；M6-C 真实 Provider 验收与正式 Authenticode 签名、Tag 演练仍待完成。
+- **commit**：PR #11 合并提交 `0b33c73`；本次文档提交见 Git 历史
+
+## 2026-10-02 · codex
+
+### docs(collab): record PR #10 merge evidence
+
+- **影响**：按用户明确授权将 PR #10 合并到 `dev`，合并提交为 `38354c8`；本地 `dev` 已安全快进同步，无未提交改动。`main`、Tag 和 Release 均未更新。
+- **验证**：PR 检查通过；合并内容与通过验证的 PR head `1b9d2f0` 一致；合并后的 Windows `verify` CI 通过，运行 `36964118419`，含前端、Go、Wails Windows 构建与产物上传。
+- **关键文件**：`docs/TASKS.md`、`docs/CONTEXT.md`、`docs/planning/ROADMAP.md`
+- **后续**：M6-C 真实 Provider 验收与正式 Authenticode 签名、Tag 演练仍待完成。
+- **commit**：待下次文档提交回填
+
+## 2026-10-02 · codex
+
+### fix(ci): run required verification for documentation pull requests
+
+- **影响**：移除 PR 事件上的文档路径忽略，使分支保护要求的 `verify` 检查覆盖文档-only PR；保留 `dev` 推送事件的路径忽略以避免无意义构建。
+- **关键文件**：`.github/workflows/ci.yml`
+- **后续**：PR #10 推送后核对 `verify` 检查状态。
+- **commit**：`1b9d2f0`
+
+## 2026-10-02 · codex
+
+### ops(github): make repository public and enable release protections
+
+- **影响**：按用户明确授权将 `lin-fy/proxy-switch` 从私有改为公开，解决原分支保护和 Environment 审批的方案限制。
+- **验证**：GitHub API 确认 `visibility=public`；`main` 要求 PR、`verify` 通过、最新分支和对话解决，规则对管理员生效，禁止强推/删除；单人仓库强制批准人数为 0。`production` 已添加 `lin-fy` 为审批人，允许本人批准；两个 Secret 名称仍存在，未读取其值。
+- **关键文件**：`docs/TASKS.md`、`docs/planning/ROADMAP.md`、`docs/DECISIONS.md`、`docs/CONTEXT.md`
+- **后续**：当前 Secrets 为自签名测试凭据，签名和 Tag 演练仍待验证；未创建 Tag 或 Release。
+- **commit**：待下次文档提交回填
+
+## 2026-10-02 · codex
+
+### docs(planning): align V1.0 goal tree and M6 acceptance gates
+
+- **影响**：修正 ROADMAP 中已完成的 Provider/Route/自动重启状态，新增 M6-A 到 M6-E 的执行顺序与验收证据矩阵，并同步产品状态与 CI/CD 的 `v1.0.0` 发布目标。
+- **关键文件**：`docs/planning/ROADMAP.md`、`docs/product.md`、`docs/ops/CI_CD.md`、`docs/CONTEXT.md`、`docs/TASKS.md`
+- **验证**：`scripts/ci/verify.ps1 -BuildWindows` 通过；生成 Windows amd64 portable ZIP；工作区无生成文件改动。
+- **后续**：M6-C 需要真实 Provider 凭据，M6-D 需要 GitHub Environment、签名 Secrets 和分支保护。
+- **commit**：待提交后补充
+
+### docs(planning): prioritize GitHub release configuration
+
+- **影响**：按用户选择先推进 M6-D GitHub 发布配置；M6-C 真实 Provider 验收延后，M6-E 仍需两者都通过后执行。
+- **关键文件**：`docs/CONTEXT.md`、`docs/planning/ROADMAP.md`
+- **后续**：按 `docs/ops/RELEASE_CHECKLIST.md` 完成仓库设置；当前不创建 Tag、不切换 `1.0.0`。
+
+### docs(ops): record GitHub branch protection plan limitation
+
+- **影响**：只读审计确认仓库为私有仓库，当前 GitHub 方案对分支保护和 Rulesets 返回 403；`production` Environment 尚未创建，远端没有 Tag。
+- **关键文件**：`docs/CONTEXT.md`
+- **后续**：用户需升级 GitHub 方案或将仓库设为公开后，才能完成 `main` 分支保护；Environment 和 Secrets 仍需用户配置。
+
+### ops(github): create production Environment
+
+- **影响**：已在 `lin-fy/proxy-switch` 创建 `production` Environment，并配置 `WINDOWS_CERTIFICATE_BASE64` 与 `WAILS_WINDOWS_CERT_PASSWORD` 自签名测试凭据；当前没有保护规则。
+- **后续**：正式发布仍需替换为受信任的 Windows Authenticode PFX 证书，并解决私有仓库的分支保护方案限制。
 
 ### fix(ci): support Windows PowerShell 5.1 in verification scripts
 
@@ -81,6 +173,15 @@
 - **关键文件**：`AGENTS.md`、`CODEX.md`、`README.md`、`docs/README.md`、`docs/CONTEXT.md`、`docs/TASKS.md`、`docs/CHANGELOG.md`、`docs/DECISIONS.md`、`docs/product.md`（原 `PRODUCT_PLAN.md`）、`docs/planning/`、`docs/architecture/`、`docs/design/`、`docs/ops/`、`.agents/skills/review-pr/SKILL.md`
 - **后续**：所有 agent 后续工作必须按 `AGENTS.md` 第 3.2 节顺序执行（TASKS → CHANGELOG → DECISIONS → CONTEXT → commit）
 - **commit**：4d554f5
+
+## 2026-10-01 · zcode
+
+### feat(ui): 版本展示同源 + build(deps): 构建依赖安装修复
+
+- **影响**：UI 尾栏版本从 build/config.yml 注入（vite define `__APP_VERSION__`），消除 1.0/0.1.0/0.0.0 三处不一致，运行时实测显示 `Codex Provider Hub · 0.1.0`；`install:frontend:deps` 由 `npm ci` 改为 `npm install --no-audit --no-fund`，不再整体删除 node_modules（EBUSY 隐患消除，CI 仍用 npm ci 保证可复现）
+- **关键文件**：`frontend/vite.config.ts`、`frontend/src/vite-env.d.ts`、`frontend/src/components/DesktopShell.vue`、`build/Taskfile.yml`
+- **后续**：无
+- **commit**：待 PR 合并后回填
 
 ## 2026-10-01 · zcode
 

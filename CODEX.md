@@ -51,7 +51,7 @@ V1 验收完成后关闭当前 goal。V1.1、V2 或其他平台支持必须创�
 ## V1 范围
 
 - Windows only。
-- Wails 3（当前锁定 `v3.0.0-beta.26`）+ Go。
+- Wails 3 beta + Go。前端开发前必须核对上游最新 beta，并让 Go 模块、`wails3` CLI、`@wailsio/runtime`、CI 和文档保持同一具体版本；不得混用旧版或提交浮动的 `latest`。
 - 只实现 Codex Desktop 平台适配器。
 - Provider 只配置一次，通过 Route 选择 Platform、Provider、Model。
 - CPA 作为普通 Provider，不实现独立的 CPA 产品逻辑。
@@ -114,6 +114,8 @@ docs/
 6. 最后实现 Wails UI、托盘、开机启动和安装包。
 7. 每个非平凡逻辑保留至少一个可运行测试或验证。
 8. 不私自扩大 V1 范围；发现约束时优先寻找兼容实现。
+
+前端工作开始前先执行 Wails beta 版本核对。若发现新 beta，先完成版本对齐、绑定重新生成和 `task ci` 验证，再继续 UI 或前端业务改动。
 
 ## 进度保存规则
 

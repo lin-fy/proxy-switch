@@ -3,30 +3,37 @@
 > agent 协作的"单一事实源"。开工读，收工更新。只保留当前状态。
 > 详细规则见 [`agent-guide/workflow.md`](agent-guide/workflow.md)。
 
-最后更新：2026-10-02 · codex（补齐删除引用保护、store 并发与损坏 JSON 针对性测试）
+最后更新：2026-10-02 · codex（同步 PR #9 测试分支与最新 dev）
 
 ## 一句话现状
 
-V1 后端核心 + 桌面壳 + Vue 前端已完成并通过桌面原生验收（M4 全部完成，含窗口/DPI/浮层/键盘/IME 与 Mock 全链路走查）；NSIS 安装包全流程验收与 `BUILD_WINDOWS.md` 最终文档定稿完成，M5 全部完成。剩余 M6 验收与发布，依赖用户凭据与 GitHub 配置。
+V1 后端核心 + 桌面壳 + Vue 前端已完成并通过桌面原生验收（M4 全部完成，含窗口/DPI/浮层/键盘/IME 与 Mock 全链路走查）；NSIS 安装包全流程验收与 `BUILD_WINDOWS.md` 最终文档定稿完成，M5 全部完成。M6-A/B 的目标、证据矩阵和本地确定性验证已完成；当前先推进 M6-D，M6-C 真实 Provider 验收延后，M6-E 正式发布仍需两者完成。
 
-## 下一步两项
+## 下一步
 
-1. GitHub 配置 `production` Environment + 签名 Secrets + `main` 分支保护，完成 Tag 发布演练（**需用户操作**）
-2. 完成 CPA、OpenAI、自定义 Provider 的真实端到端验收（**需用户提供凭据**）
+1. 确认签名凭据可用性；GitHub 配置已完成，当前证书仍为自签名测试证书；按用户决定，Tag 等代码进入 `main` 后再创建
+2. 提供 CPA、OpenAI、自定义 Provider 凭据和 Codex Desktop 环境，完成真实端到端验收（**按用户安排稍后进行**）
+3. M6-C/D 通过后统一切换 `1.0.0`、合并 `main` 并发布正式安装包
+4. 前端开发前核对最新 Wails v3 beta；当前基线已统一到已核对的 `v3.0.0-beta.27`
 
-统一验证入口已补齐：`task check:frontend`、`task check:backend`、`task ci`；GitHub Actions 与本地入口均复用 `scripts/ci/verify.ps1`，兼容 Windows PowerShell 5.1，不依赖任何 LLM。
+统一验证入口已补齐：`task check:frontend`、`task check:backend`、`task ci`；GitHub Actions 与本地入口均复用 `scripts/ci/verify.ps1`，兼容 Windows PowerShell 5.1，并在 Windows 构建时自动搜索 `GOPATH\bin` 的 Wails CLI。2026-10-02 本地完整验证通过并生成 portable ZIP。PR #10 已合并到 `dev`（`38354c8`），包含文档 PR 的 `verify` 触发修复；PR #11 已合并到 `dev`（`0b33c73`），统一 UI 版本来源并改善 Windows 依赖安装；合并后 Windows CI 通过（运行 `36967821792`）。
+
+PR #9 已在独立工作树同步 `dev` 并保留双方文档记录；补齐 Provider/Model 删除引用保护、并发写入和损坏 JSON 的回归测试。本地完整 Windows 验证通过；合并仍须以最新 PR head 的 GitHub `verify` 通过为准。
 
 ## 当前卡点
 
 - 真实 CPA / OpenAI / 自定义 Provider 凭据（**需用户提供**）
-- GitHub 仓库 Secrets 配置（**需用户操作**）
+- 签名与 Tag 演练尚未完成：两个 Secret 名称已确认存在，证书为自签名测试证书；现有 Release 工作流要求签名 `Valid` 且带时间戳，凭据可用性和信任尚未验证
 
 ## 待协调事项
 
-- <暂无>
+- 正式 `1.0.0` 签名需要受 Windows 信任链认可、包含私钥且可导出为 `.pfx` 的 Authenticode 证书；自签名证书不能作为公开发布替代品。
+- PR #11 已合并且合并后 Windows CI 通过；其后续收尾记录已由 PR #14 更新。
+- 已新增 Wails v3 beta 前端版本规则，并将 Go 模块、CLI、runtime、CI 和构建文档统一到 `v3.0.0-beta.27`；升级后的完整 Windows CI 已通过（运行 `36971499051`）。
 
 ### 已裁决（归档）
 
+- 2026-10-02：用户选择将仓库设为公开；GitHub API 已确认公开、`main` 保护和 `production` 审批生效（ADR-0012），原方案限制已解除
 - 2026-10-01：TASKS.md codex 代记条目归属问题 → 删除，由 zcode 自己条目承担
 - 2026-10-01：CI 与开发 agent、模型解耦，AI Review/失败诊断仅作为可选分析层（ADR-0011）
 
