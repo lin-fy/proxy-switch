@@ -11,9 +11,9 @@ import (
 	"strings"
 	"time"
 
-	"codex-provider-hub/internal/application/ports"
-	domainprovider "codex-provider-hub/internal/domain/provider"
-	"codex-provider-hub/internal/infrastructure/credential"
+	"proxy-switch/internal/application/ports"
+	domainprovider "proxy-switch/internal/domain/provider"
+	"proxy-switch/internal/infrastructure/credential"
 )
 
 type ResponsesTester struct {
