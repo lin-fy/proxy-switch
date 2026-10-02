@@ -13,7 +13,7 @@
     "lint:staged": "lint-staged"
   },
   "dependencies": {
-    "@wailsio/runtime": "^3.0.0-beta.27",
+    "@wailsio/runtime": "3.0.0-beta.27",
     "lucide-vue-next": "^1.0.0",
     "naive-ui": "^2.45.3",
     "pinia": "^4.0.3",
