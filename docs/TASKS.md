@@ -8,7 +8,7 @@
 
 ## 进行中
 
-- [x by zcode 2026-10-02] 版本展示同源与构建卫生（PR #11 合并：尾栏注入 0.1.0、install-or-skip）；追加强制收尾：exe 版本元数据修复（info.json 0409 + validator）、NDialog 关闭按钮 aria 兜底观察器、上游反馈 wails#6210 / naive-ui#8231
+- <暂无>
 
 ## 待认领（按优先级排序）
 
@@ -27,9 +27,9 @@
 ### M6 — V1 验收
 
 - [x by codex 2026-10-02] M6 目标树、验收证据矩阵与 1.0 发布前验证预检
-- [- by zcode 2026-10-01] M6 发布准备：README 刷新、发布说明草稿与发布演练清单（版本统一与 Tag 演练按用户决定滞后，待新任务/目标后启动）
+- [x by zcode 2026-10-02] M6 发布准备：README 刷新、发布说明草稿与发布演练清单（PR #6/#14 合并）
 - [x by codex 2026-10-02] 按用户授权将仓库公开；配置 `production` Environment、两个测试签名 Secrets、发布审批人和 `main` 分支保护（凭据可用性与签名信任尚待演练验证）
-- [- by zcode 2026-10-02] Tag 发布演练：在 main 打 v0.1.0 触发 release 流水线，首次验证 production Environment 的测试签名凭据与产物（版本元数据已全部一致 0.1.0）
+- [x by zcode 2026-10-02] Tag 发布演练：main 同步 + v0.1.0 tag + 无签名发布（PR #15~#21）；Release 已发布（3 产物 SHA256 校验一致、属性页版本 0.1.0 正确）；顺带验证测试签名证书可用但信任链不通、新增 unsigned 手动开关
 - [ ] 用真实 CPA、OpenAI、自定义 Provider 完成端到端验收（**需要用户提供凭据**）
 
 ### 持续性工作
@@ -39,6 +39,7 @@
 
 ## 已完成
 
+- [x by zcode 2026-10-02] 版本展示同源与构建卫生（PR #11 尾栏注入 0.1.0、install-or-skip）+ 收尾（PR #14 exe 版本元数据 info.json 0409 + validator、NDialog aria 兜底）；上游反馈 wails#6210 / naive-ui#8231
 - [x by codex 2026-10-02] 补齐 Provider/Model 删除引用保护、`store.go` 并发写入与损坏 JSON 安全失败的针对性测试；PR #9 同步 dev 后完整 Windows 验证通过；去锁变异测试检验并发回归用例有效，本机无 C 编译器，未运行 race detector
 
 - [x by codex 2026-10-02] 新增 Wails v3 beta 前端开发规则并统一到 `v3.0.0-beta.27`：前端改动前核对最新具体版本，统一 Go 模块、CLI、runtime、CI 和文档，重新生成绑定并通过 `task ci`
