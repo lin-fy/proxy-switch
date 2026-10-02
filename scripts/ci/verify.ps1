@@ -65,7 +65,7 @@ if ($BuildWindows) {
         $env:PATH = "$goBin;$env:PATH"
     }
     if (-not (Get-Command wails3 -ErrorAction SilentlyContinue)) {
-        throw 'Wails CLI not found; install v3.0.0-beta.26 and ensure it is available in go env GOPATH\bin'
+        throw 'Wails CLI not found; install v3.0.0-beta.27 and ensure it is available in go env GOPATH\bin'
     }
 
     $generatedPaths = @('go.mod', 'go.sum', 'frontend/package-lock.json', 'frontend/bindings')

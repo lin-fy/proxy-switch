@@ -26,7 +26,7 @@ The Windows executable and portable ZIP are retained as workflow artifacts for s
 
 All coding agents use the same PowerShell verifier; the selected model does not change the checks. From the repository root:
 
-Use PowerShell 7.3+, Go 1.25 and Node.js 22, then install the locked frontend dependencies with `npm ci` in `frontend/`. A fresh checkout needs `task check:frontend` before `task check:backend`, because the Go entry point embeds `frontend/dist`. The complete `task ci` already runs them in this order and additionally requires Wails `v3.0.0-beta.26`.
+Use PowerShell 7.3+, Go 1.25 and Node.js 22, then install the locked frontend dependencies with `npm ci` in `frontend/`. A fresh checkout needs `task check:frontend` before `task check:backend`, because the Go entry point embeds `frontend/dist`. The complete `task ci` already runs them in this order and additionally requires Wails `v3.0.0-beta.27`.
 
 ```text
 task check:frontend   # format, lint, type-check, production frontend build
@@ -39,6 +39,12 @@ task ci               # both scopes plus Wails Windows build and portable ZIP
 When Go Task is not installed, invoke the same implementation directly, for example `pwsh -NoProfile -File ./scripts/ci/verify.ps1 -Scope backend`.
 
 For Windows builds, the verifier also searches `GOPATH\bin` for an installed Wails CLI. It adjusts only the verification process's PATH; user and system PATH settings are unchanged.
+
+### Wails v3 beta version rule
+
+Wails v3 is a beta framework. Before frontend work, check the latest upstream beta and use one concrete matching version for `go.mod`, the local `wails3` CLI, `frontend/package.json` / `package-lock.json`, GitHub Actions, and build documentation. Do not mix versions or commit a floating `latest` dependency.
+
+When a newer beta is available, update the full version set first, regenerate `frontend/bindings`, then run `task check:frontend` and `task ci` before continuing frontend changes. The repository baseline is now `v3.0.0-beta.27`, the latest upstream beta checked on 2026-10-02.
 
 ## Release
 
