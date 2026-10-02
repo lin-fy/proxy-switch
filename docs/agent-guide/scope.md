@@ -5,7 +5,7 @@
 ## V1 锁定
 
 - Windows only
-- Wails 3（`v3.0.0-beta.26`）+ Go
+- Wails 3（当前最新具体 beta，现为 `v3.0.0-beta.27`）+ Go
 - 只实现 Codex Desktop 平台适配器
 - Provider 只配置一次，通过 Route 选择 Platform、Provider、Model
 - 首版只接入 Responses API Provider

@@ -7,7 +7,7 @@
 
 | 层 | 选择 | 说明 |
 | --- | --- | --- |
-| 桌面壳 | Wails 3 `v3.0.0-beta.26` | 当前项目已经使用，负责窗口、托盘、开机启动、Go 服务和本地资源嵌入 |
+| 桌面壳 | Wails 3 `v3.0.0-beta.27` | 当前项目已经使用，负责窗口、托盘、开机启动、Go 服务和本地资源嵌入 |
 | 后端 | Go | 保留现有 DDD/application/infrastructure 分层与 CodexAdapter |
 | UI 框架 | Vue 3.5.x + `<script setup>` | 用组件和响应式状态替代当前单文件 DOM 拼接 |
 | 语言 | TypeScript 5.6.x | 沿用现有严格类型设置和 Wails 生成 DTO |
@@ -41,13 +41,13 @@ CC Switch 使用 Tauri，但它的视觉形态来自 React 组件架构、页面
 
 ```json
 {
-  "@wailsio/runtime": "3.0.0-beta.26",
+  "@wailsio/runtime": "3.0.0-beta.27",
   "typescript": "^5.6.3",
   "vite": "^7.0.0"
 }
 ```
 
-上表是正式实施的兼容基线。当前 manifest 将 Wails runtime 声明为 `latest`，lockfile 解析为 `3.0.0-beta.26`；本阶段只记录差异，后续需固定匹配版本。
+上表是正式实施的兼容基线。Wails v3 处于 beta，前端开发前必须核对上游最新具体版本；当前 manifest 与 lockfile 已固定为 `3.0.0-beta.27`，避免 `latest` 漂移。
 
 ### 增加
 

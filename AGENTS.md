@@ -27,6 +27,12 @@ GitHub Actions 复用 `scripts/ci/verify.ps1`；CI 本身不调用 LLM。失败�
 
 如果本机没有安装 Go Task，可直接调用同一实现：`pwsh -NoProfile -File ./scripts/ci/verify.ps1 -Scope frontend`、`-Scope backend` 或 `-BuildWindows`。
 
+## Wails v3 beta 前端开发规则
+
+Wails v3 仍处于 beta，前端开发必须先核对上游最新 beta 版本，再开始修改 Vue/Vite、Wails 绑定或桌面壳代码。Go 模块、`wails3` CLI、`@wailsio/runtime`、GitHub Actions 和构建文档必须使用同一个具体版本；禁止混用旧版 CLI/runtime，也不要在提交的依赖中使用浮动的 `latest`。
+
+发现上游有更新时，先在同一分支完成版本对齐、重新生成 `frontend/bindings`，再实施前端功能改动，并运行 `task check:frontend` 和 `task ci`。当前规则只要求先完成版本核对；若升级涉及 API 或生成文件变化，必须单独记录并通过 PR 验证。
+
 ---
 
 ## 并行开发流程（多 agent 同时干活）

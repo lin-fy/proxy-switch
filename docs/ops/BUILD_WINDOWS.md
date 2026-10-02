@@ -8,14 +8,16 @@
 | --- | --- | --- |
 | Go | `go.mod` 要求 1.25.x | 后端构建与测试 |
 | Node.js | 20+（CI 使用 22） | 前端构建 |
-| Wails CLI | `v3.0.0-beta.26` | 桌面构建与打包 |
+| Wails CLI | 与 `go.mod` 匹配的 Wails v3 beta（当前基线 `v3.0.0-beta.27`） | 桌面构建与打包 |
 | NSIS | 3.12（系统级或用户级） | 生成 NSIS 安装包 |
 | WebView2 Runtime | Windows 10/11 通常已内置 | 运行桌面界面 |
 
-安装 Wails CLI：
+Wails v3 处于 beta。开始前端开发或桌面构建前，先确认上游最新 beta；Go 模块、CLI、`@wailsio/runtime` 和 CI 必须使用同一个具体版本。发现新版本时，先完成全链路版本对齐并重新生成绑定，再继续前端改动。
+
+安装当前基线 Wails CLI：
 
 ```powershell
-go install github.com/wailsapp/wails/v3/cmd/wails3@v3.0.0-beta.26
+go install github.com/wailsapp/wails/v3/cmd/wails3@v3.0.0-beta.27
 ```
 
 如果终端找不到工具，先把以下目录加入当前进程的 `PATH`（路径按本机安装位置调整）：

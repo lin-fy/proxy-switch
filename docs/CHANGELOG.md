@@ -10,6 +10,16 @@
 
 ## 2026-10-02 · codex
 
+### docs(rule): require latest concrete Wails beta for frontend work
+
+- **影响**：新增 Wails v3 beta 前端开发规则，并将当前基线统一到 `v3.0.0-beta.27`：开始前先核对上游最新 beta，统一 Go 模块、`wails3` CLI、`@wailsio/runtime`、CI 和文档版本；发现更新时先重新生成绑定并通过 `task ci`。禁止混用旧版或提交浮动的 `latest`。
+- **验证**：已通过 GitHub 上游 release/tag 核对到最新 beta `v3.0.0-beta.27`；Go 模块、CLI、runtime、CI 和构建文档已统一到该版本，前端绑定未发生生成差异。
+- **关键文件**：`AGENTS.md`、`CODEX.md`、`go.mod`、`frontend/package.json`、`.github/workflows/ci.yml`、`docs/agent-guide/code-rules.md`、`docs/ops/CI_CD.md`、`docs/ops/BUILD_WINDOWS.md`、`docs/DECISIONS.md`
+- **后续**：后续前端开发仍须先核对上游最新 beta；若再有更新，先完成版本对齐、重新生成绑定并运行完整 Windows CI。
+- **commit**：待本次 PR 合并后回填
+
+## 2026-10-02 · codex
+
 ### docs(collab): record PR #11 merge evidence
 
 - **影响**：按用户明确授权将 PR #11 合并到 `dev`，合并提交为 `0b33c73`；版本展示改为读取 `build/config.yml`，Windows 重复构建在已有依赖时不再整体删除重装 `node_modules`。`main`、Tag 和 Release 均未更新。
