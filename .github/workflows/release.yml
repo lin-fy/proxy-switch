@@ -110,7 +110,7 @@ jobs:
         env:
           CERTIFICATE_BASE64: ${{ secrets.WINDOWS_CERTIFICATE_BASE64 }}
         run: |
-          $certificate = Join-Path $env:RUNNER_TEMP 'codex-provider-hub.pfx'
+          $certificate = Join-Path $env:RUNNER_TEMP 'proxy-switch.pfx'
           [IO.File]::WriteAllBytes($certificate, [Convert]::FromBase64String($env:CERTIFICATE_BASE64))
           "CERTIFICATE_PATH=$certificate" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
@@ -134,7 +134,7 @@ jobs:
         if: steps.signing.outputs.signed == 'true'
         shell: pwsh
         run: |
-          foreach ($path in @('bin/codex-provider-hub.exe', 'bin/codex-provider-hub-amd64-installer.exe')) {
+          foreach ($path in @('bin/proxy-switch.exe', 'bin/proxy-switch-amd64-installer.exe')) {
             $signature = Get-AuthenticodeSignature -LiteralPath $path
             if ($signature.Status -ne 'Valid' -or -not $signature.TimeStamperCertificate) {
               throw "Missing valid timestamped signature: $path"
@@ -150,18 +150,18 @@ jobs:
         run: |
           $installer = Get-ChildItem bin -Filter '*-amd64-installer.exe' | Select-Object -First 1
           if (-not $installer) { throw 'NSIS installer was not created' }
-          $installerName = "CodexProviderHub-$env:VERSION-Setup.exe"
+          $installerName = "ProxySwitch-$env:VERSION-Setup.exe"
           Copy-Item $installer.FullName (Join-Path $installer.DirectoryName $installerName) -Force
-          $portable = Join-Path (Get-Location) 'bin\codex-provider-hub-windows-amd64.zip'
+          $portable = Join-Path (Get-Location) 'bin\proxy-switch-windows-amd64.zip'
           if (-not (Test-Path $portable)) { throw 'Portable ZIP was not created' }
-          Copy-Item $portable (Join-Path (Get-Location) "bin\CodexProviderHub-$env:VERSION-portable.zip") -Force
+          Copy-Item $portable (Join-Path (Get-Location) "bin\ProxySwitch-$env:VERSION-portable.zip") -Force
 
       - name: Generate checksums
         shell: pwsh
         run: |
           $files = @(
-            "bin\CodexProviderHub-$env:VERSION-Setup.exe",
-            "bin\CodexProviderHub-$env:VERSION-portable.zip"
+            "bin\ProxySwitch-$env:VERSION-Setup.exe",
+            "bin\ProxySwitch-$env:VERSION-portable.zip"
           )
           Get-FileHash $files -Algorithm SHA256 | ForEach-Object {
             "{0}  {1}" -f $_.Hash.ToLowerInvariant(), (Split-Path $_.Path -Leaf)
@@ -175,17 +175,17 @@ jobs:
         run: |
           gh release create $env:RELEASE_TAG `
             --verify-tag `
-            --title "Codex Provider Hub $env:VERSION" `
+            --title "Proxy Switch $env:VERSION" `
             --generate-notes `
-            "bin\CodexProviderHub-$env:VERSION-Setup.exe" `
-            "bin\CodexProviderHub-$env:VERSION-portable.zip" `
+            "bin\ProxySwitch-$env:VERSION-Setup.exe" `
+            "bin\ProxySwitch-$env:VERSION-portable.zip" `
             "bin\SHA256SUMS.txt"
 
       - name: Remove temporary signing certificate
         if: always()
         shell: pwsh
         run: |
-          $certificate = Join-Path $env:RUNNER_TEMP 'codex-provider-hub.pfx'
+          $certificate = Join-Path $env:RUNNER_TEMP 'proxy-switch.pfx'
           if (Test-Path -LiteralPath $certificate) {
             Remove-Item -LiteralPath $certificate -Force
           }

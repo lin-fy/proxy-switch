@@ -1,4 +1,4 @@
-# Codex Provider Hub：需求与架构草案
+# Proxy Switch：需求与架构草案
 
 > 状态：V1 核心后端、Vue 桌面界面和 Windows 安装包已完成；真实 Provider/Codex 端到端验收与正式发布仍待完成
 >

@@ -59,9 +59,9 @@ jobs:
       - name: Upload Windows build
         uses: actions/upload-artifact@v4
         with:
-          name: codex-provider-hub-windows-${{ github.sha }}
+          name: proxy-switch-windows-${{ github.sha }}
           path: |
-            bin/codex-provider-hub.exe
-            bin/codex-provider-hub-windows-amd64.zip
+            bin/proxy-switch.exe
+            bin/proxy-switch-windows-amd64.zip
           if-no-files-found: error
           retention-days: 7

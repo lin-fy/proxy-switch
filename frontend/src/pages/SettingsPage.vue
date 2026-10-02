@@ -106,7 +106,7 @@ async function restoreSelected(): Promise<void> {
           ><div class="section-title"><Info :size="16" />关于</div></template
         >
         <div class="setting-row">
-          <div><strong>Codex Provider Hub</strong><span>Windows 桌面工具 · V1</span></div>
+          <div><strong>Proxy Switch</strong><span>Windows 桌面工具 · V1</span></div>
           <NTag size="small" :bordered="false">1.0</NTag>
         </div>
         <div class="setting-row">

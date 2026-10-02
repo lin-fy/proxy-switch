@@ -1,7 +1,7 @@
-# Codex Provider Hub：桌面工具 UI 原型稿
+# Proxy Switch：桌面工具 UI 原型稿
 
 > 状态：设计基线（已接入 Vue 实现）  
-> 目标：把 Codex Provider Hub 组织成一个长期驻留、可快速切换配置的 Windows 工具，而不是一张铺满表单的网页。
+> 目标：把 Proxy Switch 组织成一个长期驻留、可快速切换配置的 Windows 工具，而不是一张铺满表单的网页。
 
 可视化原型：[`ui-prototype.svg`](ui-prototype.svg)
 
@@ -36,7 +36,7 @@
 
 ```text
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│  ● Codex Provider Hub                           当前档案 ▾   ↻   ● Codex 运行中 │  ← 顶部工具栏
+│  ● Proxy Switch                           当前档案 ▾   ↻   ● Codex 运行中 │  ← 顶部工具栏
 ├──────────────────┬───────────────────────────────────────────────────────────┤
 │  CP  Codex Hub   │  配置                                                       │
 │  本地 Provider 管理│  当前使用                                                     │
