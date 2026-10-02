@@ -65,7 +65,7 @@ const statusText = computed(() => {
         </div>
       </div>
       <div class="rail-version">
-        <CircleHelp :size="14" /> <span>Codex Provider Hub · {{ appVersion }}</span>
+        <CircleHelp :size="14" /> <span>Proxy Switch · {{ appVersion }}</span>
       </div>
     </aside>
     <section class="desktop-content min-w-0">

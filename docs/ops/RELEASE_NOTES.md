@@ -1,8 +1,8 @@
-# Codex Provider Hub 发布说明（草稿）
+# Proxy Switch 发布说明（草稿）
 
 > 面向用户的 V1 发布说明草稿。正式发布时粘贴到 GitHub Release（替代 `--generate-notes` 自动内容），或用 `gh release edit v1.0.0 --notes-file docs/ops/RELEASE_NOTES.md`。
 
-## Codex Provider Hub <版本号以实际发布 tag 为准>
+## Proxy Switch <版本号以实际发布 tag 为准>
 
 Windows 桌面工具：把 Codex Desktop 的 Responses API 配置（Provider、Model、Route、Profile）管理起来，安全完成切换、测试、备份和恢复。
 
@@ -19,8 +19,8 @@ Windows 桌面工具：把 Codex Desktop 的 Responses API 配置（Provider、M
 
 | 文件 | 说明 |
 | --- | --- |
-| `CodexProviderHub-<版本>-Setup.exe` | NSIS 安装包，安装到 `%LOCALAPPDATA%\Programs\Codex Provider Hub` |
-| `CodexProviderHub-<版本>-portable.zip` | 便携版，解压即用 |
+| `ProxySwitch-<版本>-Setup.exe` | NSIS 安装包，安装到 `%LOCALAPPDATA%\Programs\Proxy Switch` |
+| `ProxySwitch-<版本>-portable.zip` | 便携版，解压即用 |
 | `SHA256SUMS.txt` | 上述文件 SHA256 校验值 |
 
 系统要求：Windows 10/11（x64），WebView2 Runtime（Windows 11 内置）。

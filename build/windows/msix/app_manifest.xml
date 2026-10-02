@@ -9,14 +9,14 @@
   
   <Identity 
     Name="com.codexproviderhub.app"
-    Publisher="CN=Codex Provider Hub"
+    Publisher="CN=Proxy Switch"
     Version="0.1.0.0" 
     ProcessorArchitecture="x64" />
   
   <Properties>
-    <DisplayName>Codex Provider Hub</DisplayName>
-    <PublisherDisplayName>Codex Provider Hub</PublisherDisplayName>
-    <Description>Codex Provider Hub</Description>
+    <DisplayName>Proxy Switch</DisplayName>
+    <PublisherDisplayName>Proxy Switch</PublisherDisplayName>
+    <Description>Proxy Switch</Description>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
   
@@ -31,8 +31,8 @@
   <Applications>
     <Application Id="com.codexproviderhub.app" Executable="codex-provider-hub" EntryPoint="Windows.FullTrustApplication">
       <uap:VisualElements
-        DisplayName="Codex Provider Hub"
-        Description="Codex Provider Hub"
+        DisplayName="Proxy Switch"
+        Description="Proxy Switch"
         BackgroundColor="transparent"
         Square150x150Logo="Assets\Square150x150Logo.png"
         Square44x44Logo="Assets\Square44x44Logo.png">

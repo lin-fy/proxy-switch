@@ -7,10 +7,10 @@
 		"0409": {
 			"FileVersion": "0.1.0",
 			"ProductVersion": "0.1.0",
-			"CompanyName": "Codex Provider Hub",
+			"CompanyName": "Proxy Switch",
 			"FileDescription": "Local provider routing for Codex Desktop",
-			"LegalCopyright": "(c) 2026 Codex Provider Hub",
-			"ProductName": "Codex Provider Hub",
+			"LegalCopyright": "(c) 2026 Proxy Switch",
+			"ProductName": "Proxy Switch",
 			"Comments": "Manage Codex providers and routes locally"
 		}
 	}

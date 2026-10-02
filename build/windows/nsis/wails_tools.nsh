@@ -5,19 +5,19 @@
 !include "FileFunc.nsh"
 
 !ifndef INFO_PROJECTNAME
-    !define INFO_PROJECTNAME "codex-provider-hub"
+    !define INFO_PROJECTNAME "proxy-switch"
 !endif
 !ifndef INFO_COMPANYNAME
-    !define INFO_COMPANYNAME "Codex Provider Hub"
+    !define INFO_COMPANYNAME "Proxy Switch"
 !endif
 !ifndef INFO_PRODUCTNAME
-    !define INFO_PRODUCTNAME "Codex Provider Hub"
+    !define INFO_PRODUCTNAME "Proxy Switch"
 !endif
 !ifndef INFO_PRODUCTVERSION
     !define INFO_PRODUCTVERSION "0.1.0"
 !endif
 !ifndef INFO_COPYRIGHT
-    !define INFO_COPYRIGHT "(c) 2026 Codex Provider Hub"
+    !define INFO_COPYRIGHT "(c) 2026 Proxy Switch"
 !endif
 !ifndef PRODUCT_EXECUTABLE
     !define PRODUCT_EXECUTABLE "${INFO_PROJECTNAME}.exe"

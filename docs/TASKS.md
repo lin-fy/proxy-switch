@@ -8,7 +8,7 @@
 
 ## 进行中
 
-- <暂无>
+- [- by zcode 2026-10-02] 产品命名统一：安装包/exe/界面/发布产物由 `Codex Provider Hub` 改为 `Proxy Switch`（仓库名同源语义、去平台绑定）；Go module 路径与 CHANGELOG 历史保持不动，0.1.0 产物重发
 
 ## 待认领（按优先级排序）
 

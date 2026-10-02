@@ -1,4 +1,4 @@
-# Codex Provider Hub review checklist
+# Proxy Switch review checklist
 
 - Dependency direction remains `interfaces → application → domain`, with infrastructure implementing ports.
 - Windows-only V1 scope is preserved; no platform or protocol expansion is hidden in a refactor.

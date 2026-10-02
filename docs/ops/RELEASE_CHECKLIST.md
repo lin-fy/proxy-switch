@@ -43,7 +43,7 @@ SHA256 校验值（发布说明需标注"未签名"）。未要求无签名且�
 2. 在 `main` 打 tag 并推送：
 
    ```bash
-   git tag -a v1.0.0 -m "Codex Provider Hub 1.0.0" && git push origin v1.0.0
+   git tag -a v1.0.0 -m "Proxy Switch 1.0.0" && git push origin v1.0.0
    ```
 
    也可以在 GitHub Actions 手动运行 Release 工作流并填入已有 tag（`workflow_dispatch`）。

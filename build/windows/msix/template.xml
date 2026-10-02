@@ -10,15 +10,15 @@
     <Installer
         Path="codex-provider-hub"
         Arguments=""
-        InstallLocation="C:\Program Files\Codex Provider Hub\Codex Provider Hub">
+        InstallLocation="C:\Program Files\Proxy Switch\Proxy Switch">
     </Installer>
     <PackageInformation
-        PackageName="Codex Provider Hub"
-        PackageDisplayName="Codex Provider Hub"
-        PublisherName="CN=Codex Provider Hub"
-        PublisherDisplayName="Codex Provider Hub"
+        PackageName="Proxy Switch"
+        PackageDisplayName="Proxy Switch"
+        PublisherName="CN=Proxy Switch"
+        PublisherDisplayName="Proxy Switch"
         Version="0.1.0.0"
-        PackageDescription="Codex Provider Hub">
+        PackageDescription="Proxy Switch">
         <Capabilities>
             <Capability Name="runFullTrust" />
             
@@ -26,8 +26,8 @@
         <Applications>
             <Application
                 Id="com.codexproviderhub.app"
-                Description="Codex Provider Hub"
-                DisplayName="Codex Provider Hub"
+                Description="Proxy Switch"
+                DisplayName="Proxy Switch"
                 ExecutableName="codex-provider-hub.exe"
                 EntryPoint="Windows.FullTrustApplication">
                 
@@ -41,9 +41,9 @@
         </Dependencies>
         <Properties>
             <Framework>false</Framework>
-            <DisplayName>Codex Provider Hub</DisplayName>
-            <PublisherDisplayName>Codex Provider Hub</PublisherDisplayName>
-            <Description>Codex Provider Hub</Description>
+            <DisplayName>Proxy Switch</DisplayName>
+            <PublisherDisplayName>Proxy Switch</PublisherDisplayName>
+            <Description>Proxy Switch</Description>
             <Logo>Assets\AppIcon.png</Logo>
         </Properties>
     </PackageInformation>
