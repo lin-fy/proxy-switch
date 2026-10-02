@@ -8,7 +8,7 @@
 
 ## 进行中
 
-- [- by zcode 2026-10-01] 版本展示同源与构建卫生：UI 尾栏版本改为从 build/config.yml 注入（消除 1.0/0.1.0/0.0.0 三处不一致），install:frontend:deps 的 npm ci 每次构建重装且易 EBUSY 问题修复
+- [x by zcode 2026-10-02] 版本展示同源与构建卫生（PR #11 合并：尾栏注入 0.1.0、install-or-skip）；追加强制收尾：exe 版本元数据修复（info.json 0409 + validator）、NDialog 关闭按钮 aria 兜底观察器、上游反馈 wails#6210 / naive-ui#8231
 
 ## 待认领（按优先级排序）
 

@@ -8,6 +8,15 @@
 
 ---
 
+## 2026-10-02 · zcode
+
+### feat(ui): exe 版本元数据修复 + NDialog 关闭按钮可访问性兜底
+
+- **影响**：① 定位并修复 exe「属性 → 详细信息」版本显示为空：根因是 info.json 语言键 `"0000"`（LCID 0）生成的版本资源 Windows 无法解析，改为 `"0409"`（en-US）并补 `fixed.product_version` 与字符串表 `FileVersion`，实测属性页正确显示 File/Product 0.1.0 与产品名；`validate-release.ps1` 同步改读 `0409` 键。② 新增 `src/services/a11y.ts`：MutationObserver 为 naive-ui `NDialog` 关闭按钮（`.n-dialog__close`，无 props 可设、与 NModal 自带 `aria-label="close"` 不一致）补 `aria-label="关闭"`，节点自身与后代两种 DOM 结构均验证生效。③ 说明：Wails beta.27 升级已由 codex 以 40f0456 落地，本 PR 不重复；上游反馈已提交 wails#6210（版本元数据，问题 1）与 naive-ui#8231（NDialog aria，问题 2）
+- **关键文件**：`build/windows/info.json`、`scripts/ci/validate-release.ps1`、`frontend/src/services/a11y.ts`（新）、`frontend/src/main.ts`
+- **后续**：等上游回应 wails#6210 / naive-ui#8231；观察器在上游修复后自动失效（先查 aria-label 再补）
+- **commit**：待 PR 合并后回填
+
 ## 2026-10-02 · codex
 
 ### docs(rule): require latest concrete Wails beta for frontend work
