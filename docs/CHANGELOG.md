@@ -10,6 +10,15 @@
 
 ## 2026-10-02 · codex
 
+### fix(ci): run required verification for documentation pull requests
+
+- **影响**：移除 PR 事件上的文档路径忽略，使分支保护要求的 `verify` 检查覆盖文档-only PR；保留 `dev` 推送事件的路径忽略以避免无意义构建。
+- **关键文件**：`.github/workflows/ci.yml`
+- **后续**：PR #10 推送后核对 `verify` 检查状态。
+- **commit**：待提交后补充
+
+## 2026-10-02 · codex
+
 ### ops(github): make repository public and enable release protections
 
 - **影响**：按用户明确授权将 `lin-fy/proxy-switch` 从私有改为公开，解决原分支保护和 Environment 审批的方案限制。

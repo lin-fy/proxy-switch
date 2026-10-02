@@ -10,11 +10,6 @@ on:
       - 'LICENSE'
   pull_request:
     branches: [dev, main]
-    paths-ignore:
-      - '**.md'
-      - 'docs/**'
-      - '.agents/**'
-      - 'LICENSE'
   workflow_dispatch:
 
 permissions:
