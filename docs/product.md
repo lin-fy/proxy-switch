@@ -144,7 +144,7 @@ infrastructure (JSON / TOML / Credential / HTTP / Process / Codex)
 推荐目录：
 
 ```text
-cmd/codex-provider-hub/
+cmd/proxy-switch/
 internal/
   domain/{provider,model,route,profile}/
   application/{provider,model,route,profile}/

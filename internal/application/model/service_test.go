@@ -6,9 +6,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"codex-provider-hub/internal/domain/model"
-	domainroute "codex-provider-hub/internal/domain/route"
-	"codex-provider-hub/internal/infrastructure/config"
+	"proxy-switch/internal/domain/model"
+	domainroute "proxy-switch/internal/domain/route"
+	"proxy-switch/internal/infrastructure/config"
 )
 
 func TestSyncUpsertsRemoteModelsWithoutDeletingLocalModels(t *testing.T) {

@@ -3,7 +3,7 @@ package profile
 import (
 	"context"
 
-	"codex-provider-hub/internal/domain/profile"
+	"proxy-switch/internal/domain/profile"
 )
 
 type Service struct{ repo profile.Repository }

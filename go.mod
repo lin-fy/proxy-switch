@@ -1,4 +1,4 @@
-module codex-provider-hub
+module proxy-switch
 
 go 1.25.0
 

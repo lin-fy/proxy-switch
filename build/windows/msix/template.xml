@@ -8,7 +8,7 @@
         AllowPromptForPassword="false">
     </Settings>
     <Installer
-        Path="codex-provider-hub"
+        Path="proxy-switch"
         Arguments=""
         InstallLocation="C:\Program Files\Proxy Switch\Proxy Switch">
     </Installer>
@@ -28,7 +28,7 @@
                 Id="com.codexproviderhub.app"
                 Description="Proxy Switch"
                 DisplayName="Proxy Switch"
-                ExecutableName="codex-provider-hub.exe"
+                ExecutableName="proxy-switch.exe"
                 EntryPoint="Windows.FullTrustApplication">
                 
             </Application>
@@ -47,7 +47,7 @@
             <Logo>Assets\AppIcon.png</Logo>
         </Properties>
     </PackageInformation>
-    <SaveLocation PackagePath="codex-provider-hub.msix" />
+    <SaveLocation PackagePath="proxy-switch.msix" />
     <PackageIntegrity>
         <CertificatePath></CertificatePath>
     </PackageIntegrity>

@@ -12,12 +12,12 @@ import (
 
 	"github.com/BurntSushi/toml"
 
-	"codex-provider-hub/internal/application/ports"
-	"codex-provider-hub/internal/domain/model"
-	"codex-provider-hub/internal/domain/profile"
-	"codex-provider-hub/internal/domain/provider"
-	"codex-provider-hub/internal/domain/route"
-	"codex-provider-hub/internal/infrastructure/credential"
+	"proxy-switch/internal/application/ports"
+	"proxy-switch/internal/domain/model"
+	"proxy-switch/internal/domain/profile"
+	"proxy-switch/internal/domain/provider"
+	"proxy-switch/internal/domain/route"
+	"proxy-switch/internal/infrastructure/credential"
 )
 
 var (
@@ -354,7 +354,7 @@ func writeConfig(path string, config map[string]any) error {
 	if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
 		return err
 	}
-	tmp, err := os.CreateTemp(filepath.Dir(path), ".codex-provider-hub-*.tmp")
+	tmp, err := os.CreateTemp(filepath.Dir(path), ".proxy-switch-*.tmp")
 	if err != nil {
 		return err
 	}
@@ -378,7 +378,7 @@ func writeCatalog(path string, catalog []byte) error {
 	if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
 		return err
 	}
-	tmp, err := os.CreateTemp(filepath.Dir(path), ".codex-provider-hub-*.tmp")
+	tmp, err := os.CreateTemp(filepath.Dir(path), ".proxy-switch-*.tmp")
 	if err != nil {
 		return err
 	}
@@ -474,7 +474,7 @@ func rollbackFiles(originals map[string][]byte, existed map[string]bool, paths [
 	return result
 }
 
-func backupPath(path string) string { return path + ".codex-provider-hub.bak" }
+func backupPath(path string) string { return path + ".proxy-switch.bak" }
 
 func missingBackupPath(path string) string { return backupPath(path) + ".missing" }
 

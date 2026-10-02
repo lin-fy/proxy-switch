@@ -1,10 +1,10 @@
-import * as generated from '../../bindings/codex-provider-hub/internal/interfaces/wails/app';
+import * as generated from '../../bindings/proxy-switch/internal/interfaces/wails/app';
 import type {
   ModelDTO,
   ProfileDTO,
   ProviderDTO,
   RouteDTO,
-} from '../../bindings/codex-provider-hub/internal/interfaces/wails/models';
+} from '../../bindings/proxy-switch/internal/interfaces/wails/models';
 
 declare global {
   interface Window {

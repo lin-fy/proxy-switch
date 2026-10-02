@@ -92,7 +92,7 @@ V1 验收完成后关闭当前 goal。V1.1、V2 或其他平台支持必须创�
 推荐目录：
 
 ```text
-cmd/codex-provider-hub/
+cmd/proxy-switch/
 internal/
   domain/{provider,model,route,profile}/
   application/{provider,model,route,profile}/

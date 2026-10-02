@@ -6,10 +6,10 @@ import (
 	"path/filepath"
 	"testing"
 
-	domainmodel "codex-provider-hub/internal/domain/model"
-	domainprovider "codex-provider-hub/internal/domain/provider"
-	domainroute "codex-provider-hub/internal/domain/route"
-	"codex-provider-hub/internal/infrastructure/config"
+	domainmodel "proxy-switch/internal/domain/model"
+	domainprovider "proxy-switch/internal/domain/provider"
+	domainroute "proxy-switch/internal/domain/route"
+	"proxy-switch/internal/infrastructure/config"
 )
 
 func newProviderService(t *testing.T) (*Service, *config.ProviderRepository, *config.ModelRepository, *config.RouteRepository) {

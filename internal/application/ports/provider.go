@@ -3,7 +3,7 @@ package ports
 import (
 	"context"
 
-	"codex-provider-hub/internal/domain/provider"
+	"proxy-switch/internal/domain/provider"
 )
 
 type RemoteModel struct {
