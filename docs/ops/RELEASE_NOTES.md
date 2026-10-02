@@ -25,6 +25,10 @@ Windows 桌面工具：把 Codex Desktop 的 Responses API 配置（Provider、M
 
 系统要求：Windows 10/11（x64），WebView2 Runtime（Windows 11 内置）。
 
+> **签名说明**：0.1.0 为未签名构建，首次运行可能出现 SmartScreen"未知发布者"提示
+> （选择"仍要运行"即可）。请用 `SHA256SUMS.txt` 校验下载文件完整性。受信签名将在
+> 后续版本通过免费的开源签名服务（如 SignPath Foundation）补齐。
+
 ### 已知边界（V1）
 
 - 仅适配 Codex Desktop（单平台适配器）；其他平台留待后续目标。
