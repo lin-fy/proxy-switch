@@ -12,7 +12,7 @@ const configVersion = readFileSync('../build/config.yml', 'utf-8').match(/^\s*ve
 export default defineConfig({
   plugins: [vue(), tailwindcss()],
   define: {
-    __APP_VERSION__: JSON.stringify(configVersion),
+    'import.meta.env.VITE_APP_VERSION': JSON.stringify(configVersion),
   },
   build: {
     rollupOptions: {

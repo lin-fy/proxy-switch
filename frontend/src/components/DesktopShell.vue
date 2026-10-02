@@ -7,7 +7,7 @@ import { useWorkspaceStore } from '../stores/workspace';
 import { isPreviewMode } from '../services/wails-api';
 
 const workspace = useWorkspaceStore();
-const appVersion = __APP_VERSION__;
+const appVersion = import.meta.env.VITE_APP_VERSION;
 const route = useRoute();
 const activeLabel = computed(
   () => ({ config: '当前配置', profiles: '配置档案', settings: '设置' })[String(route.name)] ?? '当前配置',
