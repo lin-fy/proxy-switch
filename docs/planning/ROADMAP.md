@@ -144,7 +144,7 @@ M6-D 演练 / M6-E：确认签名凭据、统一版本、合并 main、Tag 演�
 
 | 阶段 | 必须证明 | 当前状态 | 证据或依赖 |
 | --- | --- | --- | --- |
-| M6-A | 文档状态与代码、已合并验收结果一致 | [x] | 本文件、`docs/CONTEXT.md`、`docs/TASKS.md`；PR #10 已合并 `dev`（`38354c8`），合并后 Windows CI 通过（`36964118419`） |
+| M6-A | 文档状态与代码、已合并验收结果一致 | [x] | 本文件、`docs/CONTEXT.md`、`docs/TASKS.md`；PR #10 已合并 `dev`（`38354c8`）；PR #11 已合并 `dev`（`0b33c73`），合并后 Windows CI 通过（`36967821792`） |
 | M6-B | Go/前端/Wails/portable ZIP 验证通过，且本地找不到 Wails 时给出明确预检 | [x] | `scripts/ci/verify.ps1`、`docs/ops/CI_CD.md`、`docs/ops/BUILD_WINDOWS.md` |
 | M6-C | 三类 Provider 各完成真实请求；CPA 验证两个模型；两个 Profile 可切换、激活、恢复 | [ ] | 需要用户提供 Provider 凭据与 Codex Desktop 环境 |
 | M6-D | GitHub Environment、签名 Secrets、`main` 分支保护和一次 Tag 发布演练完成 | [-] | 仓库已公开，保护与审批已生效；测试 Secrets 已配置，签名与 Tag 演练尚未验证；流程见 `docs/ops/RELEASE_CHECKLIST.md` |
@@ -157,6 +157,7 @@ M6-D 演练 / M6-E：确认签名凭据、统一版本、合并 main、Tag 演�
 3. Provider 只保存凭据引用；日志、错误和界面不显示完整密钥、请求头或响应体。
 4. 先修复当前构建阻塞，再扩展页面；不在 V1 引入第二个平台、协议转换、云同步或账户池。
 5. 每个里程碑完成后先更新本文档，再提交代码；未通过验证的能力不能标记为完成。
+6. 日常改动通过 PR 合并到 `dev`；按用户决定，V1 完成并验收前不更新 `main`，Tag 等代码进入 `main` 后再创建。
 
 ### 可暂停并请求用户介入的情况
 

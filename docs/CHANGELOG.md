@@ -10,6 +10,16 @@
 
 ## 2026-10-02 · codex
 
+### docs(collab): record PR #11 merge evidence
+
+- **影响**：按用户明确授权将 PR #11 合并到 `dev`，合并提交为 `0b33c73`；版本展示改为读取 `build/config.yml`，Windows 重复构建在已有依赖时不再整体删除重装 `node_modules`。`main`、Tag 和 Release 均未更新。
+- **验证**：PR #11 审查无阻塞发现；本地前端格式检查、lint、类型检查、生产构建、Go 测试、Wails Windows 构建和 portable ZIP 均通过；合并后的 Windows `verify` CI 通过，运行 `36967821792`。
+- **关键文件**：`frontend/vite.config.ts`、`frontend/src/components/DesktopShell.vue`、`build/Taskfile.yml`、`docs/TASKS.md`、`docs/CONTEXT.md`、`docs/planning/ROADMAP.md`
+- **后续**：PR #9 仍需同步最新 `dev` 并解决冲突；M6-C 真实 Provider 验收与正式 Authenticode 签名、Tag 演练仍待完成。
+- **commit**：PR #11 合并提交 `0b33c73`；本次文档提交见 Git 历史
+
+## 2026-10-02 · codex
+
 ### docs(collab): record PR #10 merge evidence
 
 - **影响**：按用户明确授权将 PR #10 合并到 `dev`，合并提交为 `38354c8`；本地 `dev` 已安全快进同步，无未提交改动。`main`、Tag 和 Release 均未更新。
