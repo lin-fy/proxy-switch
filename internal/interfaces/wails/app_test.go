@@ -6,12 +6,12 @@ import (
 	"path/filepath"
 	"testing"
 
-	modelapp "codex-provider-hub/internal/application/model"
-	"codex-provider-hub/internal/application/ports"
-	providerapp "codex-provider-hub/internal/application/provider"
-	"codex-provider-hub/internal/domain/model"
-	"codex-provider-hub/internal/domain/provider"
-	"codex-provider-hub/internal/infrastructure/config"
+	modelapp "proxy-switch/internal/application/model"
+	"proxy-switch/internal/application/ports"
+	providerapp "proxy-switch/internal/application/provider"
+	"proxy-switch/internal/domain/model"
+	"proxy-switch/internal/domain/provider"
+	"proxy-switch/internal/infrastructure/config"
 )
 
 type fakeAutostart struct {

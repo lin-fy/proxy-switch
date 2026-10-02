@@ -140,7 +140,7 @@ App
 `services/wails-api.ts` 是生成绑定的唯一运行时入口。页面和组件只调用 Pinia 动作，不直接调用适配层或导入生成绑定；DTO 使用适配层的类型导出。生成绑定路径变化时只需改一处。
 
 ```ts
-import * as generated from '../../bindings/codex-provider-hub/internal/interfaces/wails/app'
+import * as generated from '../../bindings/proxy-switch/internal/interfaces/wails/app'
 
 export const wailsApi = {
   listProviders: () => generated.ListProviders(),

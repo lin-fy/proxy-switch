@@ -4,7 +4,7 @@ import type {
   ProfileDTO,
   ProviderDTO,
   RouteDTO,
-} from '../../bindings/codex-provider-hub/internal/interfaces/wails/models';
+} from '../../bindings/proxy-switch/internal/interfaces/wails/models';
 
 /*
  * 浏览器预览模式的内存演示数据,只能在 wails-api.ts 的预览开关下被导入

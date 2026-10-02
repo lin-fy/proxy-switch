@@ -8,11 +8,11 @@ import (
 	"testing"
 	"time"
 
-	"codex-provider-hub/internal/domain/model"
-	"codex-provider-hub/internal/domain/profile"
-	"codex-provider-hub/internal/domain/provider"
-	"codex-provider-hub/internal/domain/route"
-	"codex-provider-hub/internal/infrastructure/credential"
+	"proxy-switch/internal/domain/model"
+	"proxy-switch/internal/domain/profile"
+	"proxy-switch/internal/domain/provider"
+	"proxy-switch/internal/domain/route"
+	"proxy-switch/internal/infrastructure/credential"
 )
 
 // Opt in explicitly: this test invokes the real Codex CLI and consumes API usage.

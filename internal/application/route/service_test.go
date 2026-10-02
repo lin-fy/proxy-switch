@@ -6,12 +6,12 @@ import (
 	"path/filepath"
 	"testing"
 
-	modelapp "codex-provider-hub/internal/application/model"
-	providerapp "codex-provider-hub/internal/application/provider"
-	domainmodel "codex-provider-hub/internal/domain/model"
-	domainprovider "codex-provider-hub/internal/domain/provider"
-	domainroute "codex-provider-hub/internal/domain/route"
-	"codex-provider-hub/internal/infrastructure/config"
+	modelapp "proxy-switch/internal/application/model"
+	providerapp "proxy-switch/internal/application/provider"
+	domainmodel "proxy-switch/internal/domain/model"
+	domainprovider "proxy-switch/internal/domain/provider"
+	domainroute "proxy-switch/internal/domain/route"
+	"proxy-switch/internal/infrastructure/config"
 )
 
 func TestRouteReferencesAndDeletionGuards(t *testing.T) {

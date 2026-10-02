@@ -5,8 +5,8 @@ import (
 	"errors"
 	"strings"
 
-	"codex-provider-hub/internal/domain/model"
-	"codex-provider-hub/internal/domain/route"
+	"proxy-switch/internal/domain/model"
+	"proxy-switch/internal/domain/route"
 )
 
 var ErrReferenced = errors.New("model is referenced by a route")

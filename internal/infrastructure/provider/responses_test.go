@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	domainprovider "codex-provider-hub/internal/domain/provider"
+	domainprovider "proxy-switch/internal/domain/provider"
 )
 
 func TestResponsesTesterChecksModelsEndpoint(t *testing.T) {

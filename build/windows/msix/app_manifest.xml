@@ -8,7 +8,7 @@
   IgnorableNamespaces="uap3">
   
   <Identity 
-    Name="com.codexproviderhub.app"
+    Name="com.proxyswitch.app"
     Publisher="CN=Proxy Switch"
     Version="0.1.0.0" 
     ProcessorArchitecture="x64" />
@@ -29,7 +29,7 @@
   </Resources>
   
   <Applications>
-    <Application Id="com.codexproviderhub.app" Executable="codex-provider-hub" EntryPoint="Windows.FullTrustApplication">
+    <Application Id="com.proxyswitch.app" Executable="proxy-switch" EntryPoint="Windows.FullTrustApplication">
       <uap:VisualElements
         DisplayName="Proxy Switch"
         Description="Proxy Switch"
@@ -41,7 +41,7 @@
       </uap:VisualElements>
       
       <Extensions>
-        <desktop:Extension Category="windows.fullTrustProcess" Executable="codex-provider-hub" />
+        <desktop:Extension Category="windows.fullTrustProcess" Executable="proxy-switch" />
         
         
       </Extensions>

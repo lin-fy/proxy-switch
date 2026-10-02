@@ -67,7 +67,7 @@ task ci               # 上述全部 + wails3 build + portable ZIP
 wails3 task windows:create:nsis:installer INSTALL_SCOPE=user
 ```
 
-- 产物：`bin/codex-provider-hub-amd64-installer.exe`。
+- 产物：`bin/proxy-switch-amd64-installer.exe`。
 - 安装位置：`%LOCALAPPDATA%\Programs\Proxy Switch`，不需要管理员权限。
 - 安装过程会创建开始菜单和桌面快捷方式，并在缺少 WebView2 时静默安装运行时。
 - 卸载信息写入 `HKCU\Software\Microsoft\Windows\CurrentVersion\Uninstall\Proxy SwitchProxy Switch`。
@@ -87,7 +87,7 @@ wails3 task windows:create:nsis:installer INSTALL_SCOPE=user MAKENSIS=$env:MAKEN
 
 ```powershell
 # 静默安装到当前用户目录
-Start-Process .\bin\codex-provider-hub-amd64-installer.exe -Wait -ArgumentList '/S'
+Start-Process .\bin\proxy-switch-amd64-installer.exe -Wait -ArgumentList '/S'
 
 # 静默卸载
 & "$env:LOCALAPPDATA\Programs\Proxy Switch\uninstall.exe" /S
@@ -102,7 +102,7 @@ powershell -ExecutionPolicy Bypass -File build/windows/portable/package.ps1
 
 - 产物：`bin/proxy-switch-windows-amd64.zip`。
 - 解压后运行 `install.ps1` 会安装到 `%LOCALAPPDATA%\Programs\Proxy Switch` 并创建开始菜单快捷方式。
-- 安装目录中的 `uninstall.ps1` 只在存在 `.codex-provider-hub-install` 标记时删除目录，可安全卸载。
+- 安装目录中的 `uninstall.ps1` 只在存在 `.proxy-switch-install` 标记时删除目录，可安全卸载。
 
 ### 4.3 MSIX（可选路径）
 
@@ -148,7 +148,7 @@ wails3 task windows:sign:installer ARCH=amd64 INSTALL_SCOPE=user SIGN_CERTIFICAT
 
 Provider 的 `auth_ref` 可以填写环境变量名（也接受 `env:` 前缀），或填写 `credential:<target>` 从 Windows Credential Manager 读取 Generic Credential。
 
-普通状态文件位于 `%APPDATA%\CodexProviderHub\state.json`，只保存凭据引用，不保存 API Key。不要把密钥填入 Provider 名称、地址或状态文件。
+普通状态文件位于 `%APPDATA%\ProxySwitch\state.json`，只保存凭据引用，不保存 API Key。不要把密钥填入 Provider 名称、地址或状态文件。
 
 ## 7. 卸载与残留
 
@@ -161,10 +161,10 @@ NSIS 卸载会移除：
 
 卸载**不会**自动删除：
 
-- `%APPDATA%\CodexProviderHub\state.json`（应用状态）
-- Codex 自身的配置、Profile 和 `.codex-provider-hub.bak` 备份
+- `%APPDATA%\ProxySwitch\state.json`（应用状态）
+- Codex 自身的配置、Profile 和 `.proxy-switch.bak` 备份
 
-如需彻底清理，确认不再需要配置后再手动删除上述路径。删除前建议先备份 `%APPDATA%\CodexProviderHub` 和 Codex 配置目录。
+如需彻底清理，确认不再需要配置后再手动删除上述路径。删除前建议先备份 `%APPDATA%\ProxySwitch` 和 Codex 配置目录。
 
 ## 8. 故障恢复
 
@@ -202,14 +202,14 @@ NSIS 卸载会移除：
 
 ### 8.4 Codex 配置损坏或激活失败
 
-每次路由激活前，活动配置、选中的 Profile 配置和模型目录都会写入同名 `.codex-provider-hub.bak` 备份。多文件写入中途失败时应用会自动回滚已写入文件。
+每次路由激活前，活动配置、选中的 Profile 配置和模型目录都会写入同名 `.proxy-switch.bak` 备份。多文件写入中途失败时应用会自动回滚已写入文件。
 
 界面中的“恢复备份”会恢复最近一次备份。若需要手工恢复：
 
 1. 退出 Proxy Switch 和 Codex Desktop。
-2. 在 `%CODEX_HOME%`（默认 `%USERPROFILE%\.codex`）找到 `config.toml.codex-provider-hub.bak`、Profile 配置备份和 `*.models.json.codex-provider-hub.bak`。
-3. 将备份文件复制回对应的原始路径（去掉 `.codex-provider-hub.bak` 后缀）。
-4. 如果存在 `.codex-provider-hub.bak.missing` 标记，说明激活前该文件不存在，应删除对应原始文件而不是恢复。
+2. 在 `%CODEX_HOME%`（默认 `%USERPROFILE%\.codex`）找到 `config.toml.proxy-switch.bak`、Profile 配置备份和 `*.models.json.proxy-switch.bak`。
+3. 将备份文件复制回对应的原始路径（去掉 `.proxy-switch.bak` 后缀）。
+4. 如果存在 `.proxy-switch.bak.missing` 标记，说明激活前该文件不存在，应删除对应原始文件而不是恢复。
 5. 重新启动 Codex Desktop 验证配置生效。
 
 若备份缺失，界面恢复会返回明确错误；此时只能从 Codex 自身的配置或版本控制中恢复，应用不会伪造默认配置。

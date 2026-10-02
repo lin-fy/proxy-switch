@@ -10,105 +10,105 @@ import { Call as $Call, CancellablePromise as $CancellablePromise } from "@wails
 import * as $models from "./models.js";
 
 export function ActivateRoute(routeID: string, profileID: string): $CancellablePromise<void> {
-    return $Call.ByID(23255109, routeID, profileID);
+    return $Call.ByID(873382751, routeID, profileID);
 }
 
 export function AutostartEnabled(): $CancellablePromise<boolean> {
-    return $Call.ByID(4206343947);
+    return $Call.ByID(200679149);
 }
 
 export function CodexRunning(): $CancellablePromise<boolean> {
-    return $Call.ByID(565461819);
+    return $Call.ByID(3120239309);
 }
 
 export function CreateModel(providerID: string, id: string, name: string): $CancellablePromise<$models.ModelDTO> {
-    return $Call.ByID(244308170, providerID, id, name);
+    return $Call.ByID(2667702664, providerID, id, name);
 }
 
 export function CreateProfile(id: string, name: string): $CancellablePromise<$models.ProfileDTO> {
-    return $Call.ByID(2207031774, id, name);
+    return $Call.ByID(4226225588, id, name);
 }
 
 export function CreateProvider(id: string, name: string, baseURL: string, authRef: string): $CancellablePromise<$models.ProviderDTO> {
-    return $Call.ByID(292345612, id, name, baseURL, authRef);
+    return $Call.ByID(3505045306, id, name, baseURL, authRef);
 }
 
 export function CreateRoute(id: string, name: string, providerID: string, modelID: string): $CancellablePromise<$models.RouteDTO> {
-    return $Call.ByID(3913029230, id, name, providerID, modelID);
+    return $Call.ByID(3967486520, id, name, providerID, modelID);
 }
 
 export function DeleteModel(providerID: string, id: string): $CancellablePromise<void> {
-    return $Call.ByID(4105665551, providerID, id);
+    return $Call.ByID(1717413909, providerID, id);
 }
 
 export function DeleteProfile(id: string): $CancellablePromise<void> {
-    return $Call.ByID(495927951, id);
+    return $Call.ByID(1821354509, id);
 }
 
 export function DeleteProvider(id: string): $CancellablePromise<void> {
-    return $Call.ByID(3613641423, id);
+    return $Call.ByID(3093367877, id);
 }
 
 export function DeleteRoute(id: string): $CancellablePromise<void> {
-    return $Call.ByID(2675161171, id);
+    return $Call.ByID(217495733, id);
 }
 
 export function ListModels(): $CancellablePromise<$models.ModelDTO[] | null> {
-    return $Call.ByID(3339455847);
+    return $Call.ByID(2613219817);
 }
 
 export function ListModelsByProvider(providerID: string): $CancellablePromise<$models.ModelDTO[] | null> {
-    return $Call.ByID(2850412303, providerID);
+    return $Call.ByID(3642070005, providerID);
 }
 
 export function ListProfiles(): $CancellablePromise<$models.ProfileDTO[] | null> {
-    return $Call.ByID(3182828123);
+    return $Call.ByID(565344365);
 }
 
 export function ListProviders(): $CancellablePromise<$models.ProviderDTO[] | null> {
-    return $Call.ByID(967504745);
+    return $Call.ByID(3646985203);
 }
 
 export function ListRoutes(): $CancellablePromise<$models.RouteDTO[] | null> {
-    return $Call.ByID(2210676955);
+    return $Call.ByID(603517273);
 }
 
 export function RestoreCodexConfig(profileID: string): $CancellablePromise<void> {
-    return $Call.ByID(1724632070, profileID);
+    return $Call.ByID(901113128, profileID);
 }
 
 export function SaveModel(item: $models.ModelDTO): $CancellablePromise<void> {
-    return $Call.ByID(2169819981, item);
+    return $Call.ByID(1448447267, item);
 }
 
 export function SaveProfile(item: $models.ProfileDTO): $CancellablePromise<void> {
-    return $Call.ByID(3160292805, item);
+    return $Call.ByID(2243619131, item);
 }
 
 export function SaveProvider(item: $models.ProviderDTO): $CancellablePromise<void> {
-    return $Call.ByID(2548824829, item);
+    return $Call.ByID(3302885907, item);
 }
 
 export function SaveRoute(item: $models.RouteDTO): $CancellablePromise<void> {
-    return $Call.ByID(1033275885, item);
+    return $Call.ByID(790395727, item);
 }
 
 export function SetAutostart(enabled: boolean): $CancellablePromise<void> {
-    return $Call.ByID(1529005708, enabled);
+    return $Call.ByID(1045741050, enabled);
 }
 
 export function StartCodex(): $CancellablePromise<void> {
-    return $Call.ByID(56129242);
+    return $Call.ByID(3525466424);
 }
 
 export function SyncProviderModels(providerID: string): $CancellablePromise<$models.ModelDTO[] | null> {
-    return $Call.ByID(948662285, providerID);
+    return $Call.ByID(134197607, providerID);
 }
 
 export function TestProvider(id: string): $CancellablePromise<void> {
-    return $Call.ByID(1724053524, id);
+    return $Call.ByID(3983325534, id);
 }
 
 export function TestProviderModel(providerID: string, modelID: string): $CancellablePromise<void> {
-    return $Call.ByID(1289429633, providerID, modelID);
+    return $Call.ByID(3034640651, providerID, modelID);
 }

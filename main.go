@@ -9,14 +9,14 @@ import (
 	"github.com/wailsapp/wails/v3/pkg/application"
 	"github.com/wailsapp/wails/v3/pkg/events"
 
-	modelapp "codex-provider-hub/internal/application/model"
-	"codex-provider-hub/internal/application/profile"
-	providerapp "codex-provider-hub/internal/application/provider"
-	routeapp "codex-provider-hub/internal/application/route"
-	"codex-provider-hub/internal/infrastructure/codex"
-	"codex-provider-hub/internal/infrastructure/config"
-	providerinfra "codex-provider-hub/internal/infrastructure/provider"
-	wailsui "codex-provider-hub/internal/interfaces/wails"
+	modelapp "proxy-switch/internal/application/model"
+	"proxy-switch/internal/application/profile"
+	providerapp "proxy-switch/internal/application/provider"
+	routeapp "proxy-switch/internal/application/route"
+	"proxy-switch/internal/infrastructure/codex"
+	"proxy-switch/internal/infrastructure/config"
+	providerinfra "proxy-switch/internal/infrastructure/provider"
+	wailsui "proxy-switch/internal/interfaces/wails"
 )
 
 //go:embed all:frontend/dist
@@ -32,7 +32,7 @@ func main() {
 		windowsOpts.AdditionalBrowserArgs = []string{"--remote-debugging-port=" + port}
 	}
 	app := application.New(application.Options{
-		Name:        "codex-provider-hub",
+		Name:        "proxy-switch",
 		Description: "Proxy Switch",
 		Assets: application.AssetOptions{
 			Handler: application.AssetFileServerFS(assets),
@@ -87,7 +87,7 @@ func newApp(autostart wailsui.AutostartManager) (*wailsui.App, error) {
 	if err != nil {
 		return nil, err
 	}
-	store := config.NewStore(filepath.Join(configDir, "CodexProviderHub", "state.json"))
+	store := config.NewStore(filepath.Join(configDir, "ProxySwitch", "state.json"))
 	providers := config.NewProviderRepository(store)
 	models := config.NewModelRepository(store)
 	routes := config.NewRouteRepository(store)

@@ -4,16 +4,16 @@ import (
 	"context"
 	"errors"
 
-	modelapp "codex-provider-hub/internal/application/model"
-	"codex-provider-hub/internal/application/ports"
-	profileapp "codex-provider-hub/internal/application/profile"
-	providerapp "codex-provider-hub/internal/application/provider"
-	routeapp "codex-provider-hub/internal/application/route"
-	"codex-provider-hub/internal/domain/model"
-	"codex-provider-hub/internal/domain/profile"
-	"codex-provider-hub/internal/domain/provider"
-	"codex-provider-hub/internal/domain/route"
-	codexadapter "codex-provider-hub/internal/infrastructure/codex"
+	modelapp "proxy-switch/internal/application/model"
+	"proxy-switch/internal/application/ports"
+	profileapp "proxy-switch/internal/application/profile"
+	providerapp "proxy-switch/internal/application/provider"
+	routeapp "proxy-switch/internal/application/route"
+	"proxy-switch/internal/domain/model"
+	"proxy-switch/internal/domain/profile"
+	"proxy-switch/internal/domain/provider"
+	"proxy-switch/internal/domain/route"
+	codexadapter "proxy-switch/internal/infrastructure/codex"
 )
 
 type App struct {
