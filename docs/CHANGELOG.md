@@ -19,6 +19,16 @@
 
 ## 2026-10-02 · zcode
 
+### chore(release): 完成首次 Tag 发布演练，v0.1.0 已发布
+
+- **影响**：完成 V1 首个正式 tag 发布。dev 合入 main 后打 `v0.1.0`，Release 流水线跑通全链路：tag 与六处版本元数据校验 → Windows 构建 → NSIS 打包 → conditional 签名 → portable ZIP → SHA256 → 自动创建 GitHub Release。产物：`CodexProviderHub-0.1.0-Setup.exe`、`CodexProviderHub-0.1.0-portable.zip`、`SHA256SUMS.txt`，下载后 SHA256 重算与校验值一致，安装包与便携 exe 属性页版本均为 0.1.0（验证 0409 修复在正式产物生效）
+- **关键决策**：演练暴露测试签名证书可用但信任链不通（自签证书不在 runner 受信根，Authenticode 验证按设计拦截）；按用户决定采用无签名发布，并新增 `unsigned` 手动开关（`release.yml` workflow_dispatch 输入），将来配置受信证书或接入 SignPath Foundation 后可切回签名路径
+- **关键文件**：`.github/workflows/release.yml`、`docs/ops/RELEASE_CHECKLIST.md`、`docs/ops/RELEASE_NOTES.md`
+- **后续**：正式对外发布前建议接入免费受信签名（SignPath Foundation，需申请审核）；Release 页安装/启动实测待用户确认
+- **commit**：待合并后回填
+
+## 2026-10-02 · zcode
+
 ### feat(ui): exe 版本元数据修复 + NDialog 关闭按钮可访问性兜底
 
 - **影响**：① 定位并修复 exe「属性 → 详细信息」版本显示为空：根因是 info.json 语言键 `"0000"`（LCID 0）生成的版本资源 Windows 无法解析，改为 `"0409"`（en-US）并补 `fixed.product_version` 与字符串表 `FileVersion`，实测属性页正确显示 File/Product 0.1.0 与产品名；`validate-release.ps1` 同步改读 `0409` 键。② 新增 `src/services/a11y.ts`：MutationObserver 为 naive-ui `NDialog` 关闭按钮（`.n-dialog__close`，无 props 可设、与 NModal 自带 `aria-label="close"` 不一致）补 `aria-label="关闭"`，节点自身与后代两种 DOM 结构均验证生效。③ 说明：Wails beta.27 升级已由 codex 以 40f0456 落地，本 PR 不重复；上游反馈已提交 wails#6210（版本元数据，问题 1）与 naive-ui#8231（NDialog aria，问题 2）

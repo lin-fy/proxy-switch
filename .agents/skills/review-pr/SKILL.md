@@ -1,6 +1,6 @@
 ---
 name: review-pr
-description: Review Codex Provider Hub pull requests for correctness, Windows regressions, configuration safety, and V1 scope. Use when reviewing a PR, diff, or change before merge.
+description: Review Proxy Switch pull requests for correctness, Windows regressions, configuration safety, and V1 scope. Use when reviewing a PR, diff, or change before merge.
 ---
 
 # Review a pull request

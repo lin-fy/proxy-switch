@@ -11,7 +11,7 @@
 
 ## 当前目标
 
-当前阶段只有一个长期 goal：完成 Codex Provider Hub Windows V1。
+当前阶段只有一个长期 goal：完成 Proxy Switch Windows V1。
 
 每轮对话、开发、验证、修复和文档更新都属于同一个 V1 goal，不拆成独立用户任务。
 

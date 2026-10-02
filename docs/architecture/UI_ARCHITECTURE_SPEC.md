@@ -1,4 +1,4 @@
-# Codex Provider Hub：UI 页面框架与实现规范
+# Proxy Switch：UI 页面框架与实现规范
 
 > 状态：设计规范；现有实现为部分基线，尚未完成验收
 > 配套原型：[`../design/UI_PROTOTYPE.md`](../design/UI_PROTOTYPE.md)

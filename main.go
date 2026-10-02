@@ -33,7 +33,7 @@ func main() {
 	}
 	app := application.New(application.Options{
 		Name:        "codex-provider-hub",
-		Description: "Codex Provider Hub",
+		Description: "Proxy Switch",
 		Assets: application.AssetOptions{
 			Handler: application.AssetFileServerFS(assets),
 		},
@@ -46,7 +46,7 @@ func main() {
 	app.RegisterService(application.NewService(ui))
 
 	window := app.Window.NewWithOptions(application.WebviewWindowOptions{
-		Title:            "Codex Provider Hub",
+		Title:            "Proxy Switch",
 		Width:            1120,
 		Height:           760,
 		MinWidth:         960,
@@ -62,7 +62,7 @@ func main() {
 
 	tray := app.SystemTray.New()
 	tray.SetIcon(trayIcon)
-	tray.SetTooltip("Codex Provider Hub")
+	tray.SetTooltip("Proxy Switch")
 	tray.OnClick(func() {
 		if window.IsVisible() {
 			window.Hide()

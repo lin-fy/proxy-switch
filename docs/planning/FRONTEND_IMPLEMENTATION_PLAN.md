@@ -137,7 +137,7 @@ Store 并行刷新四种资源，计算明确的已激活路由，管理 loading
 | 项目 | 证明方法 | 当前证据状态 |
 | --- | --- | --- |
 | 类型与生产构建 | 单独运行 `vue-tsc --noEmit`、`npm run build`，保存退出码和产物 | 2026-10-01 通过；4431 modules，主 chunk 637.88 kB raw / 193.66 kB gzip，Profiles/Settings 已拆为懒加载 chunk（6.37 / 5.33 kB），仍有单 chunk 超过 500 kB 的 Vite 提示 |
-| Wails Windows 构建 | 沿用项目 Windows task、生成 exe 并启动 WebView | 2026-10-01 复验：go1.25.14（用户级安装于 AppData\Local\go-sdk）+ wails3 v3.0.0-beta.26 生成 `bin/codex-provider-hub.exe`（约 11.4 MB，windowsgui），启动冒烟通过：WebView2 初始化成功、窗口渲染真实后端空态；NSIS/MSIX 安装包仍待工具链补齐 |
+| Wails Windows 构建 | 沿用项目 Windows task、生成 exe 并启动 WebView | 2026-10-01 复验：go1.25.14（用户级安装于 AppData\Local\go-sdk）+ wails3 v3.0.0-beta.26 生成 `bin/proxy-switch.exe`（约 11.4 MB，windowsgui），启动冒烟通过：WebView2 初始化成功、窗口渲染真实后端空态；NSIS/MSIX 安装包仍待工具链补齐 |
 | 本地资源 | 检查生产 HTML/CSS/JS 加载入口，离线运行并检查资源请求；SVG namespace 和文档链接不等于远程加载 | 2026-10-01 静态检查仅发现随包字体和用户输入的 URL 占位符；浏览器预览演示数据（demo-data.ts）确认已被生产构建完整剔除（仅存占位文案），离线运行与 WebView 请求记录仍待做 |
 | 令牌与字体单一来源 | 检查 `themeOverrides` 是否从 `tokens.css` 的计算值生成，且字体确实为系统字体或随包资源；不得维护第二套硬编码颜色 | 2026-10-01 已收敛：`theme.ts` 在 App setup 阶段读取 `tokens.css` 计算值生成 themeOverrides，无第二套硬编码颜色；字体改为真实系统字体栈（`--font-ui` = Segoe UI / 中文系统字体，`--font-mono` = Consolas），伪造的 IBM Plex / JetBrains Mono @font-face 已删除 |
 | 960 × 640 / 1120 × 760 | 两尺寸下空态、长列表、弹窗、菜单、通知截图；检查壳层高度和滚动区域 | 2026-10-01 浏览器预览模式下 960×640 与 1120×760 截图走查通过，发现并修复行列表 grid 轨道 max-content 溢出；原生窗口验收仍待做 |

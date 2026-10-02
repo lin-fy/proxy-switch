@@ -1,4 +1,4 @@
-# Codex Provider Hub：V1 目标、里程碑与执行状态
+# Proxy Switch：V1 目标、里程碑与执行状态
 
 > 项目目录：`H:\code\proxy-switch`  
 > 当前版本目标：Windows V1.0.0

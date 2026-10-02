@@ -38,7 +38,7 @@ C:\Program Files\nodejs
 wails3 build
 ```
 
-产物为 `bin/codex-provider-hub.exe`（Windows amd64，约 11.4 MB），并已完成启动冒烟检查。
+产物为 `bin/proxy-switch.exe`（Windows amd64，约 11.4 MB），并已完成启动冒烟检查。
 
 也可以使用统一任务入口：
 
@@ -68,9 +68,9 @@ wails3 task windows:create:nsis:installer INSTALL_SCOPE=user
 ```
 
 - 产物：`bin/codex-provider-hub-amd64-installer.exe`。
-- 安装位置：`%LOCALAPPDATA%\Programs\Codex Provider Hub`，不需要管理员权限。
+- 安装位置：`%LOCALAPPDATA%\Programs\Proxy Switch`，不需要管理员权限。
 - 安装过程会创建开始菜单和桌面快捷方式，并在缺少 WebView2 时静默安装运行时。
-- 卸载信息写入 `HKCU\Software\Microsoft\Windows\CurrentVersion\Uninstall\Codex Provider HubCodex Provider Hub`。
+- 卸载信息写入 `HKCU\Software\Microsoft\Windows\CurrentVersion\Uninstall\Proxy SwitchProxy Switch`。
 
 此命令需要 `makensis.exe`。如果没有管理员权限或不希望安装系统级 NSIS，可以把官方安装程序安装到用户目录：
 
@@ -90,7 +90,7 @@ wails3 task windows:create:nsis:installer INSTALL_SCOPE=user MAKENSIS=$env:MAKEN
 Start-Process .\bin\codex-provider-hub-amd64-installer.exe -Wait -ArgumentList '/S'
 
 # 静默卸载
-& "$env:LOCALAPPDATA\Programs\Codex Provider Hub\uninstall.exe" /S
+& "$env:LOCALAPPDATA\Programs\Proxy Switch\uninstall.exe" /S
 ```
 
 ### 4.2 Portable ZIP（无需 NSIS）
@@ -100,8 +100,8 @@ wails3 build
 powershell -ExecutionPolicy Bypass -File build/windows/portable/package.ps1
 ```
 
-- 产物：`bin/codex-provider-hub-windows-amd64.zip`。
-- 解压后运行 `install.ps1` 会安装到 `%LOCALAPPDATA%\Programs\Codex Provider Hub` 并创建开始菜单快捷方式。
+- 产物：`bin/proxy-switch-windows-amd64.zip`。
+- 解压后运行 `install.ps1` 会安装到 `%LOCALAPPDATA%\Programs\Proxy Switch` 并创建开始菜单快捷方式。
 - 安装目录中的 `uninstall.ps1` 只在存在 `.codex-provider-hub-install` 标记时删除目录，可安全卸载。
 
 ### 4.3 MSIX（可选路径）
@@ -154,10 +154,10 @@ Provider 的 `auth_ref` 可以填写环境变量名（也接受 `env:` 前缀）
 
 NSIS 卸载会移除：
 
-- 安装目录 `%LOCALAPPDATA%\Programs\Codex Provider Hub`
+- 安装目录 `%LOCALAPPDATA%\Programs\Proxy Switch`
 - 开始菜单与桌面快捷方式
 - `HKCU` 卸载注册项
-- `%APPDATA%\codex-provider-hub.exe` 下的 WebView2 数据目录
+- `%APPDATA%\proxy-switch.exe` 下的 WebView2 数据目录
 
 卸载**不会**自动删除：
 
@@ -185,10 +185,10 @@ NSIS 卸载会移除：
 | --- | --- |
 | 安装包提示架构不支持 | 安装包为 amd64，确认目标机为 64 位；ARM64 需单独构建 |
 | 安装时要求管理员权限 | 使用 `INSTALL_SCOPE=user` 生成的用户级安装包，机器级安装才需要 UAC |
-| 安装被“应用正在运行”阻塞 | 从托盘退出应用，或在任务管理器结束 `codex-provider-hub.exe` 后重试 |
+| 安装被“应用正在运行”阻塞 | 从托盘退出应用，或在任务管理器结束 `proxy-switch.exe` 后重试 |
 | 升级后仍是旧版本 | 确认安装包版本高于已安装版本，且安装目录未被其他进程占用；必要时先卸载旧版再安装 |
 | 升级异常需回滚 | 重新运行上一个版本的安装包覆盖安装；应用状态文件向后兼容，不会被安装包删除 |
-| 卸载后残留注册项 | 删除 `HKCU\Software\Microsoft\Windows\CurrentVersion\Uninstall\Codex Provider HubCodex Provider Hub` |
+| 卸载后残留注册项 | 删除 `HKCU\Software\Microsoft\Windows\CurrentVersion\Uninstall\Proxy SwitchProxy Switch` |
 
 ### 8.3 启动与运行时
 
@@ -206,7 +206,7 @@ NSIS 卸载会移除：
 
 界面中的“恢复备份”会恢复最近一次备份。若需要手工恢复：
 
-1. 退出 Codex Provider Hub 和 Codex Desktop。
+1. 退出 Proxy Switch 和 Codex Desktop。
 2. 在 `%CODEX_HOME%`（默认 `%USERPROFILE%\.codex`）找到 `config.toml.codex-provider-hub.bak`、Profile 配置备份和 `*.models.json.codex-provider-hub.bak`。
 3. 将备份文件复制回对应的原始路径（去掉 `.codex-provider-hub.bak` 后缀）。
 4. 如果存在 `.codex-provider-hub.bak.missing` 标记，说明激活前该文件不存在，应删除对应原始文件而不是恢复。
@@ -226,7 +226,7 @@ NSIS 卸载会移除：
 ## 9. V1 安装验收清单
 
 - [ ] `task ci` 在干净检出上通过。
-- [ ] 生成 `bin/codex-provider-hub.exe` 并完成启动冒烟。
+- [ ] 生成 `bin/proxy-switch.exe` 并完成启动冒烟。
 - [ ] 生成用户级 NSIS 安装包或 portable ZIP。
 - [ ] 无管理员权限完成安装、启动、隐藏到托盘、退出。
 - [ ] 覆盖安装完成升级，回滚到旧版可正常启动。

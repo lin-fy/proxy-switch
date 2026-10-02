@@ -2,7 +2,7 @@
 
 ## Scope
 
-Codex Provider Hub is a Windows desktop application. CI validates the Go, frontend, and Wails build on a Windows runner. CD creates signed Windows release artifacts; it does not deploy a server environment.
+Proxy Switch is a Windows desktop application. CI validates the Go, frontend, and Wails build on a Windows runner. CD creates signed Windows release artifacts; it does not deploy a server environment.
 
 ## Continuous integration
 
