@@ -12,9 +12,13 @@
 | `WAILS_WINDOWS_CERT_PASSWORD` | Environments → production → Secrets | 证书私钥密码 |
 | `main` 分支保护 | Settings → Branches | 发布 tag 必须位于 `main`（`validate-release.ps1` 校验 `--is-ancestor $tagCommit origin/main`） |
 
-未配置 `WINDOWS_CERTIFICATE_BASE64` 时，流水线会自动走**无签名模式**：跳过签名与
-Authenticode 验证，直接产出 NSIS 安装包、portable ZIP 与 SHA256 校验值（发布说明需
-标注"未签名"）。配置了证书则强制签名并验证（无有效带时间戳签名会失败）。
+无签名发布有两种触发方式：
+- **缺证书**：未配置 `WINDOWS_CERTIFICATE_BASE64` 时自动走无签名模式；
+- **显式开关**：手动运行 Release 工作流时把 `unsigned` 设为 `true`（即使已配置证书也强制无签名）。
+
+无签名模式会跳过签名与 Authenticode 验证，直接产出 NSIS 安装包、portable ZIP 与
+SHA256 校验值（发布说明需标注"未签名"）。未要求无签名且配置了证书时强制签名并验证
+（无有效带时间戳签名会失败）。
 
 ## 2. 版本一致性（发布前自检）
 
