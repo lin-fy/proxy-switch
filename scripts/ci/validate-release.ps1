@@ -1,0 +1,51 @@
+#Requires -Version 5.1
+param(
+    [Parameter(Mandatory)]
+    [string]$Tag,
+    [string]$MainRef = 'origin/main'
+)
+
+$ErrorActionPreference = 'Stop'
+
+function Invoke-Native([string]$Name, [scriptblock]$Command) {
+    $output = & $Command
+    $exitCode = $LASTEXITCODE
+    if ($exitCode -ne 0) {
+        throw "$Name failed with exit code $exitCode"
+    }
+    return $output
+}
+
+if ($Tag -notmatch '^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$') {
+    throw 'Release tag must match vX.Y.Z without prerelease suffixes'
+}
+$version = $Tag.Substring(1)
+foreach ($part in $version.Split('.')) {
+    if ([decimal]$part -gt 65535) { throw 'Windows version components must be at most 65535' }
+}
+
+$tagExists = @(Invoke-Native 'git tag --list' { git tag --list $Tag })
+if ($tagExists.Count -eq 0) { throw "Release tag does not exist: $Tag" }
+$tagCommit = [string](Invoke-Native 'git rev-parse tag' { git rev-parse --verify "refs/tags/$Tag^{commit}" })
+$headCommit = [string](Invoke-Native 'git rev-parse HEAD' { git rev-parse HEAD })
+if ($tagCommit -ne $headCommit) { throw 'Checkout does not match the release tag' }
+$ancestorCheck = & git merge-base --is-ancestor $tagCommit $MainRef
+if ($LASTEXITCODE -ne 0) { throw "Release tag is not on $MainRef" }
+
+$config = Get-Content build/config.yml -Raw
+if ($config -notmatch '(?m)^  version:\s*"([^"]+)"') {
+    throw 'Could not read info.version from build/config.yml'
+}
+if ($Matches[1] -ne $version) { throw 'Tag does not match build/config.yml info.version' }
+
+$info = Get-Content build/windows/info.json -Raw | ConvertFrom-Json
+if ($info.fixed.file_version -ne $version -or $info.info.'0409'.ProductVersion -ne $version) {
+    throw 'Update build/windows/info.json to match the release version'
+}
+$nsis = Get-Content build/windows/nsis/wails_tools.nsh -Raw
+if ($nsis -notmatch '(?m)^\s*!define INFO_PRODUCTVERSION "([^"]+)"' -or $Matches[1] -ne $version) {
+    throw 'Update NSIS INFO_PRODUCTVERSION to match the release version'
+}
+
+# Emit only the validated version, for GITHUB_ENV and local callers.
+Write-Output $version

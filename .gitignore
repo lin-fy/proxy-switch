@@ -1,0 +1,31 @@
+# Wails v3 build metadata is tracked; compiled output is ignored.
+build/bin/
+build/*.syso
+build/**/*.syso
+build/android/
+build/darwin/
+build/docker/
+build/ios/
+build/linux/
+bin/
+dist/
+
+# Wails / frontend dependencies
+node_modules/
+.task/
+.tools/
+build/windows/nsis/MicrosoftEdgeWebview2Setup.exe
+
+# Local secrets and runtime state
+.env
+*.local.json
+*.secret.json
+
+# IDE and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# CodeGraph cache is regenerated locally
+.codegraph/

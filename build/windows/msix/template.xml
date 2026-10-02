@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<MsixPackagingToolTemplate
+    xmlns="http://schemas.microsoft.com/msix/packaging/msixpackagingtool/template/2022">
+    <Settings
+        AllowTelemetry="false"
+        ApplyACLsToPackageFiles="true"
+        GenerateCommandLineFile="true"
+        AllowPromptForPassword="false">
+    </Settings>
+    <Installer
+        Path="codex-provider-hub"
+        Arguments=""
+        InstallLocation="C:\Program Files\Codex Provider Hub\Codex Provider Hub">
+    </Installer>
+    <PackageInformation
+        PackageName="Codex Provider Hub"
+        PackageDisplayName="Codex Provider Hub"
+        PublisherName="CN=Codex Provider Hub"
+        PublisherDisplayName="Codex Provider Hub"
+        Version="0.1.0.0"
+        PackageDescription="Codex Provider Hub">
+        <Capabilities>
+            <Capability Name="runFullTrust" />
+            
+        </Capabilities>
+        <Applications>
+            <Application
+                Id="com.codexproviderhub.app"
+                Description="Codex Provider Hub"
+                DisplayName="Codex Provider Hub"
+                ExecutableName="codex-provider-hub.exe"
+                EntryPoint="Windows.FullTrustApplication">
+                
+            </Application>
+        </Applications>
+        <Resources>
+            <Resource Language="en-us" />
+        </Resources>
+        <Dependencies>
+            <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.17763.0" MaxVersionTested="10.0.19041.0" />
+        </Dependencies>
+        <Properties>
+            <Framework>false</Framework>
+            <DisplayName>Codex Provider Hub</DisplayName>
+            <PublisherDisplayName>Codex Provider Hub</PublisherDisplayName>
+            <Description>Codex Provider Hub</Description>
+            <Logo>Assets\AppIcon.png</Logo>
+        </Properties>
+    </PackageInformation>
+    <SaveLocation PackagePath="codex-provider-hub.msix" />
+    <PackageIntegrity>
+        <CertificatePath></CertificatePath>
+    </PackageIntegrity>
+</MsixPackagingToolTemplate>

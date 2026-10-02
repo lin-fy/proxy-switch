@@ -1,0 +1,17 @@
+{
+	"fixed": {
+		"file_version": "0.1.0",
+		"product_version": "0.1.0"
+	},
+	"info": {
+		"0409": {
+			"FileVersion": "0.1.0",
+			"ProductVersion": "0.1.0",
+			"CompanyName": "Codex Provider Hub",
+			"FileDescription": "Local provider routing for Codex Desktop",
+			"LegalCopyright": "(c) 2026 Codex Provider Hub",
+			"ProductName": "Codex Provider Hub",
+			"Comments": "Manage Codex providers and routes locally"
+		}
+	}
+}
