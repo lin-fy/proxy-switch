@@ -69,7 +69,7 @@ func (t *ResponsesTester) ListModels(ctx context.Context, p domainprovider.Provi
 		return nil, fmt.Errorf("provider returned HTTP %d", response.StatusCode)
 	}
 	var payload struct {
-		Data []struct {
+		Data *[]struct {
 			ID   string `json:"id"`
 			Name string `json:"name"`
 		} `json:"data"`
@@ -78,8 +78,11 @@ func (t *ResponsesTester) ListModels(ctx context.Context, p domainprovider.Provi
 	if err := decoder.Decode(&payload); err != nil {
 		return nil, fmt.Errorf("decode provider models: %w", err)
 	}
-	models := make([]ports.RemoteModel, 0, len(payload.Data))
-	for _, item := range payload.Data {
+	if payload.Data == nil {
+		return nil, fmt.Errorf("decode provider models: response missing data array")
+	}
+	models := make([]ports.RemoteModel, 0, len(*payload.Data))
+	for _, item := range *payload.Data {
 		id := strings.TrimSpace(item.ID)
 		if id == "" {
 			continue
