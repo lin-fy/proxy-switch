@@ -72,11 +72,6 @@ if ($BuildWindows) {
     $generatedDiff = Get-GitDiff $generatedPaths
     Invoke-Native 'wails3 build' { wails3 build }
     if ((Get-GitDiff $generatedPaths) -ne $generatedDiff) {
-        Write-Host 'Generated diff:'
-        git diff --name-status -- $generatedPaths
-        git diff -- frontend/bindings/proxy-switch/internal/interfaces/wails/app.ts frontend/bindings/proxy-switch/internal/interfaces/wails/models.ts frontend/bindings/proxy-switch/internal/interfaces/wails/index.ts | Select-Object -First 260
-        Write-Host 'Generated untracked files:'
-        git ls-files --others --exclude-standard -- $generatedPaths
         throw 'Wails build changed tracked module or generated binding files'
     }
     Invoke-Native 'portable package script' {
