@@ -73,6 +73,20 @@ func TestResponsesTesterRejectsBadModelsJSON(t *testing.T) {
 	}
 }
 
+func TestResponsesTesterRejectsModelsResponseWithoutDataArray(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = w.Write([]byte(`{"object":"list"}`))
+	}))
+	defer server.Close()
+	p, err := domainprovider.New("custom", "Custom", server.URL+"/v1", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := NewResponsesTester(server.Client()).ListModels(context.Background(), p); err == nil || !strings.Contains(err.Error(), "missing data array") {
+		t.Fatalf("missing data error = %v", err)
+	}
+}
+
 func TestResponsesTesterReportsHTTPStatusWithoutBody(t *testing.T) {
 	server := httptest.NewServer(http.NotFoundHandler())
 	defer server.Close()

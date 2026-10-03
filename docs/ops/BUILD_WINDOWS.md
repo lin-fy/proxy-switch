@@ -225,6 +225,8 @@ NSIS 卸载会移除：
 
 ## 9. V1 安装验收清单
 
+Codex 配置、Provider/AuthRef 保护、Profile 导入和 Windows 原生 UI 的逐项脚本化验收见 [`CODEX_NATIVE_ACCEPTANCE.md`](./CODEX_NATIVE_ACCEPTANCE.md)。
+
 - [ ] `task ci` 在干净检出上通过。
 - [ ] 生成 `bin/proxy-switch.exe` 并完成启动冒烟。
 - [ ] 生成用户级 NSIS 安装包或 portable ZIP。

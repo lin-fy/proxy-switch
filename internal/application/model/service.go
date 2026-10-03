@@ -6,22 +6,33 @@ import (
 	"strings"
 
 	"proxy-switch/internal/domain/model"
+	"proxy-switch/internal/domain/provider"
 	"proxy-switch/internal/domain/route"
 )
 
-var ErrReferenced = errors.New("model is referenced by a route")
+var (
+	ErrReferenced         = errors.New("model is referenced by a route")
+	ErrAlreadyExists      = errors.New("model already exists")
+	ErrInvalidProviderRef = errors.New("model provider reference does not exist")
+)
 
 type Service struct {
-	repo   model.Repository
-	routes route.Repository
+	repo      model.Repository
+	routes    route.Repository
+	providers provider.Repository
 }
 
-func NewService(repo model.Repository, routes ...route.Repository) *Service {
-	var routesRepo route.Repository
-	if len(routes) > 0 {
-		routesRepo = routes[0]
+func NewService(repo model.Repository, dependencies ...any) *Service {
+	service := &Service{repo: repo}
+	for _, dependency := range dependencies {
+		switch item := dependency.(type) {
+		case route.Repository:
+			service.routes = item
+		case provider.Repository:
+			service.providers = item
+		}
 	}
-	return &Service{repo: repo, routes: routesRepo}
+	return service
 }
 
 func (s *Service) List(ctx context.Context) ([]model.Model, error) { return s.repo.List(ctx) }
@@ -39,6 +50,12 @@ func (s *Service) Create(ctx context.Context, providerID, id, name string) (mode
 	if err != nil {
 		return model.Model{}, err
 	}
+	if err := s.validateProvider(ctx, item.ProviderID); err != nil {
+		return model.Model{}, err
+	}
+	if _, err := s.repo.Get(ctx, item.ProviderID, item.ID); err == nil {
+		return model.Model{}, ErrAlreadyExists
+	}
 	if err := s.repo.Save(ctx, item); err != nil {
 		return model.Model{}, err
 	}
@@ -49,7 +66,20 @@ func (s *Service) Save(ctx context.Context, item model.Model) error {
 	if item.ProviderID == "" || item.ID == "" {
 		return model.ErrInvalidID
 	}
+	if err := s.validateProvider(ctx, item.ProviderID); err != nil {
+		return err
+	}
 	return s.repo.Save(ctx, item)
+}
+
+func (s *Service) validateProvider(ctx context.Context, providerID string) error {
+	if s.providers == nil {
+		return nil
+	}
+	if _, err := s.providers.Get(ctx, providerID); err != nil {
+		return ErrInvalidProviderRef
+	}
+	return nil
 }
 
 func (s *Service) Delete(ctx context.Context, providerID, id string) error {

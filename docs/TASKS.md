@@ -39,6 +39,25 @@
 
 ## 已完成
 
+- [x by codex 2026-10-02] Codex 配置保真与原子恢复加固：局部 TOML 补丁保留未知配置并对不安全多行/引号键表示安全失败；模型目录仅按显式 `proxy_switch_managed` 所有权更新，保护用户预设；备份标记、目标碰撞和异常回滚补齐回归测试；Go 1.25.14 下 `go test ./internal/...` 通过，根包完整测试仍需前端 `frontend/dist` embed 产物。
+- [x by codex 2026-10-02] Provider `/models` 响应契约加固：缺失 `data` 数组时连接/同步失败，不再将异常响应误判为空模型列表；Go 1.25.14 下 provider 与 internal 测试通过。
+- [x by codex 2026-10-02] Phase 2 Codex 配置只读探测与 Profile 导入：Wails `InspectCodexConfig` 返回 config.toml/auth.json 状态、当前 Provider/Model 与可导入原因；配置档案页显式导入当前 `config.toml` 到隔离 Profile，保留未知配置/MCP/OAuth 语义，绝不复制或修改 `auth.json`，并覆盖 malformed/重复目标/危险 ID 回归测试。
+- [x by codex 2026-10-02] Provider preset/auth-mode 安全显示：Provider DTO 与当前配置页展示只读 preset 元数据、认证模式和凭据引用是否配置；AuthRef 仅接受环境变量或 `credential:<target>` 引用，状态文件不保存原始密钥，补领域/Wails 回归测试。
+- [x by codex 2026-10-02] Windows 原生验收收口：新增可执行的 Codex Desktop/Provider/AuthRef/Profile/备份恢复/DPI/托盘验收清单与命令，记录 Linux 云端缺少 GTK4/WebKitGTK 导致根包 Wails 测试受限；补 Wails 原始凭据拒绝契约测试。
+- [x by codex 2026-10-02] Provider 预设快速添加：新增只读 `ListProviderPresets` 契约与配置页预设选择器；预设仅填充公开连接信息和凭据引用占位，官方 OAuth 引导 Profile 导入，不复制或写入 secret；补 Wails/前端构建验证。
+- [x by codex 2026-10-02] Provider 健康与 failover 顺序最小切片：健康检查仅由用户显式触发并返回安全状态/超时/耗时 DTO；Route 新增非负 priority，配置页按 priority 展示/编辑顺序，暂不自动切换或发送后台请求。
+- [x by codex 2026-10-02] Auth Center 只读状态：Settings/Codex 展示 auth.json 的派生认证类型与凭据存在性，覆盖 OAuth/API key/缺失/格式错误，不返回或写入认证内容。
+- [x by codex 2026-10-02] Provider/Profile 安全导出：Settings 显式导出 schema-versioned JSON，包含四类资源与安全 auth_ref 引用，移除 headers/query 参数及非法历史凭据，补 Wails secret-leak 回归测试；导入/合并与 Session/Skills 页面待后续数据契约。
+- [x by codex 2026-10-02] Provider 健康历史：内存保留最近 5 次用户显式健康检查并在 Provider 卡片 Tooltip 展示时间/状态/耗时；不自动联网、不持久化、不执行自动 failover。
+- [x by codex 2026-10-02] 安全导入预览与确认：严格解析导出 `schema_version: 1` JSON，拒绝 headers/query/auth/token 等未知或 secret 字段，报告冲突/缺失引用；无冲突时用户确认后以单次原子事务只新增资源，冲突全量拒绝。
+- [x by codex 2026-10-02] 导入原子引用加固：Store 写入前再次拒绝停用 Model 路由、共享 Profile 路径等绕过预览/竞态情况，失败不写入任何资源并补回归测试。
+- [x by codex 2026-10-02] 资源创建冲突保护：Provider/Model/Route Create 在 Save 前拒绝已存在 ID，避免新建静默覆盖；编辑继续使用 Save，补 application focused tests。
+- [x by codex 2026-10-02] Route 引用完整性：Route Delete 检查 Profile.RouteID 引用并阻止孤儿档案，main wiring 注入 Profile repository，补回归测试。
+- [x by codex 2026-10-02] Profile 引用校验：Profile Save 对非空 RouteID 检查 Route 存在性，拒绝孤儿引用并补 application focused tests；main wiring 传入 Route repository。
+- [x by codex 2026-10-02] Model 引用校验：Model Create/Save 注入 Provider repository 并拒绝不存在 Provider，防止编辑/Wails API 写入孤儿 Model；补 application tests。
+- [x by codex 2026-10-02] Model 编辑引用保护：编辑已有 Model 时锁定 Provider 选择，避免被 Route 引用的 Model 被 UI 移到另一 Provider；新建流程仍支持选择 Provider。
+- [x by codex 2026-10-02] Profile 路径冲突保护：Profile Save 拒绝不同档案共享非空 ConfigPath/ModelCatalogPath，避免激活互相覆盖；补 application focused tests。
+
 - [x by zcode 2026-10-02] 版本展示同源与构建卫生（PR #11 尾栏注入 0.1.0、install-or-skip）+ 收尾（PR #14 exe 版本元数据 info.json 0409 + validator、NDialog aria 兜底）；上游反馈 wails#6210 / naive-ui#8231
 - [x by codex 2026-10-02] 补齐 Provider/Model 删除引用保护、`store.go` 并发写入与损坏 JSON 安全失败的针对性测试；PR #9 同步 dev 后完整 Windows 验证通过；去锁变异测试检验并发回归用例有效，本机无 C 编译器，未运行 race detector
 

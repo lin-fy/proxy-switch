@@ -3,7 +3,11 @@ import type {
   ModelDTO,
   ProfileDTO,
   ProviderDTO,
+  ProviderHealthDTO,
+  ProviderPresetDTO,
+  WorkspaceImportPreviewDTO,
   RouteDTO,
+  CodexConfigStatusDTO,
 } from '../../bindings/proxy-switch/internal/interfaces/wails/models';
 
 declare global {
@@ -13,11 +17,21 @@ declare global {
   }
 }
 
-export type { ModelDTO, ProfileDTO, ProviderDTO, RouteDTO };
+export type {
+  CodexConfigStatusDTO,
+  ModelDTO,
+  ProfileDTO,
+  ProviderDTO,
+  ProviderHealthDTO,
+  ProviderPresetDTO,
+  RouteDTO,
+  WorkspaceImportPreviewDTO,
+};
 
 /** 适配层统一接口:Wails 绑定与浏览器预览演示数据都实现它。 */
 export interface WailsApi {
   listProviders(): Promise<ProviderDTO[] | null>;
+  listProviderPresets(): Promise<ProviderPresetDTO[]>;
   listModels(): Promise<ModelDTO[] | null>;
   listModelsByProvider(providerID: string): Promise<ModelDTO[] | null>;
   listRoutes(): Promise<RouteDTO[] | null>;
@@ -26,6 +40,7 @@ export interface WailsApi {
   saveProvider(item: ProviderDTO): Promise<void>;
   deleteProvider(id: string): Promise<void>;
   testProvider(id: string): Promise<void>;
+  checkProviderHealth(id: string): Promise<ProviderHealthDTO>;
   syncProviderModels(providerID: string): Promise<ModelDTO[] | null>;
   createModel(providerID: string, id: string, name: string): Promise<ModelDTO>;
   saveModel(item: ModelDTO): Promise<void>;
@@ -34,8 +49,13 @@ export interface WailsApi {
   createRoute(id: string, name: string, providerID: string, modelID: string): Promise<RouteDTO>;
   saveRoute(item: RouteDTO): Promise<void>;
   deleteRoute(id: string): Promise<void>;
+  exportWorkspace(): Promise<string>;
+  previewWorkspaceImport(payload: string): Promise<WorkspaceImportPreviewDTO>;
+  importWorkspace(payload: string): Promise<WorkspaceImportPreviewDTO>;
   activateRoute(routeID: string, profileID: string): Promise<void>;
   createProfile(id: string, name: string): Promise<ProfileDTO>;
+  inspectCodexConfig(): Promise<CodexConfigStatusDTO>;
+  importCodexConfig(id: string, name: string): Promise<ProfileDTO>;
   saveProfile(item: ProfileDTO): Promise<void>;
   deleteProfile(id: string): Promise<void>;
   restoreProfile(id: string): Promise<void>;
@@ -47,6 +67,7 @@ export interface WailsApi {
 
 const generatedApi: WailsApi = {
   listProviders: () => generated.ListProviders(),
+  listProviderPresets: () => generated.ListProviderPresets(),
   listModels: () => generated.ListModels(),
   listModelsByProvider: (providerID) => generated.ListModelsByProvider(providerID),
   listRoutes: () => generated.ListRoutes(),
@@ -55,6 +76,7 @@ const generatedApi: WailsApi = {
   saveProvider: (item) => generated.SaveProvider(item),
   deleteProvider: (id) => generated.DeleteProvider(id),
   testProvider: (id) => generated.TestProvider(id),
+  checkProviderHealth: (id) => generated.CheckProviderHealth(id),
   syncProviderModels: (providerID) => generated.SyncProviderModels(providerID),
   createModel: (providerID, id, name) => generated.CreateModel(providerID, id, name),
   saveModel: (item) => generated.SaveModel(item),
@@ -63,8 +85,13 @@ const generatedApi: WailsApi = {
   createRoute: (id, name, providerID, modelID) => generated.CreateRoute(id, name, providerID, modelID),
   saveRoute: (item) => generated.SaveRoute(item),
   deleteRoute: (id) => generated.DeleteRoute(id),
+  exportWorkspace: () => generated.ExportWorkspace(),
+  previewWorkspaceImport: (payload) => generated.PreviewWorkspaceImport(payload),
+  importWorkspace: (payload) => generated.ImportWorkspace(payload),
   activateRoute: (routeID, profileID) => generated.ActivateRoute(routeID, profileID),
   createProfile: (id, name) => generated.CreateProfile(id, name),
+  inspectCodexConfig: () => generated.InspectCodexConfig(),
+  importCodexConfig: (id, name) => generated.ImportCodexConfig(id, name),
   saveProfile: (item) => generated.SaveProfile(item),
   deleteProfile: (id) => generated.DeleteProfile(id),
   restoreProfile: (id) => generated.RestoreCodexConfig(id),

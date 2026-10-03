@@ -125,3 +125,34 @@ func TestModelDeleteSucceedsWhenUnreferenced(t *testing.T) {
 		t.Fatalf("model after delete = %v", err)
 	}
 }
+
+func TestModelCreateRejectsExistingProviderScopedID(t *testing.T) {
+	ctx := context.Background()
+	store := config.NewStore(filepath.Join(t.TempDir(), "state.json"))
+	repo := config.NewModelRepository(store)
+	service := NewService(repo)
+	if err := repo.Save(ctx, model.Model{ProviderID: "p", ID: "m", Name: "Existing"}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := service.Create(ctx, "p", "m", "Replacement"); !errors.Is(err, ErrAlreadyExists) {
+		t.Fatalf("duplicate model error = %v", err)
+	}
+	got, err := repo.Get(ctx, "p", "m")
+	if err != nil || got.Name != "Existing" {
+		t.Fatalf("existing model changed: %#v, %v", got, err)
+	}
+}
+
+func TestModelCreateAndSaveRejectMissingProvider(t *testing.T) {
+	ctx := context.Background()
+	store := config.NewStore(filepath.Join(t.TempDir(), "state.json"))
+	repo := config.NewModelRepository(store)
+	providers := config.NewProviderRepository(store)
+	service := NewService(repo, providers)
+	if _, err := service.Create(ctx, "missing", "m", "Model"); !errors.Is(err, ErrInvalidProviderRef) {
+		t.Fatalf("missing provider create error = %v", err)
+	}
+	if err := service.Save(ctx, model.Model{ProviderID: "missing", ID: "m", Name: "Model"}); !errors.Is(err, ErrInvalidProviderRef) {
+		t.Fatalf("missing provider save error = %v", err)
+	}
+}

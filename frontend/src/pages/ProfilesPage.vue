@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import {
   NButton,
   NCard,
@@ -26,12 +26,16 @@ const message = useMessage();
 
 const modalOpen = ref(false);
 const draft = ref<ProfileDTO | null>(null);
+const importing = ref(false);
 const form = ref({ id: '', name: '', configPath: '' });
 const formRef = ref<FormInst | null>(null);
 
 const { fieldErrors, setSummaryRef, registerField, focusField, submit, track, guardClose } = useFormModal();
 const tracker = track(() => form.value);
 const dirty = computed(() => tracker.dirty());
+const importReady = computed(
+  () => workspace.codexConfigStatus?.config_exists && workspace.codexConfigStatus.config_valid,
+);
 
 const formRules: FormRules = {
   id: { required: true, message: '请填写档案标识', trigger: ['blur', 'input'] },
@@ -45,6 +49,7 @@ const menuOptions = [
 ];
 
 function openProfile(item?: ProfileDTO): void {
+  importing.value = false;
   draft.value = item ? { ...item } : null;
   form.value = item
     ? { id: item.id, name: item.name, configPath: item.config_path ?? '' }
@@ -54,9 +59,29 @@ function openProfile(item?: ProfileDTO): void {
   tracker.snapshot();
 }
 
+function openImport(): void {
+  importing.value = true;
+  draft.value = null;
+  form.value = { id: 'codex-current', name: '当前 Codex 配置', configPath: '' };
+  fieldErrors.value = [];
+  modalOpen.value = true;
+  tracker.snapshot();
+}
+
 async function saveProfile(): Promise<void> {
   await submit(formRef.value, async () => {
     const value = form.value;
+    if (importing.value) {
+      const ok = await workspace.importCodexConfig(value.id.trim(), value.name.trim());
+      if (ok) {
+        workspace.selectedProfileID = value.id.trim();
+        modalOpen.value = false;
+        message.success(workspace.message);
+      } else {
+        message.error(workspace.message);
+      }
+      return ok;
+    }
     const profile: ProfileDTO = {
       ...(draft.value ?? {}),
       id: value.id.trim(),
@@ -74,6 +99,10 @@ async function saveProfile(): Promise<void> {
     return ok;
   });
 }
+
+onMounted(() => {
+  void workspace.inspectCodexConfig();
+});
 
 function removeProfile(item: ProfileDTO): void {
   const isCurrent = workspace.selectedProfileID === item.id;
@@ -130,7 +159,10 @@ function onMenu(key: string, item: ProfileDTO): void {
         <h2>配置档案</h2>
         <p>为不同工作环境保留独立的 Codex 配置文件,激活路由时使用当前选中的档案。</p>
       </div>
-      <NButton type="primary" size="small" @click="openProfile()"><Plus :size="14" />新建档案</NButton>
+      <div class="heading-actions">
+        <NButton secondary size="small" :disabled="!importReady" @click="openImport">导入当前 Codex</NButton>
+        <NButton type="primary" size="small" @click="openProfile()"><Plus :size="14" />新建档案</NButton>
+      </div>
     </section>
     <div v-if="workspace.error" class="notice notice-error" role="alert">{{ workspace.message }}</div>
     <NCard class="resource-card" :bordered="false">
@@ -168,7 +200,7 @@ function onMenu(key: string, item: ProfileDTO): void {
   <NModal
     :show="modalOpen"
     preset="card"
-    :title="draft ? '编辑配置档案' : '新建配置档案'"
+    :title="importing ? '导入当前 Codex 配置' : draft ? '编辑配置档案' : '新建配置档案'"
     class="edit-modal"
     :mask-closable="false"
     @update:show="(show: boolean) => guardClose(dirty, (next: boolean) => (modalOpen = next), show)"
@@ -181,7 +213,10 @@ function onMenu(key: string, item: ProfileDTO): void {
           </li>
         </ul>
       </div>
-      <div v-if="!draft && workspace.pendingProfile?.id === form.id" class="notice notice-error">
+      <div v-if="importing" class="notice notice-info">
+        只复制当前 config.toml 到新档案,不会复制或修改 auth.json。未知配置、MCP 与登录语义会原样保留。
+      </div>
+      <div v-if="!draft && !importing && workspace.pendingProfile?.id === form.id" class="notice notice-error">
         档案已创建,但保存配置路径失败。再次保存将只补存路径,不会重复创建档案。
       </div>
       <NFormItem label="档案标识" path="id">
@@ -199,7 +234,7 @@ function onMenu(key: string, item: ProfileDTO): void {
           placeholder="例如 工作环境"
         />
       </NFormItem>
-      <NFormItem label="配置文件路径" path="configPath">
+      <NFormItem v-if="!importing" label="配置文件路径" path="configPath">
         <NInput v-model:value="form.configPath" placeholder="相对 CODEX_HOME 的路径(可选)" />
       </NFormItem>
     </NForm>
@@ -207,7 +242,7 @@ function onMenu(key: string, item: ProfileDTO): void {
       <div class="modal-footer">
         <NButton :disabled="workspace.phase === 'saving'" @click="modalOpen = false">取消</NButton>
         <NButton type="primary" :loading="workspace.phase === 'saving'" @click="saveProfile">{{
-          draft ? '保存档案' : '创建档案'
+          importing ? '导入配置' : draft ? '保存档案' : '创建档案'
         }}</NButton>
       </div>
     </template>

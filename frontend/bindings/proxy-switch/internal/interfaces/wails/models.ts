@@ -16,14 +16,65 @@ export interface ProfileDTO {
     "model_catalog_path"?: string;
 }
 
+export interface CodexConfigStatusDTO {
+    "config_path": string;
+    "config_exists": boolean;
+    "config_valid": boolean;
+    "auth_path": string;
+    "auth_exists": boolean;
+    "auth_valid": boolean;
+    "auth_mode": string;
+    "credential_present": boolean;
+    "model_provider"?: string;
+    "model"?: string;
+    "provider_ids"?: string[];
+    "importable": boolean;
+    "import_blocker"?: string;
+}
+
 export interface ProviderDTO {
     "id": string;
     "name": string;
     "base_url": string;
     "protocol": string;
     "auth_ref"?: string;
+    "auth_mode": string;
+    "preset_id"?: string;
+    "preset_name"?: string;
+    "requires_credential": boolean;
     "headers"?: { [_ in string]?: string } | null;
     "query_params"?: { [_ in string]?: string } | null;
+}
+
+export interface ProviderPresetDTO {
+    "id": string;
+    "name": string;
+    "base_url": string;
+    "auth_mode": string;
+    "requires_credential": boolean;
+}
+
+export interface ProviderHealthDTO {
+    "provider_id": string;
+    "status": string;
+    "checked_at"?: string;
+    "latency_ms"?: number;
+    "error_code"?: string;
+}
+
+export interface WorkspaceImportPreviewDTO {
+    "valid": boolean;
+    "schema_version": number;
+    "provider_count": number;
+    "model_count": number;
+    "route_count": number;
+    "profile_count": number;
+    "provider_conflicts"?: string[];
+    "model_conflicts"?: string[];
+    "route_conflicts"?: string[];
+    "profile_conflicts"?: string[];
+    "missing_references"?: string[];
+    "errors"?: string[];
 }
 
 export interface RouteDTO {
@@ -32,6 +83,7 @@ export interface RouteDTO {
     "platform_id": string;
     "provider_id": string;
     "model_id": string;
+    "priority": number;
     "restart_on_activate": boolean;
     "default": boolean;
 }

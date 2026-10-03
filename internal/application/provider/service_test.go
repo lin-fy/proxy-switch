@@ -94,3 +94,22 @@ func TestProviderDeleteSucceedsWhenUnreferenced(t *testing.T) {
 		t.Fatalf("provider after delete = %v", err)
 	}
 }
+
+func TestProviderCreateRejectsExistingID(t *testing.T) {
+	ctx := context.Background()
+	service, providers, _, _ := newProviderService(t)
+	p, err := domainprovider.New("p", "Existing", "https://example.test/v1", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := providers.Save(ctx, p); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := service.Create(ctx, "p", "Replacement", "https://other.test/v1", ""); !errors.Is(err, ErrAlreadyExists) {
+		t.Fatalf("duplicate provider error = %v", err)
+	}
+	got, err := providers.Get(ctx, "p")
+	if err != nil || got.Name != "Existing" {
+		t.Fatalf("existing provider changed: %#v, %v", got, err)
+	}
+}

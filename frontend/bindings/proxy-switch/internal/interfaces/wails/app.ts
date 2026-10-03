@@ -29,12 +29,20 @@ export function CreateProfile(id: string, name: string): $CancellablePromise<$mo
     return $Call.ByID(4226225588, id, name);
 }
 
+export function ImportCodexConfig(id: string, name: string): $CancellablePromise<$models.ProfileDTO> {
+    return $Call.ByID(1150193431, id, name);
+}
+
 export function CreateProvider(id: string, name: string, baseURL: string, authRef: string): $CancellablePromise<$models.ProviderDTO> {
     return $Call.ByID(3505045306, id, name, baseURL, authRef);
 }
 
 export function CreateRoute(id: string, name: string, providerID: string, modelID: string): $CancellablePromise<$models.RouteDTO> {
     return $Call.ByID(3967486520, id, name, providerID, modelID);
+}
+
+export function CheckProviderHealth(id: string): $CancellablePromise<$models.ProviderHealthDTO> {
+    return $Call.ByID(3751159922, id);
 }
 
 export function DeleteModel(providerID: string, id: string): $CancellablePromise<void> {
@@ -53,6 +61,18 @@ export function DeleteRoute(id: string): $CancellablePromise<void> {
     return $Call.ByID(217495733, id);
 }
 
+export function ExportWorkspace(): $CancellablePromise<string> {
+    return $Call.ByID(3459772146);
+}
+
+export function PreviewWorkspaceImport(payload: string): $CancellablePromise<$models.WorkspaceImportPreviewDTO> {
+    return $Call.ByID(2090375363, payload);
+}
+
+export function ImportWorkspace(payload: string): $CancellablePromise<$models.WorkspaceImportPreviewDTO> {
+    return $Call.ByID(2123820419, payload);
+}
+
 export function ListModels(): $CancellablePromise<$models.ModelDTO[] | null> {
     return $Call.ByID(2613219817);
 }
@@ -69,8 +89,16 @@ export function ListProviders(): $CancellablePromise<$models.ProviderDTO[] | nul
     return $Call.ByID(3646985203);
 }
 
+export function ListProviderPresets(): $CancellablePromise<$models.ProviderPresetDTO[]> {
+    return $Call.ByID(1615070446);
+}
+
 export function ListRoutes(): $CancellablePromise<$models.RouteDTO[] | null> {
     return $Call.ByID(603517273);
+}
+
+export function InspectCodexConfig(): $CancellablePromise<$models.CodexConfigStatusDTO> {
+    return $Call.ByID(3877297554);
 }
 
 export function RestoreCodexConfig(profileID: string): $CancellablePromise<void> {
