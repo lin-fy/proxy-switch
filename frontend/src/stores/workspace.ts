@@ -6,11 +6,7 @@ import {
   type ModelDTO,
   type ProfileDTO,
   type ProviderDTO,
-  type ProviderHealthDTO,
-  type ProviderPresetDTO,
-  type WorkspaceImportPreviewDTO,
   type RouteDTO,
-  type CodexConfigStatusDTO,
 } from '../services/wails-api';
 
 export type WorkspacePhase = 'idle' | 'loading' | 'ready' | 'saving' | 'testing' | 'activating' | 'error';
@@ -18,16 +14,12 @@ export type ActivationStage = 'idle' | 'updating' | 'ready' | 'error';
 
 export const useWorkspaceStore = defineStore('workspace', () => {
   const providers = ref<ProviderDTO[]>([]);
-  const providerPresets = ref<ProviderPresetDTO[]>([]);
-  const providerHealth = ref<Record<string, ProviderHealthDTO>>({});
-  const providerHealthHistory = ref<Record<string, ProviderHealthDTO[]>>({});
   const models = ref<ModelDTO[]>([]);
   const routes = ref<RouteDTO[]>([]);
   const profiles = ref<ProfileDTO[]>([]);
   const selectedProfileID = ref('');
   const autostart = ref(false);
   const codexRunning = ref(false);
-  const codexConfigStatus = ref<CodexConfigStatusDTO | null>(null);
   const phase = ref<WorkspacePhase>('idle');
   const message = ref('准备连接本地 Codex 配置');
   const error = ref(false);
@@ -66,18 +58,15 @@ export const useWorkspaceStore = defineStore('workspace', () => {
 
   /** 只拉取数据,不发通知、不吞异常;供需要自定义消息的调用方组合。 */
   async function reload(): Promise<void> {
-    const [nextProviders, nextProviderPresets, nextModels, nextRoutes, nextProfiles, nextAutostart, nextCodexRunning] =
-      await Promise.all([
-        wailsApi.listProviders(),
-        wailsApi.listProviderPresets(),
-        wailsApi.listModels(),
-        wailsApi.listRoutes(),
-        wailsApi.listProfiles(),
-        wailsApi.autostartEnabled(),
-        wailsApi.codexRunning(),
-      ]);
+    const [nextProviders, nextModels, nextRoutes, nextProfiles, nextAutostart, nextCodexRunning] = await Promise.all([
+      wailsApi.listProviders(),
+      wailsApi.listModels(),
+      wailsApi.listRoutes(),
+      wailsApi.listProfiles(),
+      wailsApi.autostartEnabled(),
+      wailsApi.codexRunning(),
+    ]);
     providers.value = nextProviders ?? [];
-    providerPresets.value = nextProviderPresets ?? [];
     models.value = nextModels ?? [];
     routes.value = nextRoutes ?? [];
     profiles.value = nextProfiles ?? [];
@@ -97,17 +86,6 @@ export const useWorkspaceStore = defineStore('workspace', () => {
     } catch (cause) {
       phase.value = 'error';
       setNotice(describeError(cause, '读取本地配置失败'), true);
-    }
-  }
-
-  async function inspectCodexConfig(): Promise<CodexConfigStatusDTO | null> {
-    try {
-      const status = await wailsApi.inspectCodexConfig();
-      codexConfigStatus.value = status;
-      return status;
-    } catch (cause) {
-      setNotice(describeError(cause, '读取 Codex 配置状态失败'), true);
-      return null;
     }
   }
 
@@ -178,30 +156,6 @@ export const useWorkspaceStore = defineStore('workspace', () => {
     return runAction(() => wailsApi.testProvider(id), 'Provider 连接测试成功', 'testing');
   }
 
-  async function checkProviderHealth(id: string): Promise<boolean> {
-    if (busy.value) {
-      setNotice('上一步操作尚未完成,请稍候', true);
-      return false;
-    }
-    phase.value = 'testing';
-    try {
-      const status = await wailsApi.checkProviderHealth(id);
-      providerHealth.value = { ...providerHealth.value, [id]: status };
-      const history = [...(providerHealthHistory.value[id] ?? []), status].slice(-5);
-      providerHealthHistory.value = { ...providerHealthHistory.value, [id]: history };
-      phase.value = 'ready';
-      setNotice(
-        status.status === 'healthy' ? 'Provider 健康检查通过' : 'Provider 健康检查失败',
-        status.status !== 'healthy',
-      );
-      return status.status === 'healthy';
-    } catch (cause) {
-      phase.value = 'error';
-      setNotice(describeError(cause, 'Provider 健康检查失败'), true);
-      return false;
-    }
-  }
-
   async function syncProviderModels(providerID: string): Promise<boolean> {
     return runAction(() => wailsApi.syncProviderModels(providerID), 'Provider 模型已同步', 'testing');
   }
@@ -254,14 +208,12 @@ export const useWorkspaceStore = defineStore('workspace', () => {
     name: string;
     providerID: string;
     modelID: string;
-    priority: number;
     restart: boolean;
   }): Promise<boolean> {
     return runAction(async () => {
       const created = await wailsApi.createRoute(input.id, input.name, input.providerID, input.modelID);
       // CreateRoute 不接收 restart 字段:创建后立即用现有保存方法补齐,保证用户勾选被持久化。
-      if (input.priority || input.restart)
-        await wailsApi.saveRoute({ ...created, priority: input.priority, restart_on_activate: input.restart });
+      if (input.restart) await wailsApi.saveRoute({ ...created, restart_on_activate: true });
     }, '路由已添加');
   }
 
@@ -327,12 +279,6 @@ export const useWorkspaceStore = defineStore('workspace', () => {
     }
   }
 
-  async function importCodexConfig(id: string, name: string): Promise<boolean> {
-    const result = await runAction(() => wailsApi.importCodexConfig(id, name), '当前 Codex 配置已导入为档案');
-    if (result) await inspectCodexConfig();
-    return result;
-  }
-
   async function saveProfile(item: ProfileDTO): Promise<boolean> {
     const result = await runAction(() => wailsApi.saveProfile(item), '配置档案已保存');
     if (result && pendingProfile.value?.id === item.id) pendingProfile.value = null;
@@ -349,45 +295,8 @@ export const useWorkspaceStore = defineStore('workspace', () => {
     return runAction(() => wailsApi.restoreProfile(id), 'Codex 配置已恢复');
   }
 
-  async function exportWorkspace(): Promise<string | null> {
-    try {
-      return await wailsApi.exportWorkspace();
-    } catch (cause) {
-      setNotice(describeError(cause, '导出配置失败'), true);
-      return null;
-    }
-  }
-
-  async function previewWorkspaceImport(payload: string): Promise<WorkspaceImportPreviewDTO | null> {
-    try {
-      return await wailsApi.previewWorkspaceImport(payload);
-    } catch (cause) {
-      setNotice(describeError(cause, '预览导入配置失败'), true);
-      return null;
-    }
-  }
-
-  async function importWorkspace(payload: string): Promise<WorkspaceImportPreviewDTO | null> {
-    try {
-      const result = await wailsApi.importWorkspace(payload);
-      if (!result.valid) {
-        setNotice('导入未执行，请先修复预览错误或冲突', true);
-        return result;
-      }
-      setNotice('配置已导入');
-      await reload();
-      return result;
-    } catch (cause) {
-      setNotice(describeError(cause, '导入配置失败'), true);
-      return null;
-    }
-  }
-
   return {
     providers,
-    providerPresets,
-    providerHealth,
-    providerHealthHistory,
     models,
     routes,
     profiles,
@@ -395,7 +304,6 @@ export const useWorkspaceStore = defineStore('workspace', () => {
     selectedProfile,
     autostart,
     codexRunning,
-    codexConfigStatus,
     phase,
     message,
     error,
@@ -412,7 +320,6 @@ export const useWorkspaceStore = defineStore('workspace', () => {
     refresh,
     activate,
     testProvider,
-    checkProviderHealth,
     syncProviderModels,
     testModel,
     startCodex,
@@ -427,13 +334,8 @@ export const useWorkspaceStore = defineStore('workspace', () => {
     saveRoute,
     deleteRoute,
     createProfile,
-    inspectCodexConfig,
-    importCodexConfig,
     saveProfile,
     deleteProfile,
     restoreProfile,
-    exportWorkspace,
-    previewWorkspaceImport,
-    importWorkspace,
   };
 });

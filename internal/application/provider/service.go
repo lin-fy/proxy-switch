@@ -9,10 +9,7 @@ import (
 	"proxy-switch/internal/domain/route"
 )
 
-var (
-	ErrReferenced    = errors.New("provider is referenced by models or routes")
-	ErrAlreadyExists = errors.New("provider already exists")
-)
+var ErrReferenced = errors.New("provider is referenced by models or routes")
 
 type Service struct {
 	repo   provider.Repository
@@ -45,9 +42,6 @@ func (s *Service) Create(ctx context.Context, id, name, baseURL, authRef string)
 	item, err := provider.New(id, name, baseURL, authRef)
 	if err != nil {
 		return provider.Provider{}, err
-	}
-	if _, err := s.repo.Get(ctx, item.ID); err == nil {
-		return provider.Provider{}, ErrAlreadyExists
 	}
 	if err := s.repo.Save(ctx, item); err != nil {
 		return provider.Provider{}, err

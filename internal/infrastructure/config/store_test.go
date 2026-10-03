@@ -10,7 +10,6 @@ import (
 	"testing"
 
 	"proxy-switch/internal/domain/model"
-	"proxy-switch/internal/domain/profile"
 	"proxy-switch/internal/domain/provider"
 	"proxy-switch/internal/domain/route"
 )
@@ -223,40 +222,5 @@ func TestStoreMissingStateIsEmptyAndWritable(t *testing.T) {
 	}
 	if _, err := os.Stat(path); err != nil {
 		t.Fatalf("state file not created: %v", err)
-	}
-}
-
-func TestImportWorkspaceRejectsDisabledModelAndSharedProfilePathAtomically(t *testing.T) {
-	ctx := context.Background()
-	store := NewStore(filepath.Join(t.TempDir(), "state.json"))
-	providers := NewProviderRepository(store)
-	profiles := NewProfileRepository(store)
-	if err := providers.Save(ctx, provider.Provider{ID: "existing", Name: "Existing", BaseURL: "https://existing.test/v1", Protocol: provider.ProtocolResponses}); err != nil {
-		t.Fatal(err)
-	}
-	if err := profiles.Save(ctx, profile.Profile{ID: "profile", Name: "Profile", ConfigPath: "profiles/shared/config.toml"}); err != nil {
-		t.Fatal(err)
-	}
-	if err := store.ImportWorkspace(ctx,
-		[]provider.Provider{{ID: "new", Name: "New", BaseURL: "https://new.test/v1", Protocol: provider.ProtocolResponses}},
-		[]model.Model{{ProviderID: "new", ID: "model", Name: "Model", Enabled: false}},
-		[]route.Route{{ID: "route", Name: "Route", PlatformID: route.PlatformCodex, ProviderID: "new", ModelID: "model"}},
-		nil,
-	); err == nil {
-		t.Fatal("disabled model import should fail")
-	}
-	if items, err := providers.List(ctx); err != nil || len(items) != 1 {
-		t.Fatalf("failed import changed providers: %#v, %v", items, err)
-	}
-	if err := store.ImportWorkspace(ctx,
-		[]provider.Provider{{ID: "new", Name: "New", BaseURL: "https://new.test/v1", Protocol: provider.ProtocolResponses}},
-		[]model.Model{{ProviderID: "new", ID: "model", Name: "Model", Enabled: true}},
-		[]route.Route{{ID: "route", Name: "Route", PlatformID: route.PlatformCodex, ProviderID: "new", ModelID: "model"}},
-		[]profile.Profile{{ID: "new-profile", Name: "New Profile", ConfigPath: "profiles/shared/config.toml"}},
-	); err == nil {
-		t.Fatal("shared profile path import should fail")
-	}
-	if items, err := providers.List(ctx); err != nil || len(items) != 1 {
-		t.Fatalf("path-conflict import changed providers: %#v, %v", items, err)
 	}
 }
