@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"proxy-switch/internal/domain/model"
+	"proxy-switch/internal/domain/profile"
 	"proxy-switch/internal/domain/provider"
 	"proxy-switch/internal/domain/route"
 )
@@ -12,12 +13,15 @@ import (
 var (
 	ErrInvalidReference = errors.New("route provider or model does not exist")
 	ErrModelDisabled    = errors.New("route model is disabled")
+	ErrAlreadyExists    = errors.New("route already exists")
+	ErrReferenced       = errors.New("route is referenced by a profile")
 )
 
 type Service struct {
 	repo      route.Repository
 	providers provider.Repository
 	models    model.Repository
+	profiles  profile.Repository
 }
 
 func NewService(repo route.Repository, dependencies ...any) *Service {
@@ -28,6 +32,8 @@ func NewService(repo route.Repository, dependencies ...any) *Service {
 			s.providers = item
 		case model.Repository:
 			s.models = item
+		case profile.Repository:
+			s.profiles = item
 		}
 	}
 	return s
@@ -39,6 +45,9 @@ func (s *Service) Create(ctx context.Context, id, name, providerID, modelID stri
 	item, err := route.New(id, name, providerID, modelID)
 	if err != nil {
 		return route.Route{}, err
+	}
+	if _, err := s.repo.Get(ctx, item.ID); err == nil {
+		return route.Route{}, ErrAlreadyExists
 	}
 	if err := s.validateReferences(ctx, item); err != nil {
 		return route.Route{}, err
@@ -59,7 +68,20 @@ func (s *Service) Save(ctx context.Context, item route.Route) error {
 	return s.repo.Save(ctx, item)
 }
 
-func (s *Service) Delete(ctx context.Context, id string) error { return s.repo.Delete(ctx, id) }
+func (s *Service) Delete(ctx context.Context, id string) error {
+	if s.profiles != nil {
+		items, err := s.profiles.List(ctx)
+		if err != nil {
+			return err
+		}
+		for _, item := range items {
+			if item.RouteID == id {
+				return ErrReferenced
+			}
+		}
+	}
+	return s.repo.Delete(ctx, id)
+}
 
 func (s *Service) validateReferences(ctx context.Context, item route.Route) error {
 	if s.providers != nil {

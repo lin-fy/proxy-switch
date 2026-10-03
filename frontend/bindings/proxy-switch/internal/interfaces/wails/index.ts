@@ -7,8 +7,12 @@ export {
 };
 
 export type {
+    CodexConfigStatusDTO,
     ModelDTO,
     ProfileDTO,
     ProviderDTO,
-    RouteDTO
+    ProviderHealthDTO,
+    ProviderPresetDTO,
+    RouteDTO,
+    WorkspaceImportPreviewDTO
 } from "./models.js";
