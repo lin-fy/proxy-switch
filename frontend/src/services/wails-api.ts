@@ -67,7 +67,7 @@ export interface WailsApi {
 
 const generatedApi: WailsApi = {
   listProviders: () => generated.ListProviders(),
-  listProviderPresets: () => generated.ListProviderPresets(),
+  listProviderPresets: async () => (await generated.ListProviderPresets()) ?? [],
   listModels: () => generated.ListModels(),
   listModelsByProvider: (providerID) => generated.ListModelsByProvider(providerID),
   listRoutes: () => generated.ListRoutes(),
