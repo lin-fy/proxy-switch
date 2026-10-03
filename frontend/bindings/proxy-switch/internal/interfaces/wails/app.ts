@@ -89,7 +89,7 @@ export function ListProviders(): $CancellablePromise<$models.ProviderDTO[] | nul
     return $Call.ByID(3646985203);
 }
 
-export function ListProviderPresets(): $CancellablePromise<$models.ProviderPresetDTO[]> {
+export function ListProviderPresets(): $CancellablePromise<$models.ProviderPresetDTO[] | null> {
     return $Call.ByID(1615070446);
 }
 
