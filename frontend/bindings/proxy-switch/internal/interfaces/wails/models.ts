@@ -27,7 +27,7 @@ export interface CodexConfigStatusDTO {
     "credential_present": boolean;
     "model_provider"?: string;
     "model"?: string;
-    "provider_ids"?: string[];
+    "provider_ids"?: string[] | null;
     "importable": boolean;
     "import_blocker"?: string;
 }
@@ -69,12 +69,12 @@ export interface WorkspaceImportPreviewDTO {
     "model_count": number;
     "route_count": number;
     "profile_count": number;
-    "provider_conflicts"?: string[];
-    "model_conflicts"?: string[];
-    "route_conflicts"?: string[];
-    "profile_conflicts"?: string[];
-    "missing_references"?: string[];
-    "errors"?: string[];
+    "provider_conflicts"?: string[] | null;
+    "model_conflicts"?: string[] | null;
+    "route_conflicts"?: string[] | null;
+    "profile_conflicts"?: string[] | null;
+    "missing_references"?: string[] | null;
+    "errors"?: string[] | null;
 }
 
 export interface RouteDTO {
