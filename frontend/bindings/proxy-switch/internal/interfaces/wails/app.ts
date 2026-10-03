@@ -17,14 +17,6 @@ export function AutostartEnabled(): $CancellablePromise<boolean> {
     return $Call.ByID(200679149);
 }
 
-/**
- * CheckProviderHealth performs an explicit, read-only connectivity check. It
- * is never called during list/reload and it returns only a safe error code.
- */
-export function CheckProviderHealth(id: string): $CancellablePromise<$models.ProviderHealthDTO> {
-    return $Call.ByID(3751159922, id);
-}
-
 export function CodexRunning(): $CancellablePromise<boolean> {
     return $Call.ByID(3120239309);
 }
@@ -61,40 +53,6 @@ export function DeleteRoute(id: string): $CancellablePromise<void> {
     return $Call.ByID(217495733, id);
 }
 
-/**
- * ExportWorkspace returns a credential-safe JSON snapshot. Header/query
- * values are deliberately omitted because they may contain secrets; auth_ref
- * is retained only when it is a valid environment/Credential Manager reference.
- */
-export function ExportWorkspace(): $CancellablePromise<string> {
-    return $Call.ByID(3459772146);
-}
-
-/**
- * ImportCodexConfig explicitly snapshots the current config.toml into a new
- * profile. auth.json is never copied or modified by this operation.
- */
-export function ImportCodexConfig(id: string, name: string): $CancellablePromise<$models.ProfileDTO> {
-    return $Call.ByID(1150193431, id, name);
-}
-
-/**
- * ImportWorkspace applies a previously previewed snapshot only when it is
- * valid and conflict-free. The importer appends resources atomically and never
- * overwrites existing IDs or touches auth.json.
- */
-export function ImportWorkspace(payload: string): $CancellablePromise<$models.WorkspaceImportPreviewDTO> {
-    return $Call.ByID(2123820419, payload);
-}
-
-/**
- * InspectCodexConfig is read-only. Importing a detected config is deliberately
- * a separate user action and this method never writes config.toml or auth.json.
- */
-export function InspectCodexConfig(): $CancellablePromise<$models.CodexConfigStatusDTO> {
-    return $Call.ByID(3877297554);
-}
-
 export function ListModels(): $CancellablePromise<$models.ModelDTO[] | null> {
     return $Call.ByID(2613219817);
 }
@@ -107,29 +65,12 @@ export function ListProfiles(): $CancellablePromise<$models.ProfileDTO[] | null>
     return $Call.ByID(565344365);
 }
 
-/**
- * ListProviderPresets returns read-only templates. They contain no credential
- * values and selecting one never writes state until CreateProvider is called.
- */
-export function ListProviderPresets(): $CancellablePromise<$models.ProviderPresetDTO[] | null> {
-    return $Call.ByID(1615070446);
-}
-
 export function ListProviders(): $CancellablePromise<$models.ProviderDTO[] | null> {
     return $Call.ByID(3646985203);
 }
 
 export function ListRoutes(): $CancellablePromise<$models.RouteDTO[] | null> {
     return $Call.ByID(603517273);
-}
-
-/**
- * PreviewWorkspaceImport validates an exported snapshot without mutating any
- * state. Unknown fields are rejected so headers, query parameters, auth.json
- * content, and future secret-bearing fields cannot sneak into an import flow.
- */
-export function PreviewWorkspaceImport(payload: string): $CancellablePromise<$models.WorkspaceImportPreviewDTO> {
-    return $Call.ByID(2090375363, payload);
 }
 
 export function RestoreCodexConfig(profileID: string): $CancellablePromise<void> {

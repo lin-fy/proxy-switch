@@ -8,7 +8,6 @@ import {
   NForm,
   NFormItem,
   NInput,
-  NInputNumber,
   NModal,
   NSelect,
   NSkeleton,
@@ -36,9 +35,9 @@ const providerDraft = ref<ProviderDTO | null>(null);
 const modelDraft = ref<ModelDTO | null>(null);
 const routeDraft = ref<RouteDTO | null>(null);
 
-const providerForm = ref({ presetID: '', id: '', name: '', baseURL: '', authRef: '' });
+const providerForm = ref({ id: '', name: '', baseURL: '', authRef: '' });
 const modelForm = ref({ providerID: '', id: '', name: '' });
-const routeForm = ref({ id: '', name: '', providerID: '', modelID: '', priority: 0, restart: false });
+const routeForm = ref({ id: '', name: '', providerID: '', modelID: '', restart: false });
 const providerFormRef = ref<FormInst | null>(null);
 const modelFormRef = ref<FormInst | null>(null);
 const routeFormRef = ref<FormInst | null>(null);
@@ -87,14 +86,6 @@ const routeModelKey = computed({
 const profileID = computed(() => workspace.selectedProfileID || workspace.profiles[0]?.id || '');
 const selectedProfileName = computed(() => workspace.profiles.find((item) => item.id === profileID.value)?.name ?? '');
 const providerOptions = computed(() => workspace.providers.map((item) => ({ label: item.name, value: item.id })));
-const providerPresetOptions = computed(() => [
-  { label: '自定义 Responses API', value: '' },
-  ...workspace.providerPresets.map((item) => ({
-    label: item.base_url ? item.name : `${item.name}（请从 Codex 配置导入）`,
-    value: item.id,
-    disabled: !item.base_url,
-  })),
-]);
 const modelOptions = computed(() =>
   workspace.models
     .filter((item) => item.enabled)
@@ -102,9 +93,6 @@ const modelOptions = computed(() =>
       label: `${providerName(item.provider_id)} / ${item.name || item.id}`,
       value: `${item.provider_id}::${item.id}`,
     })),
-);
-const sortedRoutes = computed(() =>
-  [...workspace.routes].sort((left, right) => left.priority - right.priority || left.id.localeCompare(right.id)),
 );
 
 const providerRules: FormRules = {
@@ -134,13 +122,6 @@ function enabledModelCount(providerID: string): number {
   return (workspace.modelsByProvider.get(providerID) ?? []).filter((item) => item.enabled).length;
 }
 
-function authModeLabel(item: ProviderDTO): string {
-  if (item.auth_mode === 'oauth') return '官方登录';
-  if (item.auth_mode === 'credential_ref') return 'Windows 凭据引用';
-  if (item.auth_mode === 'env_ref') return '环境变量引用';
-  return '未配置凭据';
-}
-
 function providerHasRoute(item: ProviderDTO): boolean {
   return workspace.routes.some(
     (route) => route.provider_id === item.id && isModelEnabled(route.provider_id, route.model_id),
@@ -154,30 +135,11 @@ function isModelEnabled(providerID: string, modelID: string): boolean {
 function openProvider(item?: ProviderDTO): void {
   providerDraft.value = item ? { ...item } : null;
   providerForm.value = item
-    ? {
-        presetID: item.preset_id ?? '',
-        id: item.id,
-        name: item.name,
-        baseURL: item.base_url,
-        authRef: item.auth_ref ?? '',
-      }
-    : { presetID: '', id: '', name: '', baseURL: '', authRef: '' };
+    ? { id: item.id, name: item.name, baseURL: item.base_url, authRef: item.auth_ref ?? '' }
+    : { id: '', name: '', baseURL: '', authRef: '' };
   providerErrors.value = [];
   providerModal.value = true;
   providerTracker.snapshot();
-}
-
-function applyProviderPreset(presetID: string): void {
-  const preset = workspace.providerPresets.find((item) => item.id === presetID);
-  if (!preset?.base_url) return;
-  const envName = `${preset.id.replace(/[^a-z0-9]/gi, '_').toUpperCase()}_API_KEY`;
-  providerForm.value = {
-    presetID,
-    id: preset.id,
-    name: preset.name,
-    baseURL: preset.base_url,
-    authRef: preset.auth_mode === 'env_ref' ? envName : '',
-  };
 }
 
 function openModel(item?: ModelDTO): void {
@@ -200,10 +162,9 @@ function openRoute(item?: RouteDTO): void {
         name: item.name,
         providerID: item.provider_id,
         modelID: item.model_id,
-        priority: item.priority,
         restart: item.restart_on_activate,
       }
-    : { id: '', name: '', providerID: firstProviderID, modelID: firstModel?.id ?? '', priority: 0, restart: false };
+    : { id: '', name: '', providerID: firstProviderID, modelID: firstModel?.id ?? '', restart: false };
   routeErrors.value = [];
   routeModal.value = true;
   routeTracker.snapshot();
@@ -248,7 +209,6 @@ async function saveRoute(): Promise<void> {
       name: f.name,
       provider_id: f.providerID,
       model_id: f.modelID,
-      priority: f.priority,
       restart_on_activate: f.restart,
     };
     const ok = routeDraft.value
@@ -258,7 +218,6 @@ async function saveRoute(): Promise<void> {
           name: f.name,
           providerID: f.providerID,
           modelID: f.modelID,
-          priority: f.priority,
           restart: f.restart,
         });
     if (ok) routeModal.value = false;
@@ -311,7 +270,7 @@ async function activateRoute(route: RouteDTO): Promise<void> {
 }
 
 function switchProvider(item: ProviderDTO): void {
-  const route = sortedRoutes.value.find(
+  const route = workspace.routes.find(
     (candidate) => candidate.provider_id === item.id && isModelEnabled(candidate.provider_id, candidate.model_id),
   );
   if (!route) {
@@ -321,39 +280,10 @@ function switchProvider(item: ProviderDTO): void {
   void activateRoute(route);
 }
 
-function healthLabel(providerID: string): string {
-  const status = workspace.providerHealth[providerID];
-  if (!status) return '未检查';
-  if (status.status === 'healthy') return `健康 · ${status.latency_ms ?? 0} ms`;
-  if (status.status === 'timeout') return '超时';
-  if (status.status === 'unavailable') return '检查服务不可用';
-  return '异常';
-}
-
-function healthTagType(providerID: string): 'default' | 'success' | 'warning' | 'error' {
-  const status = workspace.providerHealth[providerID]?.status;
-  if (status === 'healthy') return 'success';
-  if (status === 'timeout') return 'warning';
-  if (status === 'unhealthy') return 'error';
-  return 'default';
-}
-
-function healthHistory(providerID: string): string[] {
-  return (workspace.providerHealthHistory[providerID] ?? []).map((item) => {
-    const time = item.checked_at ? new Date(item.checked_at).toLocaleTimeString() : '未知时间';
-    const latency = item.latency_ms != null ? ` · ${item.latency_ms} ms` : '';
-    return `${time} · ${item.status}${latency}`;
-  });
-}
-
 async function testProvider(item: ProviderDTO): Promise<void> {
   const ok = await workspace.testProvider(item.id);
   if (ok) message.success(workspace.message);
   else message.error(workspace.message);
-}
-
-async function checkProviderHealth(item: ProviderDTO): Promise<void> {
-  await workspace.checkProviderHealth(item.id);
 }
 
 async function syncProviderModels(item: ProviderDTO): Promise<void> {
@@ -374,7 +304,6 @@ async function toggleModel(item: ModelDTO, enabled: boolean): Promise<void> {
 }
 
 const providerMenuOptions = [
-  { label: '检查健康', key: 'health' },
   { label: '测试连接', key: 'test' },
   { label: '同步模型', key: 'sync' },
   { label: '编辑 Provider', key: 'edit' },
@@ -391,7 +320,6 @@ const modelMenuOptions = [
 ];
 
 function onProviderMenu(key: string, item: ProviderDTO): void {
-  if (key === 'health') void checkProviderHealth(item);
   if (key === 'test') void testProvider(item);
   if (key === 'sync') void syncProviderModels(item);
   if (key === 'edit') openProvider(item);
@@ -476,22 +404,6 @@ function onModelMenu(key: string, item: ModelDTO): void {
                   >{{ item.name }}<span class="text-muted"> · {{ item.id }}</span></strong
                 >
                 <span class="mono">{{ item.base_url }} · {{ enabledModelCount(item.id) }} 个启用模型</span>
-                <div class="provider-meta">
-                  <NTag v-if="item.preset_name" size="small" :bordered="false">{{ item.preset_name }}</NTag>
-                  <NTag size="small" type="info" :bordered="false">{{ authModeLabel(item) }}</NTag>
-                  <span class="text-muted">{{ item.auth_ref ? '凭据引用已配置' : '未配置凭据引用' }}</span>
-                  <NTooltip v-if="workspace.providerHealthHistory[item.id]?.length">
-                    <template #trigger>
-                      <NTag size="small" :type="healthTagType(item.id)" :bordered="false"
-                        >{{ healthLabel(item.id) }} · {{ workspace.providerHealthHistory[item.id].length }} 次</NTag
-                      >
-                    </template>
-                    <div v-for="entry in healthHistory(item.id)" :key="entry">{{ entry }}</div>
-                  </NTooltip>
-                  <NTag v-else size="small" :type="healthTagType(item.id)" :bordered="false">{{
-                    healthLabel(item.id)
-                  }}</NTag>
-                </div>
               </div>
               <div class="resource-side">
                 <NTag v-if="workspace.currentProvider?.id === item.id" size="small" type="success" :bordered="false"
@@ -606,13 +518,12 @@ function onModelMenu(key: string, item: ModelDTO): void {
             </template>
           </NEmpty>
           <div v-else class="resource-list">
-            <div v-for="item in sortedRoutes" :key="item.id" class="resource-row route-row">
+            <div v-for="item in workspace.routes" :key="item.id" class="resource-row route-row">
               <div class="route-indicator" :class="{ 'is-active': item.default }"><Power :size="15" /></div>
               <div class="resource-main">
                 <strong>{{ item.name }}</strong>
                 <span class="mono"
-                  >优先级 {{ item.priority }} · {{ providerName(item.provider_id) }} /
-                  {{ modelName(item.provider_id, item.model_id)
+                  >{{ providerName(item.provider_id) }} / {{ modelName(item.provider_id, item.model_id)
                   }}<template v-if="item.restart_on_activate"> · 激活时重启 Codex</template></span
                 >
               </div>
@@ -675,17 +586,6 @@ function onModelMenu(key: string, item: ModelDTO): void {
           </li>
         </ul>
       </div>
-      <NFormItem v-if="!providerDraft" label="Provider 预设" path="presetID">
-        <NSelect
-          v-model:value="providerForm.presetID"
-          :options="providerPresetOptions"
-          placeholder="选择预设或自定义"
-          @update:value="applyProviderPreset"
-        />
-        <p class="notice-hint">
-          预设只填充公开连接信息和凭据引用占位,不会写入密钥。官方 OAuth 请使用“导入当前 Codex”。
-        </p>
-      </NFormItem>
       <NFormItem label="标识" path="id">
         <NInput
           :ref="(el: unknown) => providerRegisterField('id', el)"
@@ -708,9 +608,8 @@ function onModelMenu(key: string, item: ModelDTO): void {
           placeholder="https://api.example.com/v1"
         />
       </NFormItem>
-      <NFormItem label="凭据引用（不填入密钥）" path="authRef">
+      <NFormItem label="凭据引用" path="authRef">
         <NInput v-model:value="providerForm.authRef" placeholder="环境变量名或 credential:target" />
-        <p class="notice-hint">仅填写环境变量名、env: 前缀或 credential: 引用。密钥内容不会保存到配置档案。</p>
       </NFormItem>
     </NForm>
     <template #footer>
@@ -744,7 +643,6 @@ function onModelMenu(key: string, item: ModelDTO): void {
           :ref="(el: unknown) => modelRegisterField('providerID', el)"
           v-model:value="modelForm.providerID"
           :options="providerOptions"
-          :disabled="!!modelDraft"
           placeholder="选择 Provider"
         />
       </NFormItem>
@@ -808,10 +706,6 @@ function onModelMenu(key: string, item: ModelDTO): void {
           :options="modelOptions"
           placeholder="选择已启用的 Model"
         />
-      </NFormItem>
-      <NFormItem label="故障转移优先级" path="priority">
-        <NInputNumber v-model:value="routeForm.priority" :min="0" :precision="0" />
-        <span class="switch-copy">数字越小越优先；当前版本只保存并展示顺序，不会自动切换路由。</span>
       </NFormItem>
       <NFormItem label="激活行为" path="restart">
         <NSwitch v-model:value="routeForm.restart" aria-label="激活时尝试启动 Codex" />

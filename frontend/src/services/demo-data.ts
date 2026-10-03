@@ -3,11 +3,7 @@ import type {
   ModelDTO,
   ProfileDTO,
   ProviderDTO,
-  ProviderHealthDTO,
-  ProviderPresetDTO,
-  WorkspaceImportPreviewDTO,
   RouteDTO,
-  CodexConfigStatusDTO,
 } from '../../bindings/proxy-switch/internal/interfaces/wails/models';
 
 /*
@@ -23,10 +19,6 @@ const providers: ProviderDTO[] = [
     base_url: 'http://127.0.0.1:8317/v1',
     protocol: 'Responses API',
     auth_ref: 'CPA_API_KEY',
-    auth_mode: 'env_ref',
-    preset_id: undefined,
-    preset_name: undefined,
-    requires_credential: false,
   },
   {
     id: 'openai',
@@ -34,29 +26,6 @@ const providers: ProviderDTO[] = [
     base_url: 'https://api.openai.com/v1',
     protocol: 'Responses API',
     auth_ref: 'OPENAI_API_KEY',
-    auth_mode: 'env_ref',
-    preset_id: 'openai',
-    preset_name: 'OpenAI API',
-    requires_credential: true,
-  },
-];
-
-const providerPresets: ProviderPresetDTO[] = [
-  { id: 'codex-official', name: 'OpenAI Codex 官方登录', base_url: '', auth_mode: 'oauth', requires_credential: false },
-  {
-    id: 'openai',
-    name: 'OpenAI API',
-    base_url: 'https://api.openai.com/v1',
-    auth_mode: 'env_ref',
-    requires_credential: true,
-  },
-  { id: 'xai', name: 'xAI API', base_url: 'https://api.x.ai/v1', auth_mode: 'env_ref', requires_credential: true },
-  {
-    id: 'kimi',
-    name: 'Kimi API',
-    base_url: 'https://api.moonshot.cn/v1',
-    auth_mode: 'env_ref',
-    requires_credential: true,
   },
 ];
 
@@ -75,7 +44,6 @@ const routes: RouteDTO[] = [
     platform_id: 'codex',
     provider_id: 'cpa',
     model_id: 'gpt-5.6-sol',
-    priority: 0,
     restart_on_activate: true,
     default: true,
   },
@@ -85,7 +53,6 @@ const routes: RouteDTO[] = [
     platform_id: 'codex',
     provider_id: 'openai',
     model_id: 'gpt-5.3-codex',
-    priority: 10,
     restart_on_activate: false,
     default: false,
   },
@@ -96,24 +63,8 @@ const profiles: ProfileDTO[] = [
   { id: 'personal', name: '个人', config_path: '' },
 ];
 
-const codexStatus: CodexConfigStatusDTO = {
-  config_path: '~/.codex/config.toml',
-  config_exists: true,
-  config_valid: true,
-  auth_path: '~/.codex/auth.json',
-  auth_exists: true,
-  auth_valid: true,
-  auth_mode: 'api_key',
-  credential_present: true,
-  model_provider: 'cpa',
-  model: 'gpt-5.6-sol',
-  provider_ids: ['cpa', 'openai'],
-  importable: true,
-};
-
 let autostart = false;
 let codexRunning = true;
-const providerHealth = new Map<string, ProviderHealthDTO>();
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -135,10 +86,6 @@ export function createDemoApi(): WailsApi {
       await sleep(120);
       return clone(providers);
     },
-    async listProviderPresets() {
-      await sleep(80);
-      return clone(providerPresets);
-    },
     async listModels() {
       await sleep(120);
       return clone(models);
@@ -150,67 +97,6 @@ export function createDemoApi(): WailsApi {
     async listRoutes() {
       await sleep(120);
       return clone(routes);
-    },
-    async exportWorkspace() {
-      await sleep(100);
-      return JSON.stringify(
-        {
-          schema_version: 1,
-          exported_at: new Date().toISOString(),
-          providers: providers.map((item) => {
-            const exported = clone(item);
-            delete exported.headers;
-            delete exported.query_params;
-            return exported;
-          }),
-          models: clone(models),
-          routes: clone(routes),
-          profiles: clone(profiles),
-        },
-        null,
-        2,
-      );
-    },
-    async previewWorkspaceImport(payload) {
-      await sleep(120);
-      const preview: WorkspaceImportPreviewDTO = {
-        valid: false,
-        schema_version: 0,
-        provider_count: 0,
-        model_count: 0,
-        route_count: 0,
-        profile_count: 0,
-      };
-      try {
-        const value = JSON.parse(payload) as Record<string, unknown>;
-        preview.schema_version = typeof value.schema_version === 'number' ? value.schema_version : 0;
-        preview.provider_count = Array.isArray(value.providers) ? value.providers.length : 0;
-        preview.model_count = Array.isArray(value.models) ? value.models.length : 0;
-        preview.route_count = Array.isArray(value.routes) ? value.routes.length : 0;
-        preview.profile_count = Array.isArray(value.profiles) ? value.profiles.length : 0;
-        const forbidden = ['headers', 'query_params', 'auth', 'token', 'api_key'];
-        if (Object.keys(value).some((key) => forbidden.includes(key))) preview.errors = ['导入 JSON 包含不允许字段'];
-        else if (preview.schema_version !== 1) preview.errors = ['不支持的导出 schema_version'];
-        else preview.valid = true;
-      } catch {
-        preview.errors = ['导入 JSON 无效或包含不允许字段'];
-      }
-      return clone(preview);
-    },
-    async importWorkspace(payload) {
-      const preview = await this.previewWorkspaceImport(payload);
-      if (!preview.valid) return preview;
-      const value = JSON.parse(payload) as {
-        providers?: ProviderDTO[];
-        models?: ModelDTO[];
-        routes?: RouteDTO[];
-        profiles?: ProfileDTO[];
-      };
-      providers.push(...(value.providers ?? []));
-      models.push(...(value.models ?? []));
-      routes.push(...(value.routes ?? []));
-      profiles.push(...(value.profiles ?? []));
-      return clone(preview);
     },
     async listProfiles() {
       await sleep(120);
@@ -225,8 +111,6 @@ export function createDemoApi(): WailsApi {
         base_url: baseURL,
         protocol: 'Responses API',
         auth_ref: authRef || undefined,
-        auth_mode: authRef.startsWith('credential:') ? 'credential_ref' : authRef ? 'env_ref' : 'none',
-        requires_credential: false,
       };
       providers.push(created);
       return clone(created);
@@ -255,18 +139,6 @@ export function createDemoApi(): WailsApi {
     async testProvider(id) {
       await sleep(600);
       requireProvider(id);
-    },
-    async checkProviderHealth(id) {
-      await sleep(180);
-      requireProvider(id);
-      const status: ProviderHealthDTO = {
-        provider_id: id,
-        status: 'healthy',
-        checked_at: new Date().toISOString(),
-        latency_ms: 42,
-      };
-      providerHealth.set(id, status);
-      return clone(status);
     },
     async syncProviderModels(providerID) {
       await sleep(500);
@@ -318,7 +190,6 @@ export function createDemoApi(): WailsApi {
         provider_id: providerID,
         model_id: modelID,
         restart_on_activate: false,
-        priority: 0,
         default: false,
       };
       routes.push(created);
@@ -348,17 +219,6 @@ export function createDemoApi(): WailsApi {
       await sleep(150);
       if (profiles.some((profile) => profile.id === id)) throw new Error(`profile id "${id}" already exists`);
       const created: ProfileDTO = { id, name };
-      profiles.push(created);
-      return clone(created);
-    },
-    async inspectCodexConfig() {
-      await sleep(120);
-      return clone(codexStatus);
-    },
-    async importCodexConfig(id, name) {
-      await sleep(250);
-      if (profiles.some((profile) => profile.id === id)) throw new Error(`profile id "${id}" already exists`);
-      const created: ProfileDTO = { id, name, config_path: `profiles/${id}/config.toml` };
       profiles.push(created);
       return clone(created);
     },

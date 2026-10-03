@@ -12,7 +12,6 @@ var (
 	ErrInvalidPlatformID = errors.New("route platform id must be codex")
 	ErrInvalidProviderID = errors.New("route provider id is required")
 	ErrInvalidModelID    = errors.New("route model id is required")
-	ErrInvalidPriority   = errors.New("route priority must be non-negative")
 )
 
 type Route struct {
@@ -21,7 +20,6 @@ type Route struct {
 	PlatformID        string `json:"platform_id"`
 	ProviderID        string `json:"provider_id"`
 	ModelID           string `json:"model_id"`
-	Priority          int    `json:"priority"`
 	RestartOnActivate bool   `json:"restart_on_activate"`
 	Default           bool   `json:"default"`
 }
@@ -52,9 +50,6 @@ func (r Route) Validate() error {
 	}
 	if r.ModelID == "" {
 		return ErrInvalidModelID
-	}
-	if r.Priority < 0 {
-		return ErrInvalidPriority
 	}
 	return nil
 }
